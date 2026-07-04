@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Domus Zamittello · AI Concierge Agent — Preview</title>
+<style>
+  :root{
+    --ink:#1c1a17;
+    --ink-soft:#4a453e;
+    --paper:#faf7f1;
+    --paper-2:#f3ede2;
+    --gold:#b08d3f;
+    --gold-deep:#8a6d29;
+    --gold-soft:#d9c48a;
+    --line:#e3dac7;
+    --green:#3d7a52;
+    --green-bg:#eaf3ec;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:"Georgia","Times New Roman",serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:0 22px;}
+
+  /* ---------- HEADER ---------- */
+  header{
+    background:linear-gradient(160deg,#1c1a17 0%, #2a2621 55%, #322c22 100%);
+    color:var(--paper);
+    text-align:center;
+    padding:64px 22px 58px;
+    border-bottom:3px solid var(--gold);
+    position:relative;
+  }
+  header::after{
+    content:"";position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);
+    width:120px;height:3px;background:var(--gold-soft);
+  }
+  .crest{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    letter-spacing:.42em;
+    font-size:11px;
+    text-transform:uppercase;
+    color:var(--gold-soft);
+    margin-bottom:18px;
+  }
+  header h1{
+    font-size:44px;
+    font-weight:400;
+    letter-spacing:.06em;
+    line-height:1.15;
+  }
+  header h1 .gold{color:var(--gold-soft);}
+  .rule{
+    width:70px;height:1px;background:var(--gold);
+    margin:22px auto 20px;opacity:.8;
+  }
+  header .sub{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:13px;letter-spacing:.16em;text-transform:uppercase;
+    color:#cfc6b4;
+  }
+  .keys{
+    margin-top:22px;font-size:12px;letter-spacing:.18em;
+    font-family:"Helvetica Neue",Arial,sans-serif;color:var(--gold-soft);
+    text-transform:uppercase;
+  }
+
+  /* ---------- INTRO ---------- */
+  .intro{padding:46px 0 8px;text-align:center;}
+  .intro .kicker{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:12px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--gold-deep);margin-bottom:14px;
+  }
+  .intro h2{font-size:27px;font-weight:400;color:var(--ink);margin-bottom:14px;}
+  .intro p{color:var(--ink-soft);font-size:16.5px;max-width:640px;margin:0 auto;}
+
+  /* ---------- SECTION TITLES ---------- */
+  .sec-head{text-align:center;margin:56px 0 30px;}
+  .sec-head .kicker{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--gold-deep);margin-bottom:10px;
+  }
+  .sec-head h3{font-size:24px;font-weight:400;}
+  .sec-head p{color:var(--ink-soft);font-size:14.5px;margin-top:8px;
+    font-family:"Helvetica Neue",Arial,sans-serif;}
+
+  /* ---------- DASHBOARD BAR ---------- */
+  .dash-bar{
+    background:#242019;color:var(--paper);border-radius:10px 10px 0 0;
+    padding:14px 20px;display:flex;align-items:center;justify-content:space-between;
+    font-family:"Helvetica Neue",Arial,sans-serif;font-size:12.5px;letter-spacing:.06em;
+    border:1px solid #322c22;border-bottom:none;
+  }
+  .dash-bar .dot{display:inline-block;width:9px;height:9px;border-radius:50%;
+    background:var(--green);margin-right:8px;box-shadow:0 0 0 3px rgba(61,122,82,.25);}
+  .dash-bar .right{color:var(--gold-soft);}
+
+  /* ---------- EMAIL CARD ---------- */
+  .card{
+    background:#fff;border:1px solid var(--line);
+    border-radius:0;margin-bottom:26px;overflow:hidden;
+    box-shadow:0 8px 26px rgba(40,34,22,.06);
+  }
+  .card:first-of-type{border-radius:0;}
+  .card .inbox{
+    padding:20px 24px;background:var(--paper-2);border-bottom:1px solid var(--line);
+  }
+  .meta{
+    font-family:"Helvetica Neue",Arial,sans-serif;font-size:12px;color:var(--ink-soft);
+    display:flex;flex-wrap:wrap;gap:6px 16px;margin-bottom:10px;letter-spacing:.02em;
+  }
+  .meta b{color:var(--ink);font-weight:600;}
+  .tag{
+    display:inline-block;background:var(--gold);color:#fff;font-size:10.5px;
+    letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:20px;
+    font-family:"Helvetica Neue",Arial,sans-serif;
+  }
+  .subj{font-size:16px;color:var(--ink);margin:4px 0 10px;font-weight:400;}
+  .body-in{font-size:15px;color:var(--ink-soft);}
+
+  .draft{
+    padding:22px 24px 24px;position:relative;
+  }
+  .draft-head{
+    display:flex;align-items:center;gap:10px;margin-bottom:14px;
+    font-family:"Helvetica Neue",Arial,sans-serif;
+  }
+  .ai-chip{
+    background:linear-gradient(135deg,var(--gold) 0%,var(--gold-deep) 100%);
+    color:#fff;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    padding:5px 12px;border-radius:4px;font-weight:600;
+  }
+  .draft-head .time{font-size:12px;color:var(--green);font-weight:600;}
+  .draft-head .time::before{content:"⚡ ";}
+  .draft-body{
+    background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--gold);
+    padding:20px 22px;font-size:14.6px;color:var(--ink);line-height:1.68;
+  }
+  .draft-body p{margin-bottom:12px;}
+  .draft-body .sig{color:var(--ink-soft);font-style:italic;}
+  .actions{
+    margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;
+    font-family:"Helvetica Neue",Arial,sans-serif;
+  }
+  .btn-mini{
+    font-size:12.5px;padding:8px 16px;border-radius:5px;border:1px solid var(--line);
+    background:#fff;color:var(--ink-soft);cursor:default;letter-spacing:.03em;
+  }
+  .btn-mini.primary{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  /* ---------- ROI ---------- */
+  .roi{
+    background:linear-gradient(160deg,#1c1a17 0%, #2c271f 100%);
+    color:var(--paper);border-radius:12px;padding:42px 34px;margin-top:16px;
+    border:1px solid #322c22;
+  }
+  .roi .kicker{
+    font-family:"Helvetica Neue",Arial,sans-serif;text-align:center;
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--gold-soft);margin-bottom:8px;
+  }
+  .roi h3{text-align:center;font-weight:400;font-size:24px;margin-bottom:6px;}
+  .roi .lead{text-align:center;color:#cfc6b4;font-size:14px;margin-bottom:30px;
+    font-family:"Helvetica Neue",Arial,sans-serif;}
+  .grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;}
+  .stat{
+    flex:1 1 150px;min-width:150px;text-align:center;
+    background:rgba(255,255,255,.04);border:1px solid rgba(217,196,138,.22);
+    border-radius:9px;padding:22px 14px;
+  }
+  .stat .num{font-size:34px;color:var(--gold-soft);line-height:1;margin-bottom:8px;}
+  .stat .lbl{font-family:"Helvetica Neue",Arial,sans-serif;font-size:11.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:#cbc2b1;}
+  .roi-note{
+    text-align:center;margin-top:26px;font-size:13px;color:#b8b0a0;
+    font-family:"Helvetica Neue",Arial,sans-serif;line-height:1.7;
+  }
+  .roi-note b{color:var(--gold-soft);font-weight:600;}
+
+  /* ---------- CTA ---------- */
+  .cta{text-align:center;padding:58px 22px 30px;}
+  .cta h3{font-size:28px;font-weight:400;margin-bottom:12px;}
+  .cta p{color:var(--ink-soft);font-size:16px;max-width:560px;margin:0 auto 26px;}
+  .cta-btn{
+    display:inline-block;background:linear-gradient(135deg,var(--gold) 0%,var(--gold-deep) 100%);
+    color:#fff;text-decoration:none;font-family:"Helvetica Neue",Arial,sans-serif;
+    font-size:15px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;
+    padding:17px 42px;border-radius:6px;box-shadow:0 10px 24px rgba(176,141,63,.35);
+    transition:transform .15s ease;
+  }
+  .cta-btn:hover{transform:translateY(-2px);}
+  .cta .fine{margin-top:16px;font-size:12.5px;color:var(--ink-soft);
+    font-family:"Helvetica Neue",Arial,sans-serif;letter-spacing:.04em;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    background:#1c1a17;color:#9a9484;text-align:center;padding:32px 22px;
+    font-family:"Helvetica Neue",Arial,sans-serif;font-size:12px;letter-spacing:.04em;
+    margin-top:40px;border-top:2px solid var(--gold);
+  }
+  footer .ref{color:var(--gold-soft);}
+  @media(max-width:560px){
+    header h1{font-size:32px;}
+    .stat .num{font-size:28px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crest">Valletta · Malta — Est. 16th Century</div>
+  <h1>Domus <span class="gold">Zamittello</span></h1>
+  <div class="rule"></div>
+  <div class="sub">Your AI Concierge Agent — A Private Preview</div>
+  <div class="keys">★★★★★ · 21 Rooms &amp; Suites · MICHELIN Key 2025</div>
+</header>
+
+<div class="wrap">
+
+  <section class="intro">
+    <div class="kicker">Prepared exclusively for your team</div>
+    <h2>Every guest email, answered with the warmth of a five-star welcome</h2>
+    <p>Below is a live-style preview of how your concierge inbox would look. The AI Concierge Agent reads each incoming message, understands the guest's intent, and drafts a polished, on-brand reply in roughly <strong>30 seconds</strong> — ready for your team to review, refine and send.</p>
+  </section>
+
+  <div class="sec-head">
+    <div class="kicker">Your inbox, reimagined</div>
+    <h3>Three arrivals this morning — three drafts already waiting</h3>
+    <p>Real examples for a 21-key palazzo in Valletta. You stay in control; the AI does the typing.</p>
+  </div>
+
+  <!-- Dashboard header -->
+  <div class="dash-bar">
+    <span><span class="dot"></span>Domus Zamittello · Concierge Desk</span>
+    <span class="right">3 new · 3 drafts ready · Mews synced</span>
+  </div>
+
+  <!-- EMAIL 1 -->
+  <div class="card">
+    <div class="inbox">
+      <div class="meta">
+        <span><b>From:</b> charlotte.reeves@gmail.com</span>
+        <span><b>Received:</b> 08:14</span>
+        <span class="tag">Reservation · Parking</span>
+      </div>
+      <div class="subj"><b>Subject:</b> Availability &amp; parking for our stay in October</div>
+      <div class="body-in">
+        Hello, my husband and I would love to stay with you for three nights from 12–15 October.
+        We'll be driving from the airport — is there parking at the hotel, and would a Deluxe Suite
+        be available for those dates? Many thanks, Charlotte.
+      </div>
+    </div>
+    <div class="draft">
+      <div class="draft-head">
+        <span class="ai-chip">AI Draft</span>
+        <span class="time">Generated in 28s</span>
+      </div>
+      <div class="draft-body">
+        <p>Dear Charlotte,</p>
+        <p>What a pleasure to hear from you — we would be delighted to welcome you and your husband to Domus Zamittello for your three-night escape from 12 to 15 October. I am pleased to confirm that a Deluxe Suite is available for your dates, and I have placed a courtesy hold on it while you decide.</p>
+        <p>Regarding your drive from the airport: as we are set within a historic 16th-century palazzo in the heart of Valletta, the city is largely pedestrian, so we do not have on-site parking. We warmly recommend the secure MCP car park a short two-minute walk away, and our concierge would be glad to arrange a private transfer or assist with your arrival so the last steps of your journey are effortless.</p>
+        <p>May I proceed with your reservation, or is there anything further I can prepare ahead of your visit?</p>
+        <p class="sig">With warm regards,<br>The Concierge Team · Domus Zamittello, Valletta</p>
+      </div>
+      <div class="actions">
+        <span class="btn-mini primary">Approve &amp; Send</span>
+        <span class="btn-mini">Edit draft</span>
+        <span class="btn-mini">Regenerate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL 2 -->
+  <div class="card">
+    <div class="inbox">
+      <div class="meta">
+        <span><b>From:</b> m.laurent@outlook.com</span>
+        <span><b>Received:</b> 09:02</span>
+        <span class="tag">Late Check-out</span>
+      </div>
+      <div class="subj"><b>Subject:</b> Late check-out request — departing Sunday</div>
+      <div class="body-in">
+        Good morning, we are checking out this Sunday but our flight is not until the evening.
+        Would it be possible to have a later check-out so we can enjoy the morning? Thank you, Marc.
+      </div>
+    </div>
+    <div class="draft">
+      <div class="draft-head">
+        <span class="ai-chip">AI Draft</span>
+        <span class="time">Generated in 24s</span>
+      </div>
+      <div class="draft-body">
+        <p>Dear Marc,</p>
+        <p>Thank you for letting us know — and please, never rush your final morning with us. With an evening flight, a leisurely departure is exactly as it should be.</p>
+        <p>I am happy to extend your check-out to <strong>2:00 pm on Sunday</strong> as a complimentary courtesy, subject to a final confirmation the evening before. Should you wish to linger even longer, we can arrange a half-day rate to keep the suite entirely yours until your transfer.</p>
+        <p>In the meantime, do let us store your luggage after check-out and enjoy a coffee on the terrace — consider the hotel yours until you leave for the airport.</p>
+        <p class="sig">Warmest regards,<br>The Concierge Team · Domus Zamittello, Valletta</p>
+      </div>
+      <div class="actions">
+        <span class="btn-mini primary">Approve &amp; Send</span>
+        <span class="btn-mini">Edit draft</span>
+        <span class="btn-mini">Regenerate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL 3 -->
+  <div class="card">
+    <div class="inbox">
+      <div class="meta">
+        <span><b>From:</b> sofia.bianchi@icloud.com</span>
+        <span><b>Received:</b> 10:37</span>
+        <span class="tag">Dining · Recommendations</span>
+      </div>
+      <div class="subj"><b>Subject:</b> Dinner recommendations near the hotel?</div>
+      <div class="body-in">
+        Hi there, we arrive next Friday and would love your advice on where to dine nearby —
+        somewhere special for our anniversary, and perhaps a more casual spot too. Grazie! Sofia
+      </div>
+    </div>
+    <div class="draft">
+      <div class="draft-head">
+        <span class="ai-chip">AI Draft</span>
+        <span class="time">Generated in 31s</span>
+      </div>
+      <div class="draft-body">
+        <p>Dear Sofia,</p>
+        <p>Congratulations on your anniversary — how wonderful to celebrate it in Valletta, and it would be our joy to help you make the evening unforgettable.</p>
+        <p>For a truly special dinner, <strong>ION Harbour</strong> (moments from the hotel) offers refined tasting menus with sweeping views over the Grand Harbour — an ideal setting for the occasion, and we would be delighted to secure a table with the finest outlook. For your relaxed evening, the characterful lanes of <strong>Strait Street</strong> are just around the corner, with intimate wine bars and authentic Maltese fare in a lively, romantic atmosphere.</p>
+        <p>If you would like, I can reserve both on your behalf and note the anniversary so a small surprise awaits you. Simply share your preferred times and I shall arrange everything.</p>
+        <p class="sig">With warm regards,<br>The Concierge Team · Domus Zamittello, Valletta</p>
+      </div>
+      <div class="actions">
+        <span class="btn-mini primary">Approve &amp; Send</span>
+        <span class="btn-mini">Edit draft</span>
+        <span class="btn-mini">Regenerate</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROI -->
+  <div class="sec-head">
+    <div class="kicker">What it means for you</div>
+    <h3>The maths behind a calmer front desk</h3>
+  </div>
+
+  <div class="roi">
+    <div class="kicker">Estimated impact · 21 keys</div>
+    <h3>Reclaim over 100 hours every month</h3>
+    <p class="lead">Based on a typical volume for a five-star, 21-room property in Valletta.</p>
+    <div class="grid">
+      <div class="stat"><div class="num">~20</div><div class="lbl">Guest emails / day</div></div>
+      <div class="stat"><div class="num">15 min</div><div class="lbl">Saved per email</div></div>
+      <div class="stat"><div class="num">~5 h</div><div class="lbl">Saved per day</div></div>
+      <div class="stat"><div class="num">~35 h</div><div class="lbl">Saved per week</div></div>
+      <div class="stat"><div class="num">~150 h</div><div class="lbl">Saved per month</div></div>
+    </div>
+    <div class="roi-note">
+      Assumptions: <b>15–25 emails/day</b> (≈20 average) × <b>15 minutes</b> drafted and typed by hand.<br>
+      That's <b>five hours a day</b> — nearly a full working shift — returned to your team to spend where it matters most: <b>with your guests.</b><br>
+      Faster replies also mean higher direct-booking conversion and a warmer first impression, every single time.
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h3>See your own concierge agent, live.</h3>
+    <p>In just fifteen minutes we'll connect the agent to your real inbox and Mews PMS, and show you the very first drafts written in your hotel's voice.</p>
+    <a class="cta-btn" href="mailto:enzo@example.com?subject=Book%20a%2015-minute%20demo%20—%20Domus%20Zamittello">Book a 15-minute demo</a>
+    <div class="fine">Setup €2,500 · €100/month · Live in days, not weeks · Trusted by IBB Palazzo Bettina, Malta</div>
+  </div>
+
+</div>
+
+<footer>
+  AI Concierge Agent — a private preview crafted for <span class="ref">Domus Zamittello</span>, Valletta.<br>
+  Reference client: IBB Palazzo Bettina (Malta) · Integrates with Mews PMS
+</footer>
+
+</body>
+</html>

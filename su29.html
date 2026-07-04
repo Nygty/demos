@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SU29 &times; AI Concierge — Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background: #f4f4f2;
+    color: #1a1a1a;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---- HEADER ---- */
+  header {
+    background: #0f0f0f;
+    color: #fff;
+    padding: 72px 0 64px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: "";
+    position: absolute;
+    top: -40%;
+    right: -10%;
+    width: 380px;
+    height: 380px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .logo {
+    font-size: 64px;
+    font-weight: 200;
+    letter-spacing: 14px;
+    margin-left: 14px;
+    line-height: 1;
+  }
+  .logo span { font-weight: 700; }
+  .tagline {
+    margin-top: 20px;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #9a9a9a;
+    font-weight: 400;
+  }
+  .kicker {
+    display: inline-block;
+    margin-top: 40px;
+    padding: 8px 18px;
+    border: 1px solid #333;
+    border-radius: 40px;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #d8d8d8;
+  }
+  .kicker b { color: #fff; }
+
+  /* ---- SECTION HEADS ---- */
+  .section { padding: 64px 0; }
+  .eyebrow {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8a8a8a;
+    margin-bottom: 10px;
+  }
+  h2 {
+    font-size: 30px;
+    font-weight: 300;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+  }
+  h2 b { font-weight: 700; }
+  .lead { color: #555; max-width: 620px; font-size: 15px; }
+
+  /* ---- DASHBOARD ---- */
+  .dash {
+    background: #fff;
+    border: 1px solid #e6e6e2;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-top: 32px;
+    box-shadow: 0 20px 50px -30px rgba(0,0,0,0.4);
+  }
+  .dash-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    background: #0f0f0f;
+    color: #fff;
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dash-bar .title {
+    margin-left: 12px;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #cfcfcf;
+  }
+  .dash-bar .status {
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #5fd18a;
+    text-transform: uppercase;
+  }
+
+  .email {
+    padding: 26px 28px;
+    border-bottom: 1px solid #eee;
+  }
+  .email:last-child { border-bottom: none; }
+  .email-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+  .email-meta .from { color: #0f0f0f; font-weight: 600; }
+  .tag {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 30px;
+    background: #f0efe9;
+    color: #6a6a5a;
+    margin-left: auto;
+  }
+  .subj { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .body-in { font-size: 14px; color: #444; font-style: italic; }
+
+  .draft {
+    margin-top: 16px;
+    background: #f7f7f4;
+    border-left: 3px solid #0f0f0f;
+    border-radius: 0 10px 10px 0;
+    padding: 16px 20px;
+  }
+  .draft-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #0f0f0f;
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+  .spark {
+    display: inline-flex;
+    width: 18px; height: 18px;
+    align-items: center; justify-content: center;
+    background: #0f0f0f; color: #fff;
+    border-radius: 5px; font-size: 11px;
+  }
+  .draft-time { margin-left: auto; font-weight: 400; color: #8a8a8a; letter-spacing: 1px; }
+  .draft-body { font-size: 14px; color: #222; }
+  .draft-body p { margin-bottom: 10px; }
+  .draft-body p:last-child { margin-bottom: 0; }
+
+  /* ---- ROI ---- */
+  .roi {
+    background: #0f0f0f;
+    color: #fff;
+    border-radius: 14px;
+    padding: 48px 44px;
+    margin-top: 8px;
+  }
+  .roi .eyebrow { color: #7a7a7a; }
+  .roi h2 { color: #fff; }
+  .metrics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    margin: 32px 0 8px;
+  }
+  .metric { flex: 1; min-width: 150px; }
+  .metric .num { font-size: 42px; font-weight: 200; letter-spacing: -1px; }
+  .metric .lbl { font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: #9a9a9a; margin-top: 4px; }
+  .roi-note {
+    margin-top: 24px;
+    font-size: 14px;
+    color: #c8c8c8;
+    max-width: 640px;
+    border-top: 1px solid #2a2a2a;
+    padding-top: 24px;
+  }
+  .roi-note b { color: #fff; }
+
+  /* ---- CTA ---- */
+  .cta {
+    text-align: center;
+    padding: 72px 24px 88px;
+  }
+  .cta h2 { font-size: 34px; margin-bottom: 14px; }
+  .cta p { color: #555; margin-bottom: 30px; }
+  .btn {
+    display: inline-block;
+    background: #0f0f0f;
+    color: #fff;
+    text-decoration: none;
+    padding: 18px 44px;
+    border-radius: 50px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    transition: transform .2s ease, background .2s ease;
+  }
+  .btn:hover { background: #333; transform: translateY(-2px); }
+  .cta .sub { margin-top: 22px; font-size: 12px; color: #999; letter-spacing: 1px; }
+
+  footer {
+    text-align: center;
+    padding: 30px 24px;
+    font-size: 12px;
+    color: #9a9a9a;
+    letter-spacing: 1px;
+    border-top: 1px solid #e6e6e2;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="logo">SU<span>29</span></div>
+    <div class="tagline">Boutique Hotel &middot; Valletta, Malta</div>
+    <div class="kicker">A private preview of your <b>AI Concierge</b></div>
+  </div>
+</header>
+
+<section class="section">
+  <div class="wrap">
+    <div class="eyebrow">The idea</div>
+    <h2>Every reply, in <b>SU29's voice</b> — drafted in ~30 seconds.</h2>
+    <p class="lead">
+      With only 8 rooms, your inbox <em>is</em> your brand. The AI Concierge reads each
+      incoming email, understands the intent, and writes a ready-to-send draft that sounds
+      exactly like SU29 — contemporary, warm, effortlessly design-led. You stay in control:
+      review, tweak, send.
+    </p>
+
+    <div class="dash">
+      <div class="dash-bar">
+        <span class="dot" style="background:#ff5f57"></span>
+        <span class="dot" style="background:#febc2e"></span>
+        <span class="dot" style="background:#28c840"></span>
+        <span class="title">SU29 &middot; Concierge Inbox</span>
+        <span class="status">&#9679; Live &middot; RoomRaccoon synced</span>
+      </div>
+
+      <!-- EMAIL 1 -->
+      <div class="email">
+        <div class="email-meta">
+          <span class="from">Sofia Lindqvist</span>
+          <span>&lt;sofia.l@gmail.com&gt;</span>
+          <span class="tag">Booking &middot; Early check-in</span>
+        </div>
+        <div class="subj">Room for the 14th — can we arrive early?</div>
+        <div class="body-in">
+          "Hi! We'd love to book a double for two nights from the 14th. Our flight lands at
+          9am so we'll be there way before 3pm — any chance of an early check-in? Also is
+          breakfast included? Thanks!"
+        </div>
+        <div class="draft">
+          <div class="draft-head">
+            <span class="spark">&#9889;</span> AI Draft
+            <span class="draft-time">generated in 28s</span>
+          </div>
+          <div class="draft-body">
+            <p>Hi Sofia,</p>
+            <p>Great choice — and a 9am landing means you get the whole city to yourselves before
+            the crowds. We've pencilled you in for a Double for two nights from the 14th.</p>
+            <p>Standard check-in is from 3pm, but we'll do our best to have your room ready early.
+            If it isn't quite set, drop your bags with us and start the day on our rooftop —
+            coffee's on the house while you wait. We'll confirm the early check-in the morning of
+            your arrival.</p>
+            <p>And yes, breakfast is included: a slow, local-produce spread served up top with a
+            view over Valletta's rooftops.</p>
+            <p>Shall I lock in the reservation for you?</p>
+            <p>Warmly,<br>The SU29 Team</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL 2 -->
+      <div class="email">
+        <div class="email-meta">
+          <span class="from">Marco Den-Design Weekly</span>
+          <span>&lt;marco@designweekly.co&gt;</span>
+          <span class="tag">Design &middot; Rooftop</span>
+        </div>
+        <div class="subj">Curious about your rooftop &amp; interiors</div>
+        <div class="body-in">
+          "I keep seeing SU29 on my feed — the interiors look incredible. Can you tell me more
+          about the design concept and the rooftop? Is it open to guests all day?"
+        </div>
+        <div class="draft">
+          <div class="draft-head">
+            <span class="spark">&#9889;</span> AI Draft
+            <span class="draft-time">generated in 31s</span>
+          </div>
+          <div class="draft-body">
+            <p>Hi Marco,</p>
+            <p>Thank you — that means a lot. SU29 was built around a single idea: contemporary
+            design that lets a 16th-century Valletta building breathe. Clean lines, warm stone,
+            muted tones and pieces curated by the Studio Moda Group — nothing loud, everything
+            considered.</p>
+            <p>The rooftop is the heart of it: open to guests from sunrise to late, whether that's
+            breakfast in the morning light or a glass of something local as the harbour lights up.
+            It's designed to feel like an extension of your room, not a separate venue.</p>
+            <p>If you'd like, I can send over a few images or hold a room for you to experience it
+            in person — that's really the only way to get it.</p>
+            <p>Best,<br>The SU29 Team</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL 3 -->
+      <div class="email">
+        <div class="email-meta">
+          <span class="from">James &amp; Priya</span>
+          <span>&lt;jpwanders@outlook.com&gt;</span>
+          <span class="tag">Concierge &middot; Nightlife</span>
+        </div>
+        <div class="subj">Where should we go out tonight?</div>
+        <div class="body-in">
+          "We're staying with you tonight and want to see Valletta after dark — nothing too
+          touristy. Cocktails, maybe some music? What do you recommend?"
+        </div>
+        <div class="draft">
+          <div class="draft-head">
+            <span class="spark">&#9889;</span> AI Draft
+            <span class="draft-time">generated in 27s</span>
+          </div>
+          <div class="draft-body">
+            <p>Hi James &amp; Priya,</p>
+            <p>Love this question. Here's how we'd spend the evening:</p>
+            <p><b>Start</b> with cocktails at Bridge Bar on Victoria Gate steps — candle-lit,
+            low-key, and it spills right onto the fortifications. <b>Then</b> wander up to
+            Strait Street, Valletta's old entertainment quarter, for live jazz and a proper
+            local buzz without the tourist gloss. <b>Late</b>, Tico Tico or Yard 32 for a final
+            drink among locals.</p>
+            <p>Give us a nod at the desk and we'll call ahead so you're expected. And the rooftop
+            stays open — a nightcap up top is the best way to close a Valletta night.</p>
+            <p>Have a brilliant one,<br>The SU29 Team</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ROI -->
+<section class="section" style="padding-top:0">
+  <div class="wrap">
+    <div class="roi">
+      <div class="eyebrow">Why it matters for SU29</div>
+      <h2>Small property. <b>Big, consistent voice.</b></h2>
+      <div class="metrics">
+        <div class="metric">
+          <div class="num">8&ndash;10</div>
+          <div class="lbl">emails / day handled</div>
+        </div>
+        <div class="metric">
+          <div class="num">~30s</div>
+          <div class="lbl">to draft each reply</div>
+        </div>
+        <div class="metric">
+          <div class="num">100%</div>
+          <div class="lbl">on-brand tone</div>
+        </div>
+        <div class="metric">
+          <div class="num">8</div>
+          <div class="lbl">rooms, one voice</div>
+        </div>
+      </div>
+      <p class="roi-note">
+        At 8 rooms the numbers game isn't about volume — it's about <b>consistency</b>. Whether an
+        email is answered by you, a night manager, or on a Sunday, every guest hears the same
+        confident, design-led SU29 voice. Around <b>8&ndash;10 emails a day</b> stop being a
+        chore and become a brand touchpoint — each one reinforcing the Studio Moda Group standard,
+        drafted in seconds and always ready for your final human touch.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="wrap">
+    <h2>See it running on <b>your</b> inbox.</h2>
+    <p>A 15-minute call. We'll draft live replies to real SU29-style emails — no slides.</p>
+    <a class="btn" href="mailto:enzo@example.com?subject=SU29%20—%20AI%20Concierge%20Demo">Book a 15-minute demo</a>
+    <div class="sub">Setup €2,500 &middot; €100/month &middot; Integrates with RoomRaccoon</div>
+  </div>
+</section>
+
+<footer>
+  Prepared for SU29 Boutique Hotel &middot; Studio Moda Group &middot; Valletta
+  &nbsp;&middot;&nbsp; AI Concierge by Enzo
+</footer>
+
+</body>
+</html>

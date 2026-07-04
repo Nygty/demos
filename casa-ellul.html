@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Casa Ellul · AI Concierge Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Jost', sans-serif;
+    color: #2e2a26;
+    background: #f5f1ea;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- HEADER ---------- */
+  header {
+    background: linear-gradient(160deg, #1f1b17 0%, #34291f 100%);
+    color: #efe7db;
+    text-align: center;
+    padding: 72px 24px 64px;
+    position: relative;
+    border-bottom: 3px solid #b89b6e;
+  }
+  header .eyebrow {
+    font-size: 12px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #b89b6e;
+    font-weight: 400;
+    margin-bottom: 18px;
+  }
+  header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 62px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    line-height: 1.05;
+  }
+  header .rule {
+    width: 60px; height: 1px; background: #b89b6e;
+    margin: 22px auto;
+  }
+  header .sub {
+    font-weight: 300;
+    font-size: 15px;
+    letter-spacing: 1.5px;
+    color: #cabfae;
+  }
+  header .slh {
+    margin-top: 26px;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #8f8574;
+  }
+
+  /* ---------- SECTION INTRO ---------- */
+  .intro { text-align: center; padding: 56px 24px 8px; }
+  .intro h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px;
+    font-weight: 500;
+    color: #34291f;
+  }
+  .intro p {
+    max-width: 620px; margin: 14px auto 0;
+    color: #6b6155; font-weight: 300; font-size: 16px;
+  }
+
+  /* ---------- DASHBOARD ---------- */
+  .dashboard { padding: 40px 0 20px; }
+  .db-head {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #fff; border: 1px solid #e3dccf;
+    border-radius: 10px 10px 0 0;
+    padding: 16px 24px;
+    box-shadow: 0 1px 0 #e3dccf;
+  }
+  .db-head .title { font-weight: 500; letter-spacing: 1px; color: #34291f; }
+  .db-head .title span { color: #b89b6e; font-weight: 400; }
+  .db-head .stat {
+    font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+    color: #8a8070;
+  }
+  .db-head .dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: #6fae7c; margin-right: 7px;
+    box-shadow: 0 0 0 3px rgba(111,174,124,.2);
+  }
+
+  .email-card {
+    background: #fff;
+    border: 1px solid #e3dccf;
+    border-top: none;
+    padding: 26px 28px;
+  }
+  .email-card:last-of-type { border-radius: 0 0 10px 10px; }
+
+  .em-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .em-meta .from { font-weight: 500; color: #34291f; }
+  .em-meta .addr { font-size: 13px; color: #a39889; }
+  .em-time { font-size: 12px; color: #a39889; white-space: nowrap; }
+  .em-subject {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 21px; color: #2e2a26;
+    margin: 12px 0 8px;
+    font-weight: 600;
+  }
+  .em-body {
+    font-weight: 300; color: #5d5347; font-size: 15px;
+    border-left: 2px solid #e3dccf; padding-left: 16px;
+  }
+
+  .ai-reply {
+    margin-top: 20px;
+    background: #faf6ef;
+    border: 1px solid #e8ddc8;
+    border-radius: 8px;
+    padding: 20px 22px;
+    position: relative;
+  }
+  .ai-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+    color: #9a7b45; font-weight: 500; margin-bottom: 12px;
+  }
+  .ai-tag .badge {
+    background: #b89b6e; color: #fff; border-radius: 20px;
+    padding: 2px 10px; font-size: 10px; letter-spacing: 1px;
+  }
+  .ai-reply p { font-weight: 300; color: #453e34; font-size: 15px; margin-bottom: 10px; }
+  .ai-reply p:last-child { margin-bottom: 0; }
+  .ai-actions {
+    margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .ai-actions button {
+    font-family: 'Jost', sans-serif; cursor: pointer;
+    border: 1px solid #cdbf9f; background: #fff; color: #6b5a38;
+    padding: 8px 18px; border-radius: 6px; font-size: 13px; letter-spacing: .5px;
+    transition: .2s;
+  }
+  .ai-actions button:hover { background: #b89b6e; color: #fff; border-color: #b89b6e; }
+  .ai-actions .primary { background: #34291f; color: #efe7db; border-color: #34291f; }
+  .ai-actions .primary:hover { background: #b89b6e; border-color: #b89b6e; }
+
+  /* ---------- ROI ---------- */
+  .roi {
+    margin: 60px 0 20px;
+    background: linear-gradient(160deg, #2b241d 0%, #3d3125 100%);
+    color: #efe7db;
+    border-radius: 12px;
+    padding: 48px 40px;
+    text-align: center;
+    border: 1px solid #4a3d2e;
+  }
+  .roi h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px; font-weight: 500; color: #f3ecdf;
+  }
+  .roi .lead { color: #c9bda9; font-weight: 300; max-width: 560px; margin: 12px auto 32px; }
+  .roi-grid {
+    display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+  }
+  .roi-card {
+    background: rgba(255,255,255,.04);
+    border: 1px solid #4a3d2e;
+    border-radius: 10px;
+    padding: 26px 24px;
+    min-width: 180px; flex: 1;
+  }
+  .roi-card .num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px; color: #d8b877; font-weight: 600; line-height: 1;
+  }
+  .roi-card .lbl {
+    margin-top: 10px; font-size: 12px; letter-spacing: 1.5px;
+    text-transform: uppercase; color: #b3a892;
+  }
+  .roi-note {
+    margin-top: 30px; font-size: 13px; color: #9a8f7c; font-weight: 300;
+    letter-spacing: .5px;
+  }
+
+  /* ---------- CTA ---------- */
+  .cta { text-align: center; padding: 64px 24px 40px; }
+  .cta h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; font-weight: 500; color: #34291f;
+  }
+  .cta p { color: #6b6155; font-weight: 300; margin: 12px auto 30px; max-width: 520px; }
+  .cta a {
+    display: inline-block;
+    background: #34291f; color: #efe7db;
+    text-decoration: none;
+    padding: 18px 44px;
+    border-radius: 8px;
+    letter-spacing: 2px; text-transform: uppercase; font-size: 14px;
+    border: 1px solid #34291f;
+    transition: .25s;
+  }
+  .cta a:hover { background: #b89b6e; border-color: #b89b6e; letter-spacing: 3px; }
+  .cta .fine { margin-top: 22px; font-size: 12px; color: #a39889; letter-spacing: 1px; }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    background: #1f1b17; color: #8f8574;
+    text-align: center; padding: 30px 24px;
+    font-size: 12px; letter-spacing: 1.5px;
+  }
+  footer .brand { color: #b89b6e; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 44px; }
+    .roi { padding: 36px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Boutique Palazzo · Valletta, Malta</div>
+  <h1>Casa Ellul</h1>
+  <div class="rule"></div>
+  <div class="sub">An AI Concierge, tailored for your nine suites</div>
+  <div class="slh">Small Luxury Hotels of the World</div>
+</header>
+
+<section class="intro wrap">
+  <h2>Every guest enquiry, answered in the voice of Casa Ellul</h2>
+  <p>The AI Concierge reads each incoming email, understands the request, and prepares a polished draft reply in roughly thirty seconds — ready for your team to review, refine, and send. Below is a live simulation using enquiries typical of a historic Valletta palazzo.</p>
+</section>
+
+<section class="dashboard wrap">
+  <div class="db-head">
+    <div class="title">Casa Ellul · <span>Concierge Inbox</span></div>
+    <div class="stat"><span class="dot"></span>3 drafts ready · avg. 28s</div>
+  </div>
+
+  <!-- EMAIL 1 -->
+  <article class="email-card">
+    <div class="em-top">
+      <div class="em-meta">
+        <div class="from">Charlotte Whitmore</div>
+        <div class="addr">c.whitmore@outlook.com</div>
+      </div>
+      <div class="em-time">Today · 08:14</div>
+    </div>
+    <div class="em-subject">Reservation — a suite with a view for our anniversary</div>
+    <div class="em-body">
+      Good morning, my husband and I would love to celebrate our anniversary in Valletta from the 18th to the 21st of September. Do you have a suite available with a view, and could you tell me a little about it? We are looking for something truly special.
+    </div>
+
+    <div class="ai-reply">
+      <div class="ai-tag"><span class="badge">AI Draft</span> generated in 26s · ready to review</div>
+      <p>Dear Ms Whitmore,</p>
+      <p>Thank you for considering Casa Ellul for such a meaningful occasion — we would be honoured to be part of your anniversary celebration.</p>
+      <p>For your dates of 18–21 September, I am delighted to offer our <strong>Terrace Suite</strong>, one of only nine suites within our restored 19th-century palazzo. It features a private terrace with open views across the rooftops and church domes of Valletta, a freestanding bath, and interiors that blend original architectural detail with contemporary comfort.</p>
+      <p>Should you wish, we would be pleased to arrange a bottle of Maltese sparkling wine and fresh flowers on arrival to mark the occasion. Simply let me know and I will take care of every detail.</p>
+      <p>Warmest regards,<br>The Concierge Team · Casa Ellul</p>
+    </div>
+    <div class="ai-actions">
+      <button class="primary">Approve &amp; Send</button>
+      <button>Edit Draft</button>
+      <button>View Availability</button>
+    </div>
+  </article>
+
+  <!-- EMAIL 2 -->
+  <article class="email-card">
+    <div class="em-top">
+      <div class="em-meta">
+        <div class="from">Dr. Marco Bianchi</div>
+        <div class="addr">m.bianchi@studio-bianchi.it</div>
+      </div>
+      <div class="em-time">Today · 09:41</div>
+    </div>
+    <div class="em-subject">Spa treatments & in-suite services during our stay</div>
+    <div class="em-body">
+      Buongiorno, we are arriving next week and my wife would like to book a massage. Do you have a spa on site, and what wellness or in-room services can you offer? We would also appreciate a late check-out if possible.
+    </div>
+
+    <div class="ai-reply">
+      <div class="ai-tag"><span class="badge">AI Draft</span> generated in 29s · ready to review</div>
+      <p>Dear Dr Bianchi,</p>
+      <p>Thank you for your message — we look forward to welcoming you and your wife to Casa Ellul.</p>
+      <p>As an intimate palazzo of nine suites, we offer a bespoke rather than a conventional spa experience: our therapist can arrange <strong>in-suite massage and wellness treatments</strong> at a time that suits you, so your wife may relax in complete privacy. I would be happy to reserve a session and share the treatment menu in advance.</p>
+      <p>A late check-out until 14:00 can be arranged with pleasure, subject to availability, and we will do our utmost to confirm this closer to your departure.</p>
+      <p>Please let me know your preferred day and time, and I will coordinate everything ahead of your arrival.</p>
+      <p>With kind regards,<br>The Concierge Team · Casa Ellul</p>
+    </div>
+    <div class="ai-actions">
+      <button class="primary">Approve &amp; Send</button>
+      <button>Edit Draft</button>
+      <button>Notify Therapist</button>
+    </div>
+  </article>
+
+  <!-- EMAIL 3 -->
+  <article class="email-card">
+    <div class="em-top">
+      <div class="em-meta">
+        <div class="from">James &amp; Élodie Laurent</div>
+        <div class="addr">jlaurent.paris@gmail.com</div>
+      </div>
+      <div class="em-time">Today · 11:07</div>
+    </div>
+    <div class="em-subject">A recommendation for a romantic evening in Valletta</div>
+    <div class="em-body">
+      Hello, we will be staying with you next month and would love your advice for one very special romantic evening — perhaps a memorable dinner with a view, and something lovely to do afterwards. We trust your local knowledge completely!
+    </div>
+
+    <div class="ai-reply">
+      <div class="ai-tag"><span class="badge">AI Draft</span> generated in 27s · ready to review</div>
+      <p>Dear Mr and Mrs Laurent,</p>
+      <p>What a delight to help you plan such a special evening — Valletta is wonderfully romantic after dusk.</p>
+      <p>For dinner, I would suggest a candlelit table at a rooftop restaurant overlooking the Grand Harbour, where the illuminated fortifications make an unforgettable backdrop. I would be glad to reserve the finest table on your behalf.</p>
+      <p>Afterwards, a gentle stroll through the <strong>Upper Barrakka Gardens</strong> offers a breathtaking harbour panorama by night, followed perhaps by a glass of local wine at a quiet historic wine bar tucked into the old streets — a favourite of ours for its intimacy.</p>
+      <p>If you would like, I can arrange the dinner reservation and a private transfer, so that you need think of nothing but each other. Simply let me know the evening you have in mind.</p>
+      <p>Warmly,<br>The Concierge Team · Casa Ellul</p>
+    </div>
+    <div class="ai-actions">
+      <button class="primary">Approve &amp; Send</button>
+      <button>Edit Draft</button>
+      <button>Add to Itinerary</button>
+    </div>
+  </article>
+</section>
+
+<section class="wrap">
+  <div class="roi">
+    <h2>What this means for Casa Ellul</h2>
+    <p class="lead">Across nine suites, a boutique palazzo typically handles 8–12 guest emails a day. The AI Concierge drafts each reply in about 30 seconds, saving roughly 15 minutes of your team's time on every message.</p>
+    <div class="roi-grid">
+      <div class="roi-card">
+        <div class="num">8–12</div>
+        <div class="lbl">Emails per day</div>
+      </div>
+      <div class="roi-card">
+        <div class="num">15 min</div>
+        <div class="lbl">Saved per email</div>
+      </div>
+      <div class="roi-card">
+        <div class="num">~2–3 h</div>
+        <div class="lbl">Reclaimed daily</div>
+      </div>
+      <div class="roi-card">
+        <div class="num">50–75 h</div>
+        <div class="lbl">Saved per month</div>
+      </div>
+    </div>
+    <div class="roi-note">
+      That is time your team returns to what matters most — the guests standing before you.
+      Estimate based on 10 emails/day × 15 minutes saved, reviewed and sent by your staff.
+    </div>
+  </div>
+</section>
+
+<section class="cta wrap">
+  <h2>See it working with your own inbox</h2>
+  <p>In fifteen minutes we will connect the AI Concierge to sample enquiries and show you drafts written in the voice of Casa Ellul — with full Mews PMS integration.</p>
+  <a href="mailto:enzo@example.com?subject=Casa%20Ellul%20—%20AI%20Concierge%20Demo">Book a 15-minute demo</a>
+  <div class="fine">Setup €2,500 · €100 / month · Trusted by Palazzo Bettina, Malta</div>
+</section>
+
+<footer>
+  Prepared exclusively for <span class="brand">Casa Ellul</span> · AI Concierge by Enzo · Valletta, Malta
+</footer>
+
+</body>
+</html>

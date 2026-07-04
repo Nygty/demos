@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palazzo Bifora · AI Concierge Demo</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    background: #f5f1e8;
+    color: #2b2620;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #1a1610 0%, #3a2f1c 55%, #6b5424 100%);
+    color: #f5ecd0;
+    text-align: center;
+    padding: 70px 24px 60px;
+    border-bottom: 4px solid #c9a227;
+    position: relative;
+  }
+  header::before {
+    content: "";
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(201,162,39,0.04) 0 12px, transparent 12px 24px);
+    pointer-events: none;
+  }
+  .crest {
+    font-size: 40px; letter-spacing: 6px; color: #c9a227; margin-bottom: 8px;
+  }
+  header h1 {
+    font-size: 48px; font-weight: normal; letter-spacing: 4px;
+    color: #f5ecd0; text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .subtitle {
+    font-size: 15px; letter-spacing: 3px; text-transform: uppercase;
+    color: #d8b84a; margin-top: 14px;
+  }
+  .location {
+    font-style: italic; font-size: 17px; color: #e6dcc0; margin-top: 6px;
+  }
+  .rating { margin-top: 18px; color: #c9a227; font-size: 20px; letter-spacing: 4px; }
+
+  /* SECTION TITLES */
+  .section-head {
+    text-align: center; margin: 60px 0 30px;
+  }
+  .section-head h2 {
+    font-size: 30px; font-weight: normal; color: #6b5424; letter-spacing: 2px;
+  }
+  .section-head .rule {
+    width: 80px; height: 2px; background: #c9a227; margin: 14px auto 0;
+  }
+  .section-head p { color: #6f665a; font-size: 15px; margin-top: 10px; font-style: italic; }
+
+  /* DASHBOARD */
+  .dash-bar {
+    background: #2b2620; color: #e6dcc0; border-radius: 8px 8px 0 0;
+    padding: 14px 22px; display: flex; justify-content: space-between; align-items: center;
+    font-size: 14px; letter-spacing: 1px;
+  }
+  .dash-bar .live { color: #8fce8f; font-size: 12px; }
+  .dash-bar .live::before { content: "● "; }
+
+  .email-card {
+    background: #fff; border: 1px solid #e3dac4; border-top: none;
+    margin-bottom: 0;
+  }
+  .email-card:last-child { border-radius: 0 0 8px 8px; }
+
+  .email-in {
+    padding: 22px 26px; border-bottom: 1px dashed #e0d6bd;
+    background: #fbf8f0;
+  }
+  .email-meta {
+    display: flex; justify-content: space-between; flex-wrap: wrap;
+    font-size: 13px; color: #8a8070; margin-bottom: 8px;
+  }
+  .email-meta .from { font-weight: bold; color: #4a4030; }
+  .tag {
+    display: inline-block; background: #c9a227; color: #fff;
+    font-size: 11px; letter-spacing: 1px; padding: 2px 10px; border-radius: 12px;
+    text-transform: uppercase;
+  }
+  .email-subject { font-size: 17px; color: #2b2620; margin-bottom: 8px; font-weight: bold; }
+  .email-body { font-size: 15px; color: #514a3c; font-style: italic; }
+
+  .ai-draft {
+    padding: 22px 26px; background: #fff;
+    position: relative;
+  }
+  .ai-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+    color: #6b5424; margin-bottom: 12px; font-family: Arial, sans-serif;
+  }
+  .ai-label .dot {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, #c9a227, #8a6d1c); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: bold;
+  }
+  .ai-label .time {
+    margin-left: auto; color: #9a9080; text-transform: none; letter-spacing: 0;
+    font-style: italic;
+  }
+  .draft-text {
+    background: #f9f6ee; border-left: 3px solid #c9a227;
+    padding: 16px 20px; font-size: 15px; color: #3a3226;
+    white-space: pre-line;
+  }
+  .draft-actions {
+    margin-top: 14px; display: flex; gap: 12px;
+  }
+  .btn-mini {
+    font-family: Arial, sans-serif; font-size: 13px; padding: 8px 18px;
+    border-radius: 4px; border: 1px solid #c9a227; cursor: default;
+  }
+  .btn-approve { background: #c9a227; color: #fff; }
+  .btn-edit { background: #fff; color: #6b5424; }
+
+  /* ROI */
+  .roi {
+    background: linear-gradient(135deg, #2b2620, #3a2f1c);
+    color: #f5ecd0; border-radius: 10px; padding: 44px 40px;
+    margin: 20px 0; border: 1px solid #c9a227;
+  }
+  .roi h3 { font-size: 26px; color: #d8b84a; font-weight: normal; margin-bottom: 8px; letter-spacing: 1px; }
+  .roi .lead { color: #e6dcc0; font-size: 16px; margin-bottom: 28px; font-style: italic; }
+  .roi-grid { display: flex; gap: 28px; flex-wrap: wrap; }
+  .roi-item { flex: 1; min-width: 180px; text-align: center; }
+  .roi-num { font-size: 40px; color: #c9a227; }
+  .roi-cap { font-size: 13px; color: #cfc6ad; letter-spacing: 1px; margin-top: 6px; text-transform: uppercase; }
+  .roi-note {
+    margin-top: 28px; padding-top: 22px; border-top: 1px solid rgba(201,162,39,0.3);
+    font-size: 15px; color: #e6dcc0; line-height: 1.7;
+  }
+  .roi-note strong { color: #d8b84a; }
+
+  /* CTA */
+  .cta {
+    text-align: center; padding: 60px 24px 50px;
+  }
+  .cta h2 { font-size: 30px; font-weight: normal; color: #6b5424; margin-bottom: 12px; letter-spacing: 2px; }
+  .cta p { color: #6f665a; font-size: 16px; margin-bottom: 28px; }
+  .cta-btn {
+    display: inline-block; background: linear-gradient(135deg, #c9a227, #a5811c);
+    color: #fff; text-decoration: none; font-family: Arial, sans-serif;
+    font-size: 18px; letter-spacing: 1px; padding: 18px 44px; border-radius: 6px;
+    box-shadow: 0 6px 18px rgba(107,84,36,0.35); transition: transform 0.15s;
+  }
+  .cta-btn:hover { transform: translateY(-2px); }
+  .cta-sub { margin-top: 18px; font-size: 13px; color: #9a9080; }
+
+  /* FOOTER */
+  footer {
+    background: #1a1610; color: #a59a7e; text-align: center;
+    padding: 28px 24px; font-size: 13px; letter-spacing: 1px;
+  }
+  footer .gold { color: #c9a227; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="crest">&#10070;</div>
+  <h1>Palazzo Bifora</h1>
+  <div class="subtitle">The AI Concierge · Personalised Demonstration</div>
+  <div class="location">A 14th-century palazzo · Mdina, Malta</div>
+  <div class="rating">&#9733; &#9733; &#9733; &#9733; &#9733;</div>
+</header>
+
+<div class="wrap">
+
+  <!-- DASHBOARD -->
+  <div class="section-head">
+    <h2>Your Inbox, Answered with Grace</h2>
+    <div class="rule"></div>
+    <p>Every guest enquiry receives a refined, on-brand reply draft in about 30 seconds — ready for your approval.</p>
+  </div>
+
+  <div class="dash-bar">
+    <span>Palazzo Bifora — Guest Correspondence</span>
+    <span class="live">AI Concierge active · synced with Mews</span>
+  </div>
+
+  <div class="email-card">
+    <!-- EMAIL 1 -->
+    <div class="email-in">
+      <div class="email-meta">
+        <span class="from">Charlotte &amp; James Whitfield &lt;whitfield.jc@gmail.com&gt;</span>
+        <span><span class="tag">Reservation</span></span>
+      </div>
+      <div class="email-subject">Suite for our anniversary — private dinner possible?</div>
+      <div class="email-body">"Good evening, we would love to stay in one of your suites for three nights in late September to celebrate our 25th wedding anniversary. Is it possible to arrange a private dinner for two on our first evening? Something truly special. Thank you."</div>
+    </div>
+    <div class="ai-draft">
+      <div class="ai-label"><span class="dot">AI</span> Suggested reply <span class="time">drafted in 28s</span></div>
+      <div class="draft-text">Dear Mrs and Mr Whitfield,
+
+What a joy it would be to welcome you to Palazzo Bifora for so meaningful an occasion. Congratulations on your 25th anniversary.
+
+For late September we would be delighted to offer you our Bifora Suite, whose arched twin windows overlook the silent lanes of the Silent City. For your first evening, our Chef would be honoured to compose a private candle-lit dinner for two, served in the palazzo courtyard beneath the stars, with a wine pairing drawn from Malta's finest cellars.
+
+May I ask your preferred arrival date and any dietary preferences, so that we may tailor every detail? I shall gladly hold the suite for you in the meantime.
+
+With warm regards,
+The Concierge
+Palazzo Bifora · Mdina</div>
+      <div class="draft-actions">
+        <span class="btn-mini btn-approve">Approve &amp; Send</span>
+        <span class="btn-mini btn-edit">Edit</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="email-card">
+    <!-- EMAIL 2 -->
+    <div class="email-in">
+      <div class="email-meta">
+        <span class="from">Sofia Bergström &lt;s.bergstrom@outlook.com&gt;</span>
+        <span><span class="tag">Concierge</span></span>
+      </div>
+      <div class="email-subject">Exploring Mdina &amp; the palazzo's history</div>
+      <div class="email-body">"Hello, we arrive next week and are fascinated by the history of Mdina. Could you recommend how to best discover the old city, and could you tell us a little about the story of the palazzo itself?"</div>
+    </div>
+    <div class="ai-draft">
+      <div class="ai-label"><span class="dot">AI</span> Suggested reply <span class="time">drafted in 31s</span></div>
+      <div class="draft-text">Dear Ms Bergström,
+
+We are delighted that Mdina's history stirs your curiosity — it is a passion we share.
+
+Palazzo Bifora takes its name from the elegant twin-arched "bifora" windows that grace its 14th-century façade. Once home to a Mdina noble family, its stone walls have witnessed nearly seven centuries of the Silent City's quiet grandeur, and we have restored it with great care to preserve that soul.
+
+To discover Mdina, we would suggest beginning at first light, when the bastions are hushed and golden. Our concierge can arrange a private historian-led walk through the medieval streets, a visit to St Paul's Cathedral, and a sunset aperitivo along the ramparts overlooking the whole island. We would be pleased to reserve these for you before your arrival.
+
+Might I prepare a bespoke itinerary for your stay?
+
+With warm regards,
+The Concierge
+Palazzo Bifora · Mdina</div>
+      <div class="draft-actions">
+        <span class="btn-mini btn-approve">Approve &amp; Send</span>
+        <span class="btn-mini btn-edit">Edit</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="email-card">
+    <!-- EMAIL 3 -->
+    <div class="email-in">
+      <div class="email-meta">
+        <span class="from">Élise Moreau &lt;elise.moreau@maison-events.fr&gt;</span>
+        <span><span class="tag">Special Event</span></span>
+      </div>
+      <div class="email-subject">Intimate proposal / private event enquiry</div>
+      <div class="email-body">"Bonjour, I am planning a surprise marriage proposal for my partner and would love to host an intimate celebration afterwards, perhaps 12 guests. Could Palazzo Bifora accommodate such a private event? What might be possible?"</div>
+    </div>
+    <div class="ai-draft">
+      <div class="ai-label"><span class="dot">AI</span> Suggested reply <span class="time">drafted in 29s</span></div>
+      <div class="draft-text">Dear Ms Moreau,
+
+How romantic — and what an honour it would be to help you create such a moment.
+
+With only six suites, Palazzo Bifora offers the rare privilege of a truly private setting. For the proposal itself, we could arrange the intimacy of our candle-lit courtyard or the rooftop terrace at dusk, framed by Mdina's timeless skyline. For a celebration of twelve guests thereafter, our Chef would design a bespoke tasting menu, and we can reserve the palazzo exclusively so that the evening belongs entirely to you.
+
+To shape every detail with care, may I ask your preferred dates, and whether your partner has a cherished flower, wine, or music that we might weave into the surprise?
+
+I remain entirely at your service.
+
+With warm regards,
+The Concierge
+Palazzo Bifora · Mdina</div>
+      <div class="draft-actions">
+        <span class="btn-mini btn-approve">Approve &amp; Send</span>
+        <span class="btn-mini btn-edit">Edit</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROI -->
+  <div class="section-head">
+    <h2>Value for a House of Six Suites</h2>
+    <div class="rule"></div>
+    <p>At Palazzo Bifora, it is never about volume — it is about protecting the perfection of every reply.</p>
+  </div>
+
+  <div class="roi">
+    <h3>Consistency is the true luxury</h3>
+    <p class="lead">With 5–8 enquiries a day, the challenge is not quantity — it is ensuring each guest feels equally cherished, at every hour, in flawless English.</p>
+    <div class="roi-grid">
+      <div class="roi-item">
+        <div class="roi-num">~30s</div>
+        <div class="roi-cap">Per polished draft</div>
+      </div>
+      <div class="roi-item">
+        <div class="roi-num">5–8</div>
+        <div class="roi-cap">Emails a day, effortless</div>
+      </div>
+      <div class="roi-item">
+        <div class="roi-num">100%</div>
+        <div class="roi-cap">On-brand, 5&#9733; tone</div>
+      </div>
+      <div class="roi-item">
+        <div class="roi-num">0</div>
+        <div class="roi-cap">Enquiries left waiting</div>
+      </div>
+    </div>
+    <div class="roi-note">
+      For an ultra-boutique palazzo, a single reply that misses the mark — a slow response, a hurried tone, an overlooked detail — can shape a guest's entire impression. The AI Concierge ensures that <strong>every</strong> message, whether at breakfast or midnight, carries the same warmth, elegance, and precision that define Palazzo Bifora. Your team simply reviews and approves. The Michelin-level attention you give to the plate is now given to the inbox.
+      <br><br>
+      <strong>Investment:</strong> €2,500 one-time setup &middot; €100 / month &middot; fully integrated with Mews.
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta">
+    <h2>See it with your own correspondence</h2>
+    <p>Let us show you the AI Concierge working live on Palazzo Bifora's real enquiries.</p>
+    <a href="#" class="cta-btn">Book a 15-minute demo</a>
+    <div class="cta-sub">No commitment · A quiet conversation between hoteliers</div>
+  </div>
+
+</div>
+
+<footer>
+  <span class="gold">Palazzo Bifora</span> &nbsp;·&nbsp; The AI Concierge &nbsp;·&nbsp; Trusted by boutique palazzi across Malta, including Palazzo Bettina
+</footer>
+
+</body>
+</html>
