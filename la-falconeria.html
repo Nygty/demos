@@ -1,353 +1,514 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>La Falconeria Hotel — AI Concierge Demo</title>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: 'Georgia', 'Times New Roman', serif;
-    background: #f4f1ea;
-    color: #2b2b28;
-    line-height: 1.6;
-  }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
-
-  /* HEADER */
-  header {
-    background: linear-gradient(135deg, #1c2a24 0%, #2f4438 55%, #3d5a49 100%);
-    color: #f4f1ea;
-    text-align: center;
-    padding: 60px 20px 50px;
-    border-bottom: 4px solid #c9a24b;
-  }
-  header .crest {
-    font-size: 40px;
-    letter-spacing: 4px;
-    color: #c9a24b;
-    margin-bottom: 12px;
-  }
-  header h1 {
-    font-size: 42px;
-    font-weight: 400;
-    letter-spacing: 3px;
-    margin-bottom: 6px;
-  }
-  header .loc {
-    font-size: 15px;
-    letter-spacing: 6px;
-    text-transform: uppercase;
-    color: #d8cfa8;
-  }
-  .green-key {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 24px;
-    background: rgba(255,255,255,0.08);
-    border: 1px solid #6fae7a;
-    color: #bfe6c4;
-    padding: 8px 18px;
-    border-radius: 30px;
-    font-size: 13px;
-    letter-spacing: 1px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-  }
-  .green-key .dot { width: 12px; height: 12px; border-radius: 50%; background: #6fae7a; }
-
-  /* SECTION TITLES */
-  .section-title {
-    text-align: center;
-    margin: 55px 0 8px;
-    font-size: 28px;
-    font-weight: 400;
-    color: #2f4438;
-  }
-  .section-sub {
-    text-align: center;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 14px;
-    color: #7a7a70;
-    margin-bottom: 30px;
-    letter-spacing: 0.5px;
-  }
-  .rule { width: 60px; height: 2px; background: #c9a24b; margin: 14px auto 0; }
-
-  /* DASHBOARD */
-  .dash-bar {
-    background: #fff;
-    border: 1px solid #e3ddd0;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 22px;
-    margin-bottom: 26px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-  }
-  .dash-bar .brand { font-weight: 700; color: #2f4438; letter-spacing: 1px; }
-  .dash-bar .pms { font-size: 12px; color: #7a7a70; }
-  .dash-bar .pms b { color: #c9a24b; }
-
-  .email-card {
-    background: #fff;
-    border: 1px solid #e3ddd0;
-    border-radius: 10px;
-    margin-bottom: 26px;
-    overflow: hidden;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.05);
-  }
-  .email-in {
-    padding: 18px 24px;
-    border-left: 5px solid #c9a24b;
-    background: #faf8f2;
-  }
-  .email-in .meta {
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    color: #8a8a80;
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 6px;
-    letter-spacing: 0.5px;
-  }
-  .email-in .tag {
-    background: #eef3ec;
-    color: #3d5a49;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-weight: 600;
-  }
-  .email-in .subj { font-weight: 700; color: #2b2b28; margin-bottom: 4px; }
-  .email-in .body { font-size: 15px; color: #4a4a44; }
-
-  .ai-draft {
-    padding: 20px 24px;
-    background: #f2f6f1;
-  }
-  .ai-head {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 12px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #3d5a49;
-    font-weight: 700;
-    margin-bottom: 10px;
-  }
-  .ai-head .badge {
-    background: #3d5a49;
-    color: #fff;
-    padding: 3px 10px;
-    border-radius: 5px;
-    font-size: 11px;
-  }
-  .ai-head .time { color: #9a9a8e; font-weight: 400; text-transform: none; }
-  .ai-draft .draft-body {
-    background: #fff;
-    border: 1px dashed #b9cbb8;
-    border-radius: 8px;
-    padding: 16px 18px;
-    font-family: 'Helvetica Neue', Arial, sans-serif;
-    font-size: 14px;
-    color: #333;
-    white-space: pre-line;
-  }
-
-  /* ROI */
-  .roi {
-    background: linear-gradient(135deg, #2f4438, #1c2a24);
-    color: #f4f1ea;
-    border-radius: 12px;
-    padding: 40px 30px;
-    margin: 20px 0 10px;
-    text-align: center;
-  }
-  .roi h3 { font-size: 24px; font-weight: 400; margin-bottom: 6px; color: #fff; }
-  .roi .roi-sub { font-family:'Helvetica Neue',Arial,sans-serif; font-size:13px; color:#c9c3ad; margin-bottom:28px; }
-  .roi-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px;
-  }
-  .roi-cell {
-    flex: 1 1 160px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(201,162,75,0.4);
-    border-radius: 10px;
-    padding: 22px 14px;
-  }
-  .roi-cell .num { font-size: 34px; color: #c9a24b; font-weight: 700; }
-  .roi-cell .lbl { font-family:'Helvetica Neue',Arial,sans-serif; font-size: 12px; color: #d8cfa8; letter-spacing: 0.5px; margin-top: 6px; }
-  .roi-highlight {
-    margin-top: 26px;
-    font-size: 18px;
-    color: #bfe6c4;
-  }
-  .roi-highlight b { font-size: 26px; color: #fff; }
-  .roi-note { font-family:'Helvetica Neue',Arial,sans-serif; font-size:12px; color:#9a9a8e; margin-top: 14px; }
-
-  /* CTA */
-  .cta {
-    text-align: center;
-    padding: 55px 20px 40px;
-  }
-  .cta h3 { font-size: 26px; font-weight: 400; color: #2f4438; margin-bottom: 10px; }
-  .cta p { font-family:'Helvetica Neue',Arial,sans-serif; font-size: 15px; color: #6a6a60; margin-bottom: 26px; }
-  .cta a {
-    display: inline-block;
-    background: #c9a24b;
-    color: #1c2a24;
-    text-decoration: none;
-    font-family:'Helvetica Neue',Arial,sans-serif;
-    font-weight: 700;
-    letter-spacing: 1px;
-    padding: 16px 40px;
-    border-radius: 40px;
-    font-size: 16px;
-    transition: background 0.2s;
-    box-shadow: 0 4px 14px rgba(201,162,75,0.4);
-  }
-  .cta a:hover { background: #b8912f; }
-
-  footer {
-    background: #1c2a24;
-    color: #8f9a90;
-    text-align: center;
-    padding: 26px 20px;
-    font-family:'Helvetica Neue',Arial,sans-serif;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-  }
-  footer .ref { color: #c9a24b; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - La Falconeria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: #f5f5f0;
+            padding: 30px 40px;
+            border-bottom: 1px solid #e0e0d8;
+        }
+        .stars {
+            color: #c9a962;
+            font-size: 14px;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+        .hotel-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            font-weight: 500;
+            color: #2c2c2c;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+        .subtitle {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        .tabs {
+            display: flex;
+            background-color: #f5f5f0;
+            padding: 0 40px;
+            border-bottom: 1px solid #e0e0d8;
+        }
+        .tab {
+            padding: 18px 28px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            color: #888;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab:hover {
+            color: #2c2c2c;
+        }
+        .tab.active {
+            color: #2c2c2c;
+            border-bottom-color: #2c2c2c;
+        }
+        .main-content {
+            flex: 1;
+            padding: 30px 40px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .inbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .refresh-btn {
+            background: #2c2c2c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .refresh-btn:hover {
+            background: #444;
+        }
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter {
+            padding: 8px 16px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter:hover, .filter.active {
+            background: #2c2c2c;
+            color: white;
+            border-color: #2c2c2c;
+        }
+        .filter .count {
+            background: #e8e8e4;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-size: 9px;
+        }
+        .filter.active .count {
+            background: rgba(255,255,255,0.2);
+        }
+        .email-list {
+            background: white;
+            border: 1px solid #e0e0d8;
+        }
+        .email-item {
+            padding: 20px 25px;
+            border-bottom: 1px solid #f0f0eb;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .email-item:hover {
+            background: #fafaf8;
+        }
+        .email-item:last-child {
+            border-bottom: none;
+        }
+        .email-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .email-from {
+            font-weight: 600;
+            color: #2c2c2c;
+            font-size: 14px;
+        }
+        .email-date {
+            font-size: 11px;
+            color: #999;
+        }
+        .email-subject {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .email-preview {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+        .email-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .tag {
+            padding: 4px 10px;
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            border-radius: 3px;
+        }
+        .tag.urgent {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .tag.auto-replied {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .tag.to-validate {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        .tag.processed {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+        .tag.escalated {
+            background: #fce7f3;
+            color: #db2777;
+        }
+        .ai-response {
+            background: #f8f8f5;
+            border-left: 3px solid #c9a962;
+            padding: 15px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.6;
+        }
+        .ai-response-header {
+            font-size: 10px;
+            color: #c9a962;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .footer {
+            background: #2c2c2c;
+            color: #999;
+            padding: 20px 40px;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        .analyze-content, .history-content, .reservations-content, .invoices-content {
+            background: white;
+            border: 1px solid #e0e0d8;
+            padding: 40px;
+            text-align: center;
+            color: #888;
+        }
+        .analyze-content textarea {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #e0e0d8;
+            padding: 20px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+        .analyze-btn {
+            background: #c9a962;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .history-table {
+            width: 100%;
+            text-align: left;
+            border-collapse: collapse;
+        }
+        .history-table th {
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: #888;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0d8;
+            font-weight: 500;
+        }
+        .history-table td {
+            padding: 15px;
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0eb;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            font-size: 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .status-badge.sent {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+    </style>
 </head>
 <body>
-
-<header>
-  <div class="crest">&#10022; &#8212; &#10022;</div>
-  <h1>La Falconeria Hotel</h1>
-  <div class="loc">Valletta &middot; Malta</div>
-  <div class="green-key"><span class="dot"></span> Green Key Certified &middot; Committed to Sustainable Hospitality</div>
-</header>
-
-<div class="wrap">
-
-  <!-- DASHBOARD -->
-  <h2 class="section-title">Your AI Concierge, at work</h2>
-  <p class="section-sub">A live look at how incoming guest emails are read, understood and answered — automatically.<span class="rule" style="display:block"></span></p>
-
-  <div class="dash-bar">
-    <span class="brand">&#9993; FALCONERIA · INBOX</span>
-    <span class="pms">Synced with <b>Mews PMS</b> · 43 rooms · 3 new drafts ready</span>
-  </div>
-
-  <!-- EMAIL 1 -->
-  <div class="email-card">
-    <div class="email-in">
-      <div class="meta"><span>From: events@meridiantravel.co.uk</span><span class="tag">Group Booking</span></div>
-      <div class="subj">Re: Modification to our group reservation (12 rooms, 14–17 Oct)</div>
-      <div class="body">Hello, we need to reduce our block from 12 to 9 rooms and push arrival to the 15th of October. Could you confirm availability and let us know if the group rate still applies? Thank you.</div>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★ ★</div>
+        <div class="hotel-name">LA FALCONERIA</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · VALLETTA, MALTA</div>
     </div>
-    <div class="ai-draft">
-      <div class="ai-head"><span class="badge">AI DRAFT</span> Suggested reply <span class="time">· generated in 28s</span></div>
-      <div class="draft-body">Dear Meridian Travel team,
 
-Thank you for reaching out and for choosing La Falconeria Hotel for your group stay.
-
-We are pleased to confirm that we can accommodate your revised requirements: 9 rooms for arrival on 15 October, departing 17 October. Availability is confirmed for these dates, and I am happy to advise that your original group rate remains fully applicable to the reduced block.
-
-I have updated the reservation in our system accordingly. Should you wish to add any airport transfers or arrange group dining at our restaurant, we would be delighted to assist.
-
-Warm regards,
-Reservations Team
-La Falconeria Hotel · Valletta</div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS CREATED</div>
+        <div class="tab" data-tab="invoices">🔥 INVOICES</div>
     </div>
-  </div>
 
-  <!-- EMAIL 2 -->
-  <div class="email-card">
-    <div class="email-in">
-      <div class="meta"><span>From: j.harrison@gmail.com</span><span class="tag">Airport Transfer</span></div>
-      <div class="subj">Airport pick-up for our arrival on Friday</div>
-      <div class="body">Hi, we land at Malta International Airport at 16:45 this Friday (flight KM101). Could you organise a private transfer to the hotel for two guests, and let me know the cost? Many thanks, John.</div>
+    <div class="main-content">
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">1</span></div>
+                    <div class="filter">ESCALATED <span class="count">1</span></div>
+                    <div class="filter">URGENT <span class="count">0</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">1</span></div>
+                    <div class="filter">PROCESSED <span class="count">0</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Victoria Ashworth</div>
+                        <div class="email-date">Today, 15:20</div>
+                    </div>
+                    <div class="email-subject">Private wine tasting experience for anniversary</div>
+                    <div class="email-preview">Dear La Falconeria, we are celebrating our 10th wedding anniversary during our stay (March 15-18). Could you arrange a private wine tasting featuring Maltese wines in your courtyard?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE</div>
+                        Dear Mrs. Ashworth,<br><br>
+                        Congratulations on your upcoming anniversary! We would be delighted to arrange a private wine tasting in our 16th-century courtyard.<br><br>
+                        Our sommelier curates a selection of premium Maltese wines from Meridiana, Marsovin, and Ta' Betta estates. The experience includes 6 wines paired with local cheeses and ftira.<br><br>
+                        <b>Private Tasting:</b> €120 for two guests, approximately 90 minutes<br>
+                        <b>Best timing:</b> 6pm for golden hour ambiance<br><br>
+                        Shall I reserve March 15th or 16th for this experience?<br><br>
+                        Warm regards,<br>La Falconeria Concierge
+                    </div>
+                </div>
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Booking.com Guest Message</div>
+                        <div class="email-date">Today, 12:05</div>
+                    </div>
+                    <div class="email-subject">COMPLAINT: Wrong room assigned - Mr. Hoffmann</div>
+                    <div class="email-preview">We booked a room with harbour view but were given a room facing the courtyard. This is unacceptable for the price we paid. We demand an immediate upgrade or compensation...</div>
+                    <div class="email-tags">
+                        <span class="tag escalated">ESCALATED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">⚠️ ESCALATED TO MANAGER</div>
+                        This message has been escalated to the Front Desk Manager for immediate attention.<br><br>
+                        <b>Guest:</b> Mr. Hoffmann (Booking.com)<br>
+                        <b>Issue:</b> Room assignment complaint - expected harbour view<br>
+                        <b>Priority:</b> High - Guest dissatisfaction<br><br>
+                        <i>Suggested resolution: Check availability for Harbour View Suite upgrade. If unavailable, offer complimentary dinner and future stay discount.</i>
+                    </div>
+                </div>
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Giulia Bianchi</div>
+                        <div class="email-date">Today, 08:30</div>
+                    </div>
+                    <div class="email-subject">Yoga session on the rooftop?</div>
+                    <div class="email-preview">Buongiorno! I noticed your beautiful rooftop terrace on Instagram. I am a certified yoga instructor - would it be possible to practice there during sunrise? I'm staying January 10-13.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">AUTO-REPLIED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT</div>
+                        Dear Ms. Bianchi,<br><br>
+                        What a wonderful idea! Our rooftop terrace is indeed available for private yoga practice. Sunrise is around 7:15am in January - a magical time with views over Valletta's domes and spires.<br><br>
+                        We can provide yoga mats and a light breakfast afterwards. The terrace is exclusively yours from 6:30am to 8:30am upon request.<br><br>
+                        I've noted your preference for your stay. Would you like this arranged for all three mornings?<br><br>
+                        Namaste,<br>La Falconeria Concierge
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3 style="margin-bottom: 20px; color: #2c2c2c; font-family: 'Cormorant Garamond', serif; font-size: 24px;">Paste an email to analyze</h3>
+                <textarea placeholder="Paste the email content here..."></textarea>
+                <button class="analyze-btn">ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>GUEST</th>
+                            <th>SUBJECT</th>
+                            <th>STATUS</th>
+                            <th>RESPONSE TIME</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dec 18, 2024</td>
+                            <td>Andrew Mitchell</td>
+                            <td>Blue Lagoon boat trip</td>
+                            <td><span class="status-badge sent">SENT</span></td>
+                            <td>2 min</td>
+                        </tr>
+                        <tr>
+                            <td>Dec 17, 2024</td>
+                            <td>Marie Johansson</td>
+                            <td>Allergy information request</td>
+                            <td><span class="status-badge sent">SENT</span></td>
+                            <td>1 min</td>
+                        </tr>
+                        <tr>
+                            <td>Dec 16, 2024</td>
+                            <td>Roberto Silva</td>
+                            <td>Private tour of Mdina</td>
+                            <td><span class="status-badge sent">SENT</span></td>
+                            <td>4 min</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESERVATIONS TAB -->
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>CREATED</th>
+                            <th>GUEST</th>
+                            <th>DATES</th>
+                            <th>ROOM TYPE</th>
+                            <th>VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dec 18, 2024</td>
+                            <td>Catherine Moore</td>
+                            <td>Feb 8-12, 2025</td>
+                            <td>Harbour View Suite</td>
+                            <td>€1,980</td>
+                        </tr>
+                        <tr>
+                            <td>Dec 16, 2024</td>
+                            <td>Klaus Weber</td>
+                            <td>Jan 25-28, 2025</td>
+                            <td>Deluxe Courtyard Room</td>
+                            <td>€1,080</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- INVOICES TAB -->
+        <div class="tab-content" id="invoices">
+            <div class="invoices-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>INVOICE #</th>
+                            <th>GUEST</th>
+                            <th>AMOUNT</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dec 19, 2024</td>
+                            <td>LF-2024-1123</td>
+                            <td>Jennifer Adams</td>
+                            <td>€2,150</td>
+                            <td><span class="status-badge sent">PAID</span></td>
+                        </tr>
+                        <tr>
+                            <td>Dec 18, 2024</td>
+                            <td>LF-2024-1122</td>
+                            <td>Paolo Rossi</td>
+                            <td>€1,420</td>
+                            <td><span class="status-badge pending">PENDING</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-    <div class="ai-draft">
-      <div class="ai-head"><span class="badge">AI DRAFT</span> Suggested reply <span class="time">· generated in 24s</span></div>
-      <div class="draft-body">Dear Mr Harrison,
 
-Thank you for your message — we look forward to welcoming you to La Falconeria Hotel this Friday.
-
-We would be delighted to arrange a private transfer for two guests from Malta International Airport. Our driver will be waiting in the arrivals hall with a name sign for your 16:45 landing (flight KM101). The private transfer to the hotel is €35 for the two of you, payable on arrival or added to your room account.
-
-Please simply confirm and we will take care of every detail. Should your flight be delayed, there is no need to worry — our driver monitors arrivals in real time.
-
-Kind regards,
-Guest Relations
-La Falconeria Hotel · Valletta</div>
+    <div class="footer">
+        AI CONCIERGE V3.0 — LA FALCONERIA MALTA
     </div>
-  </div>
 
-  <!-- EMAIL 3 -->
-  <div class="email-card">
-    <div class="email-in">
-      <div class="meta"><span>From: sofia.mendez@outlook.com</span><span class="tag">Restaurant · Dietary</span></div>
-      <div class="subj">Vegan &amp; gluten-free options at your restaurant?</div>
-      <div class="body">Hello, we have a dinner reservation next week. One of us is vegan and another is gluten-intolerant. Could you tell me whether your restaurant can cater to these dietary needs? Thank you!</div>
-    </div>
-    <div class="ai-draft">
-      <div class="ai-head"><span class="badge">AI DRAFT</span> Suggested reply <span class="time">· generated in 26s</span></div>
-      <div class="draft-body">Dear Ms Mendez,
-
-Thank you for letting us know in advance — it is always a pleasure to prepare for our guests' preferences.
-
-I am happy to confirm that our restaurant fully caters to both vegan and gluten-free diets. Our chef sources fresh, local and largely seasonal produce (in line with our Green Key sustainability commitment) and will be delighted to prepare dedicated dishes for you both. Simply mention your requirements to our host on the evening, and everything will be ready.
-
-We look forward to welcoming you to your table next week. Should you have any further requests, please do not hesitate to ask.
-
-Warm regards,
-Restaurant Reservations
-La Falconeria Hotel · Valletta</div>
-    </div>
-  </div>
-
-  <!-- ROI -->
-  <h2 class="section-title">The maths behind your inbox</h2>
-  <p class="section-sub">A 43-room independent hotel handles a serious volume of guest correspondence.<span class="rule" style="display:block"></span></p>
-
-  <div class="roi">
-    <h3>What the AI Concierge gives back to your team</h3>
-    <div class="roi-sub">Estimated for La Falconeria — 43 rooms, Valletta</div>
-    <div class="roi-grid">
-      <div class="roi-cell"><div class="num">30–45</div><div class="lbl">GUEST EMAILS / DAY</div></div>
-      <div class="roi-cell"><div class="num">~15 min</div><div class="lbl">SAVED PER EMAIL</div></div>
-      <div class="roi-cell"><div class="num">~30s</div><div class="lbl">TO DRAFT EACH REPLY</div></div>
-    </div>
-    <div class="roi-highlight">
-      That's roughly <b>9 hours saved every day</b><br>
-      <span style="font-size:15px;">≈ <b style="font-size:20px;">180+ hours a month</b> given back to your front desk</span>
-    </div>
-    <div class="roi-note">Based on 38 emails/day × 15 min. Setup €2,500 + €100/month — typically recovered within the first weeks. Ref: Palazzo Bettina, Malta.</div>
-  </div>
-
-  <!-- CTA -->
-  <div class="cta">
-    <h3>See it running on your own inbox</h3>
-    <p>15 minutes. A live demo tailored to La Falconeria. No commitment.</p>
-    <a href="mailto:enzo@example.com?subject=Book%20a%2015-minute%20demo%20-%20La%20Falconeria">Book a 15-minute demo</a>
-  </div>
-
-</div>
-
-<footer>
-  AI Concierge — email analysis &amp; instant draft replies, integrated with <span class="ref">Mews PMS</span>.<br>
-  Prepared for La Falconeria Hotel · Valletta, Malta · Green Key Certified
-</footer>
-
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
