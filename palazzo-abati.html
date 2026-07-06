@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Palazzo degli Abati</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: #f5f5f0;
+            padding: 30px 40px;
+            border-bottom: 1px solid #e0e0d8;
+        }
+        .stars {
+            color: #c9a962;
+            font-size: 14px;
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+        .hotel-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            font-weight: 500;
+            color: #2c2c2c;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+        .subtitle {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        .tabs {
+            display: flex;
+            background-color: #f5f5f0;
+            padding: 0 40px;
+            border-bottom: 1px solid #e0e0d8;
+        }
+        .tab {
+            padding: 18px 28px;
+            font-size: 12px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            color: #888;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab:hover {
+            color: #2c2c2c;
+        }
+        .tab.active {
+            color: #2c2c2c;
+            border-bottom-color: #2c2c2c;
+        }
+        .main-content {
+            flex: 1;
+            padding: 30px 40px;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .inbox-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .refresh-btn {
+            background: #2c2c2c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .refresh-btn:hover {
+            background: #444;
+        }
+        .filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .filter {
+            padding: 8px 16px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter:hover, .filter.active {
+            background: #2c2c2c;
+            color: white;
+            border-color: #2c2c2c;
+        }
+        .filter .count {
+            background: #e8e8e4;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 6px;
+            font-size: 9px;
+        }
+        .filter.active .count {
+            background: rgba(255,255,255,0.2);
+        }
+        .email-list {
+            background: white;
+            border: 1px solid #e0e0d8;
+        }
+        .email-item {
+            padding: 20px 25px;
+            border-bottom: 1px solid #f0f0eb;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .email-item:hover {
+            background: #fafaf8;
+        }
+        .email-item:last-child {
+            border-bottom: none;
+        }
+        .email-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        .email-from {
+            font-weight: 600;
+            color: #2c2c2c;
+            font-size: 14px;
+        }
+        .email-date {
+            font-size: 11px;
+            color: #999;
+        }
+        .email-subject {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+        }
+        .email-preview {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+        .email-tags {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .tag {
+            padding: 4px 10px;
+            font-size: 9px;
+            letter-spacing: 0.5px;
+            border-radius: 3px;
+        }
+        .tag.urgent {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .tag.auto-replied {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .tag.to-validate {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        .tag.processed {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+        .ai-response {
+            background: #f8f8f5;
+            border-left: 3px solid #c9a962;
+            padding: 15px;
+            margin-top: 12px;
+            font-size: 12px;
+            color: #555;
+            line-height: 1.6;
+        }
+        .ai-response-header {
+            font-size: 10px;
+            color: #c9a962;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .footer {
+            background: #2c2c2c;
+            color: #999;
+            padding: 20px 40px;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        .analyze-content, .history-content, .reservations-content, .invoices-content {
+            background: white;
+            border: 1px solid #e0e0d8;
+            padding: 40px;
+            text-align: center;
+            color: #888;
+        }
+        .analyze-content textarea {
+            width: 100%;
+            height: 200px;
+            border: 1px solid #e0e0d8;
+            padding: 20px;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+            margin-bottom: 20px;
+        }
+        .analyze-btn {
+            background: #c9a962;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 12px;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .history-table {
+            width: 100%;
+            text-align: left;
+            border-collapse: collapse;
+        }
+        .history-table th {
+            font-size: 10px;
+            letter-spacing: 1px;
+            color: #888;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0d8;
+            font-weight: 500;
+        }
+        .history-table td {
+            padding: 15px;
+            font-size: 13px;
+            border-bottom: 1px solid #f0f0eb;
+        }
+        .status-badge {
+            padding: 4px 10px;
+            font-size: 10px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .status-badge.sent {
+            background: #d1fae5;
+            color: #059669;
+        }
+        .status-badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★ ★</div>
+        <div class="hotel-name">PALAZZO DEGLI ABATI</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · MATERA, ITALY</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS CREATED</div>
+        <div class="tab" data-tab="invoices">🔥 INVOICES</div>
+    </div>
+
+    <div class="main-content">
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">1</span></div>
+                    <div class="filter">ESCALATED <span class="count">0</span></div>
+                    <div class="filter">URGENT <span class="count">0</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">2</span></div>
+                    <div class="filter">PROCESSED <span class="count">0</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Charlotte Dupont</div>
+                        <div class="email-date">Today, 16:45</div>
+                    </div>
+                    <div class="email-subject">Romantic getaway - Valentine's Day 2025</div>
+                    <div class="email-preview">Bonjour, I am planning a surprise romantic weekend for my partner's birthday which falls on Valentine's Day. Do you have any special packages available for February 14-16?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE</div>
+                        Dear Ms. Dupont,<br><br>
+                        How wonderful! Palazzo degli Abati is the perfect intimate setting for such a special occasion. For Valentine's weekend (Feb 14-16), we offer our Romance Package at €695 including:<br><br>
+                        • 2 nights in our Maltese Balcony Suite<br>
+                        • Champagne & chocolates on arrival<br>
+                        • Candlelit dinner for two at our courtyard<br>
+                        • Late checkout until 2pm<br><br>
+                        Shall I hold this reservation for you?<br><br>
+                        With warm regards,<br>Palazzo degli Abati Concierge
+                    </div>
+                </div>
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Oliver Blackwood</div>
+                        <div class="email-date">Today, 09:20</div>
+                    </div>
+                    <div class="email-subject">Dinner reservations at nearby restaurants</div>
+                    <div class="email-preview">We're arriving tomorrow and would love recommendations for fine dining within walking distance. Preferably Mediterranean cuisine with vegetarian options.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">AUTO-REPLIED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT</div>
+                        Dear Mr. Blackwood,<br><br>
+                        Welcome! Here are our top recommendations within a 5-minute walk:<br><br>
+                        1. <b>Noni</b> - Contemporary Mediterranean, excellent vegetarian tasting menu (€85pp)<br>
+                        2. <b>Rubino</b> - Traditional Maltese with modern twist, vegetarian-friendly<br>
+                        3. <b>Legligin</b> - Wine bar with local small plates<br><br>
+                        I've taken the liberty of reserving a table for 2 at Noni for tomorrow at 8pm. Please let us know if you'd prefer an alternative.<br><br>
+                        Best,<br>Palazzo degli Abati Concierge
+                    </div>
+                </div>
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Ingrid Svensson</div>
+                        <div class="email-date">Yesterday, 22:10</div>
+                    </div>
+                    <div class="email-subject">Early morning taxi to Gozo ferry</div>
+                    <div class="email-preview">Hello, we need to catch the 6:30am ferry to Gozo on Saturday. Can you arrange a taxi pickup? What time should we leave?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">AUTO-REPLIED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT</div>
+                        Dear Ms. Svensson,<br><br>
+                        For the 6:30am Gozo ferry from Ċirkewwa, I recommend a 5:15am pickup from Palazzo degli Abati. The journey takes approximately 45 minutes at that hour.<br><br>
+                        I've arranged a taxi for Saturday at 5:15am. Cost: €28 (fixed rate). The driver will meet you at our entrance.<br><br>
+                        Would you like us to prepare a breakfast box for your journey? (Complimentary for early departures)<br><br>
+                        Kind regards,<br>Palazzo degli Abati Concierge
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3 style="margin-bottom: 20px; color: #2c2c2c; font-family: 'Cormorant Garamond', serif; font-size: 24px;">Paste an email to analyze</h3>
+                <textarea placeholder="Paste the email content here..."></textarea>
+                <button class="analyze-btn">ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>GUEST</th>
+                            <th>SUBJECT</th>
+                            <th>STATUS</th>
+                            <th>RESPONSE TIME</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dec 18, 2024</td>
+                            <td>Henrik Larsson</td>
+                            <td>Airport transfer confirmation</td>
+                            <td><span class="status-badge sent">SENT</span></td>
+                            <td>1 min</td>
+                        </tr>
+                        <tr>
+                            <td>Dec 17, 2024</td>
+                            <td>Emily Watson</td>
+                            <td>Spa booking request</td>
+                            <td><span class="status-badge sent">SENT</span></td>
+                            <td>3 min</td>
+                        </tr>
+                        <tr>
+                            <td>Dec 16, 2024</td>
+                            <td>François Martin</td>
+                            <td>Room upgrade inquiry</td>
+                            <td><span class="status-badge sent">SENT</span></td>
+                            <td>2 min</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESERVATIONS TAB -->
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>CREATED</th>
+                            <th>GUEST</th>
+                            <th>DATES</th>
+                            <th>ROOM TYPE</th>
+                            <th>VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dec 19, 2024</td>
+                            <td>Isabella Romano</td>
+                            <td>Jan 8-11, 2025</td>
+                            <td>Maltese Balcony Suite</td>
+                            <td>€1,185</td>
+                        </tr>
+                        <tr>
+                            <td>Dec 17, 2024</td>
+                            <td>Thomas Anderson</td>
+                            <td>Jan 20-23, 2025</td>
+                            <td>Courtyard Room</td>
+                            <td>€840</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- INVOICES TAB -->
+        <div class="tab-content" id="invoices">
+            <div class="invoices-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>INVOICE #</th>
+                            <th>GUEST</th>
+                            <th>AMOUNT</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Dec 19, 2024</td>
+                            <td>CE-2024-0456</td>
+                            <td>Alexandra Petrov</td>
+                            <td>€1,650</td>
+                            <td><span class="status-badge pending">PENDING</span></td>
+                        </tr>
+                        <tr>
+                            <td>Dec 18, 2024</td>
+                            <td>CE-2024-0455</td>
+                            <td>David Kim</td>
+                            <td>€980</td>
+                            <td><span class="status-badge sent">PAID</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        AI CONCIERGE V3.0 — PALAZZO DEGLI ABATI MALTA
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
