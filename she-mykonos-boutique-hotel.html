@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>She Mykonos Boutique Hotel — AI Concierge Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Jost:wght@300;400;500&display=swap');
+
+  :root {
+    --sand: #F5F0E8;
+    --warm-white: #FDFBF7;
+    --stone: #C4B49A;
+    --deep-stone: #8C7A65;
+    --charcoal: #2C2C2C;
+    --aegean: #7BA7BC;
+    --aegean-light: #B8D4E0;
+    --success: #6B9E78;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--sand);
+    color: var(--charcoal);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--warm-white);
+    border-bottom: 1px solid var(--stone);
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hotel-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--charcoal);
+  }
+  .hotel-location {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--deep-stone);
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+  .badge-demo {
+    background: var(--aegean);
+    color: white;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 2px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(135deg, var(--charcoal) 0%, #3d3d3d 100%);
+    padding: 50px 40px;
+    text-align: center;
+    color: var(--warm-white);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(123,167,188,0.25) 0%, transparent 70%);
+  }
+  .hero-content { position: relative; z-index: 1; }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 38px;
+    font-weight: 300;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+  .hero h1 span { color: var(--aegean-light); }
+  .hero p {
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.75);
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* TABS */
+  .tabs {
+    background: var(--warm-white);
+    border-bottom: 1px solid var(--stone);
+    display: flex;
+    padding: 0 40px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 16px 24px;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--deep-stone);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .tab.active {
+    color: var(--charcoal);
+    border-bottom-color: var(--aegean);
+  }
+
+  /* MAIN */
+  .main { padding: 32px 40px; max-width: 1100px; margin: 0 auto; }
+
+  /* STATS ROI */
+  .roi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .roi-card {
+    background: var(--warm-white);
+    border: 1px solid var(--stone);
+    border-radius: 4px;
+    padding: 22px 20px;
+    text-align: center;
+  }
+  .roi-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--aegean);
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .roi-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--deep-stone);
+  }
+
+  /* EMAIL SECTION */
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 8px;
+    color: var(--charcoal);
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--deep-stone);
+    margin-bottom: 24px;
+  }
+
+  .email-demo {
+    background: var(--warm-white);
+    border: 1px solid var(--stone);
+    border-radius: 4px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .email-header {
+    background: #f0ebe2;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--stone);
+  }
+  .email-tag {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    background: var(--stone);
+    color: white;
+  }
+  .email-tag.booking { background: #5a8a6a; }
+  .email-tag.special { background: var(--aegean); }
+  .email-tag.info { background: var(--deep-stone); }
+  .email-meta { font-size: 12px; color: var(--deep-stone); }
+  .email-meta strong { color: var(--charcoal); }
+
+  .email-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+  }
+  .email-in, .email-out {
+    padding: 20px;
+  }
+  .email-in { border-right: 1px solid var(--stone); }
+  .email-col-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--deep-stone);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .email-col-title .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #ccc;
+  }
+  .email-col-title .dot.ai { background: var(--aegean); }
+  .email-text {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--charcoal);
+    white-space: pre-line;
+  }
+  .email-footer {
+    padding: 12px 20px;
+    border-top: 1px solid var(--stone);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fafaf8;
+  }
+  .timing {
+    font-size: 11px;
+    color: var(--success);
+    letter-spacing: 1px;
+  }
+  .timing::before { content: '⚡ '; }
+  .btn-use {
+    background: var(--charcoal);
+    color: white;
+    border: none;
+    padding: 8px 18px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+
+  /* PRICING */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .pricing-card {
+    background: var(--warm-white);
+    border: 1px solid var(--stone);
+    border-radius: 4px;
+    padding: 28px 24px;
+  }
+  .pricing-card.featured {
+    border-color: var(--aegean);
+    background: var(--charcoal);
+    color: white;
+  }
+  .pricing-name {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--deep-stone);
+    margin-bottom: 16px;
+  }
+  .pricing-card.featured .pricing-name { color: var(--aegean-light); }
+  .pricing-price {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .pricing-period { font-size: 12px; color: var(--deep-stone); margin-bottom: 20px; }
+  .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.6); }
+  .pricing-features { list-style: none; font-size: 13px; }
+  .pricing-features li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(196,180,154,0.3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pricing-features li::before { content: '—'; color: var(--aegean); font-weight: 600; }
+  .pricing-card.featured .pricing-features li { border-color: rgba(255,255,255,0.1); }
+
+  /* FOOTER */
+  .footer {
+    background: var(--charcoal);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-top: 48px;
+  }
+  .footer a { color: var(--aegean-light); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .roi-grid { grid-template-columns: repeat(2, 1fr); }
+    .email-body { grid-template-columns: 1fr; }
+    .email-in { border-right: none; border-bottom: 1px solid var(--stone); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .main { padding: 24px 20px; }
+    .hero { padding: 36px 20px; }
+    .tabs { padding: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div>
+    <div class="hotel-name">She Mykonos</div>
+    <div class="hotel-location">Mykonos Town, Greece · Boutique Hotel</div>
+  </div>
+  <div class="badge-demo">AI Concierge — Live Demo</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-content">
+    <h1>Your <span>AI Concierge</span><br>for She Mykonos</h1>
+    <p>Every guest email answered with warmth and precision — in 30 seconds, day and night</p>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active">Inbox</div>
+  <div class="tab">Analyze</div>
+  <div class="tab">History</div>
+  <div class="tab">Reservations</div>
+  <div class="tab">Invoices</div>
+</div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- ROI STATS -->
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-number">13</div>
+      <div class="roi-label">Rooms & Residences</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">~18</div>
+      <div class="roi-label">Guest emails / day</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">9h</div>
+      <div class="roi-label">Hours saved / week</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">&lt;30s</div>
+      <div class="roi-label">Response time</div>
+    </div>
+  </div>
+
+  <!-- EMAILS -->
+  <div class="section-title">Live Email Drafts</div>
+  <p class="section-sub">The AI analyses each guest email and drafts a personalised response in your hotel's voice</p>
+
+  <!-- EMAIL 1 — Booking inquiry -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag booking">Booking</span>
+      <div class="email-meta">
+        <strong>James Hartley</strong> · james.hartley@gmail.com · Today 09:14
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Hi,
+
+I'd like to book a room or suite at She Mykonos for 5 nights in August (14–19). Two adults, celebrating our anniversary — ideally something with a sea view and a private terrace if possible.
+
+Could you let me know availability and rates? Also, is breakfast included?
+
+Thanks,
+James</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear James,
+
+Thank you for choosing She Mykonos to celebrate your anniversary — what a wonderful occasion!
+
+We do have availability for 14–19 August. Our Superior Sea View Suite, with its private terrace and panoramic Aegean views, would be perfect for your stay.
+
+Rate: from €320/night (5 nights).
+Daily breakfast is included for both guests.
+
+We'd be delighted to arrange a small welcome surprise for your arrival. Shall I provisionally hold the suite?
+
+Warm regards,
+She Mykonos Reception</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 28 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 2 — Special request -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag special">Special Request</span>
+      <div class="email-meta">
+        <strong>Sofia Petrakis</strong> · sofia.p@outlook.com · Today 11:32
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Hello,
+
+We are checking in tomorrow (room booked under Petrakis). My husband has a severe nut allergy — is the kitchen able to accommodate this? Also, is there a possibility to arrange a private massage at the hotel?
+
+Thank you,
+Sofia</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear Sofia,
+
+Thank you for letting us know ahead of your arrival.
+
+Regarding the nut allergy: our kitchen team will be fully briefed before your check-in. All meals served to your party will be prepared without any nut-based ingredients. Please feel free to mention this at breakfast as well.
+
+For the massage: yes, we offer in-room treatment sessions. I can arrange a 60-minute session at your preferred time tomorrow — late afternoon is popular. Shall I confirm this?
+
+We look forward to welcoming you both tomorrow.
+
+Warm regards,
+She Mykonos Reception</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 26 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 3 — Information -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag info">Information</span>
+      <div class="email-meta">
+        <strong>Mia Johansson</strong> · mia.j@hotmail.se · Today 14:07
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Hi She Mykonos,
+
+Quick question — we're arriving by ferry at the Old Port in Mykonos Town. How far is the hotel from the port? Can you arrange a taxi or transfer?
+
+Also, what time is check-in? We'll likely arrive around 2pm.
+
+Best,
+Mia & Erik</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear Mia and Erik,
+
+Welcome! The hotel is only a 5-minute walk from the Old Port — you'll find us right in the heart of Mykonos Town.
+
+We can certainly arrange a luggage transfer if needed, so you can stroll over easily. For a taxi, the port taxi stand is just outside the ferry terminal.
+
+Check-in is from 3:00 PM, but we'll gladly store your bags from 2:00 PM so you can explore the town while your room is prepared. We'll send you a message as soon as it's ready.
+
+We look forward to seeing you soon!
+
+Warm regards,
+She Mykonos Reception</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 24 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-title" style="margin-top: 40px;">Choose Your Plan</div>
+  <p class="section-sub">Tailored for She Mykonos — no long-term commitment required</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-name">Standard</div>
+      <div class="pricing-price">€80<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €800 one-time setup</div>
+      <ul class="pricing-features">
+        <li>AI email drafting</li>
+        <li>Multilingual (EN/GR)</li>
+        <li>Dashboard access</li>
+        <li>Inbox management</li>
+      </ul>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-name">Premium ✦ Recommended</div>
+      <div class="pricing-price">€120<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €800 one-time setup</div>
+      <ul class="pricing-features">
+        <li>Everything in Standard</li>
+        <li>Weekly AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">Premium+</div>
+      <div class="pricing-price">€150<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €1,200 one-time setup</div>
+      <ul class="pricing-features">
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Custom voice & tone tuning</li>
+        <li>Onboarding support</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>This is a personalised demo for <strong style="color:white">She Mykonos Boutique Hotel</strong> · Powered by Agent Concierge AI</p>
+  <p style="margin-top:8px">Created by Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Intern at IBB Palazzo Bettina, Birgu, Malta</p>
+</footer>
+
+</body>
+</html>

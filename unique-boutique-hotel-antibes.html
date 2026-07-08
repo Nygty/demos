@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unique Boutique Hotel Antibes — Démo Agent Concierge IA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap');
+
+  :root {
+    --ivory: #FAFAF7;
+    --warm: #F3EFE7;
+    --black: #111111;
+    --anthracite: #2D2D2D;
+    --olive: #6B7355;
+    --olive-light: #8C9468;
+    --gold: #C4992A;
+    --gold-light: #DDB94A;
+    --grey: #7A7A7A;
+    --border: #DEDBD3;
+    --success: #587A5F;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--ivory);
+    color: var(--anthracite);
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--black);
+    padding: 20px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hotel-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 400;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: white;
+  }
+  .hotel-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-light);
+    margin-top: 4px;
+  }
+  .badge {
+    background: var(--gold);
+    color: var(--black);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 7px 18px;
+    border-radius: 2px;
+    font-weight: 500;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--olive);
+    padding: 56px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.1) 100%);
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 580px; }
+  .hero-tag {
+    display: inline-block;
+    background: var(--gold);
+    color: var(--black);
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 300;
+    color: white;
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+  .hero h1 em { font-style: italic; color: var(--gold-light); }
+  .hero p {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.75;
+  }
+
+  /* TABS */
+  .tabs {
+    background: var(--anthracite);
+    display: flex;
+    padding: 0 48px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 14px 22px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+
+  /* MAIN */
+  .main { padding: 36px 48px; max-width: 1100px; margin: 0 auto; }
+
+  /* ROI */
+  .roi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+  .roi-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 22px 18px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .roi-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+  }
+  .roi-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--olive);
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .roi-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey); }
+
+  /* EMAILS */
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+  .section-sub { font-size: 13px; color: var(--grey); margin-bottom: 26px; line-height: 1.6; }
+
+  .email-demo {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .email-header {
+    background: var(--warm);
+    padding: 13px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .email-tag {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .email-tag.booking { background: var(--olive); color: white; }
+  .email-tag.special { background: var(--gold); color: var(--black); }
+  .email-tag.info { background: var(--border); color: var(--anthracite); }
+  .email-meta { font-size: 12px; color: var(--grey); }
+  .email-meta strong { color: var(--anthracite); }
+  .email-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .email-in { border-right: 1px solid var(--border); }
+  .email-in, .email-out { padding: 20px; }
+  .email-col-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 14px;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+  .dot.ai { background: var(--gold); }
+  .email-text { font-size: 13px; line-height: 1.75; white-space: pre-line; }
+  .email-footer {
+    background: var(--ivory);
+    border-top: 1px solid var(--border);
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .timing { font-size: 11px; color: var(--success); }
+  .timing::before { content: '⚡ '; }
+  .btn-use {
+    background: var(--olive);
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 3px;
+  }
+
+  /* NOTA */
+  .nota-score {
+    background: white;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--gold);
+    border-radius: 4px;
+    padding: 18px 22px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .score-big {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 600;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .score-text { font-size: 13px; line-height: 1.6; color: var(--grey); }
+  .score-text strong { color: var(--anthracite); }
+
+  /* PRICING */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .pricing-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 24px;
+  }
+  .pricing-card.featured {
+    background: var(--black);
+    color: white;
+    border-color: var(--black);
+  }
+  .pricing-name { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-bottom: 16px; }
+  .pricing-card.featured .pricing-name { color: var(--gold-light); }
+  .pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 36px; margin-bottom: 4px; }
+  .pricing-period { font-size: 12px; color: var(--grey); margin-bottom: 20px; }
+  .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.5); }
+  .pricing-features { list-style: none; font-size: 13px; }
+  .pricing-features li { padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; gap: 8px; }
+  .pricing-features li::before { content: '✓'; color: var(--gold); font-weight: 600; }
+  .pricing-card.featured .pricing-features li { border-color: rgba(255,255,255,0.1); }
+
+  .footer {
+    background: var(--black);
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    padding: 26px;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    margin-top: 48px;
+  }
+  .footer a { color: var(--gold-light); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .roi-grid { grid-template-columns: repeat(2, 1fr); }
+    .email-body { grid-template-columns: 1fr; }
+    .email-in { border-right: none; border-bottom: 1px solid var(--border); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .main, .hero, .tabs, .header { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <div class="hotel-name">Unique</div>
+    <div class="hotel-sub">Boutique Hotel · Juan-les-Pins, Antibes · Côte d'Azur</div>
+  </div>
+  <div class="badge">Démo Agent IA</div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">Note 9,7/10 · #1 Antibes Juan-les-Pins</div>
+    <h1>L'excellence de votre accueil,<br><em>amplifiée par l'IA</em></h1>
+    <p>Avec seulement 10 chambres et la meilleure note d'Antibes, chaque email compte. L'Agent Concierge IA rédige des brouillons en 30 secondes — en français et en anglais — pour que votre équipe reste concentrée sur l'accueil.</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">Boîte de réception</div>
+  <div class="tab">Analyser</div>
+  <div class="tab">Historique</div>
+  <div class="tab">Réservations</div>
+  <div class="tab">Factures</div>
+</div>
+
+<main class="main">
+
+  <!-- SCORE CARD -->
+  <div class="nota-score">
+    <div class="score-big">9,7</div>
+    <div class="score-text">
+      <strong>Meilleur hôtel d'Antibes Juan-les-Pins sur Booking.com</strong><br>
+      Avec 10 chambres, votre réputation se construit email par email. Un temps de réponse rapide et des messages soignés renforcent directement votre note — et vos réservations directes.
+    </div>
+  </div>
+
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-number">10</div>
+      <div class="roi-label">Chambres</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">~14</div>
+      <div class="roi-label">Emails / jour</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">7h</div>
+      <div class="roi-label">Économisées / semaine</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">&lt;30s</div>
+      <div class="roi-label">Brouillon généré</div>
+    </div>
+  </div>
+
+  <div class="section-title">Emails en conditions réelles</div>
+  <p class="section-sub">L'IA analyse chaque email entrant et rédige un brouillon personnalisé, dans la voix de l'hôtel, prêt à envoyer en un clic</p>
+
+  <!-- EMAIL 1 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag booking">Réservation</span>
+      <div class="email-meta">
+        <strong>Claire Dupont</strong> · claire.d@gmail.com · Aujourd'hui 08:51
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Message reçu</div>
+        <div class="email-text">Bonjour,
+
+Nous cherchons une chambre pour 2 personnes du 22 au 28 juillet à Juan-les-Pins. Est-ce que vous avez des disponibilités ? Avez-vous un parking ?
+
+Merci d'avance,
+Claire</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> Brouillon IA — prêt à envoyer</div>
+        <div class="email-text">Bonjour Claire,
+
+Merci pour votre message ! Nous avons bien de la disponibilité du 22 au 28 juillet.
+
+Nos chambres à partir de 185 €/nuit, petit-déjeuner inclus. Je vous réserve votre chambre dès réception de vos coordonnées.
+
+Concernant le parking : un parking public est disponible à 200 m de l'hôtel à tarif préférentiel pour nos clients (5 €/jour).
+
+Souhaitez-vous que je vous envoie le formulaire de réservation ?
+
+Bien cordialement,
+Unique Boutique Hotel — Antibes</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Brouillon généré en 26 secondes</span>
+      <button class="btn-use">Utiliser ce brouillon</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 2 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag special">Demande spéciale</span>
+      <div class="email-meta">
+        <strong>Andrew & Sarah Miller</strong> · miller.sa@hotmail.co.uk · Aujourd'hui 10:22
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Message reçu</div>
+        <div class="email-text">Hello,
+
+We are arriving this Saturday. It's our anniversary and we would love to have flowers and a bottle of rosé waiting in the room as a surprise. Is that something you could arrange?
+
+Also, could you recommend a good seafood restaurant nearby?
+
+Thanks,
+Andrew & Sarah</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> Brouillon IA — prêt à envoyer</div>
+        <div class="email-text">Dear Andrew and Sarah,
+
+Happy anniversary — what a pleasure to help you celebrate!
+
+Absolutely — we'll prepare a beautiful floral arrangement and a chilled bottle of Provençal rosé in your room before your arrival on Saturday. No additional charge.
+
+For seafood: we recommend Le Perroquet, just 5 minutes' walk away on the port — fresh catch every day, excellent terrace. The owner knows us well and can usually find a table with little notice.
+
+Shall I let them know you'll be coming on Saturday evening?
+
+See you soon,
+Unique Boutique Hotel — Antibes</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Brouillon généré en 29 secondes</span>
+      <button class="btn-use">Utiliser ce brouillon</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 3 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag info">Information</span>
+      <div class="email-meta">
+        <strong>Marco Rossi</strong> · m.rossi@libero.it · Aujourd'hui 13:18
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Message reçu</div>
+        <div class="email-text">Buongiorno,
+
+Siamo in 4 persone (2 coppie) e vorremmo prenotare 2 camere per fine agosto. Avete una zona piscina? E qual è la distanza dal centro di Antibes?
+
+Grazie,
+Marco</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> Brouillon IA — prêt à envoyer</div>
+        <div class="email-text">Dear Marco,
+
+Thank you for your message! We would be delighted to welcome two couples at Unique.
+
+We have two rooms available for late August. Our hotel features a lovely garden terrace — the perfect spot for morning coffee or evening drinks in true Riviera style.
+
+The centre of Antibes is approximately 2 km away, easily reachable by bus or bicycle. Juan-les-Pins beach is just 300 metres on foot.
+
+Shall I check availability for your preferred dates and send you our rates?
+
+With pleasure,
+Unique Boutique Hotel — Antibes</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Brouillon généré en 25 secondes</span>
+      <button class="btn-use">Utiliser ce brouillon</button>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-title" style="margin-top: 42px;">Formules</div>
+  <p class="section-sub">Conçu pour les hôtels boutique — pas d'engagement long terme, impact immédiat</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-name">Standard</div>
+      <div class="pricing-price">80 €<span style="font-size:18px">/mois</span></div>
+      <div class="pricing-period">+ 800 € de mise en place (une fois)</div>
+      <ul class="pricing-features">
+        <li>Brouillons IA (FR/EN/IT)</li>
+        <li>Dashboard complet</li>
+        <li>Gestion inbox</li>
+        <li>Historique emails</li>
+      </ul>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-name">Premium ✦ Recommandé</div>
+      <div class="pricing-price">120 €<span style="font-size:18px">/mois</span></div>
+      <div class="pricing-period">+ 800 € de mise en place (une fois)</div>
+      <ul class="pricing-features">
+        <li>Tout le Standard</li>
+        <li>Amélioration IA hebdomadaire</li>
+        <li>Rapport mensuel</li>
+        <li>Support prioritaire</li>
+      </ul>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">Premium+</div>
+      <div class="pricing-price">150 €<span style="font-size:18px">/mois</span></div>
+      <div class="pricing-period">+ 1 200 € de mise en place (une fois)</div>
+      <ul class="pricing-features">
+        <li>Tout le Premium</li>
+        <li>Formation sur vrais échanges</li>
+        <li>Voix personnalisée</li>
+        <li>Onboarding complet</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>Démo personnalisée pour <strong style="color:white">Unique Boutique Hotel · Juan-les-Pins, Antibes</strong> · Propulsé par Agent Concierge IA</p>
+  <p style="margin-top:8px">Créé par Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Stagiaire à IBB Palazzo Bettina, Birgu, Malte</p>
+</footer>
+
+</body>
+</html>

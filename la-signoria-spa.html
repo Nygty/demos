@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Signoria & Spa — Démo Agent Concierge IA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap');
+
+  :root {
+    --ivory: #FAF8F3;
+    --parchment: #EDE4D0;
+    --corsican-green: #3D5A3E;
+    --sage: #7A9E7B;
+    --sage-light: #A8C5A9;
+    --ochre: #C4922A;
+    --deep: #1A1A14;
+    --grey: #6E6A5E;
+    --border: #DDD5C0;
+    --white: #FFFFFF;
+    --success: #4A7A4E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: var(--ivory);
+    color: var(--deep);
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--deep);
+    padding: 22px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hotel-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-weight: 300;
+    letter-spacing: 3px;
+    color: var(--parchment);
+  }
+  .hotel-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ochre);
+    margin-top: 5px;
+  }
+  .badge {
+    border: 1px solid var(--ochre);
+    color: var(--ochre);
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 7px 18px;
+    border-radius: 2px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(to bottom, var(--corsican-green), #243524);
+    padding: 60px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 40%;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Ccircle cx='100' cy='100' r='80' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'/%3E%3Ccircle cx='100' cy='100' r='50' fill='none' stroke='rgba(255,255,255,0.04)' stroke-width='1'/%3E%3C/svg%3E") center/contain no-repeat;
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 580px; }
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ochre);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .hero-eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--ochre); opacity: 0.4; max-width: 60px; }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 46px;
+    font-weight: 300;
+    color: white;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .hero h1 em { font-style: italic; color: var(--sage-light); }
+  .hero p {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.8;
+  }
+
+  /* RC BADGE */
+  .rc-banner {
+    background: var(--ochre);
+    padding: 10px 48px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .rc-text {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--deep);
+    font-weight: 500;
+  }
+  .rc-stars { color: var(--deep); font-size: 13px; }
+
+  /* TABS */
+  .tabs {
+    background: #1c2a1c;
+    display: flex;
+    padding: 0 48px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 14px 22px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--parchment); border-bottom-color: var(--ochre); }
+
+  /* MAIN */
+  .main { padding: 36px 48px; max-width: 1100px; margin: 0 auto; }
+
+  /* ROI */
+  .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px; }
+  .roi-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 24px 18px;
+    text-align: center;
+    border-top: 3px solid var(--corsican-green);
+  }
+  .roi-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 400;
+    color: var(--corsican-green);
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .roi-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); }
+
+  /* EMAILS */
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 300; margin-bottom: 6px; }
+  .section-sub { font-size: 13px; color: var(--grey); margin-bottom: 26px; line-height: 1.6; }
+
+  .email-demo {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .email-header {
+    background: var(--parchment);
+    padding: 13px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .email-tag {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 2px;
+  }
+  .email-tag.booking { background: var(--corsican-green); color: white; }
+  .email-tag.special { background: var(--ochre); color: white; }
+  .email-tag.info { background: var(--sage); color: white; }
+  .email-meta { font-size: 12px; color: var(--grey); }
+  .email-meta strong { color: var(--deep); }
+  .email-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .email-in { border-right: 1px solid var(--border); }
+  .email-in, .email-out { padding: 22px; }
+  .email-col-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-bottom: 14px; display: flex; gap: 8px; align-items: center; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+  .dot.ai { background: var(--ochre); }
+  .email-text { font-size: 13px; line-height: 1.75; white-space: pre-line; }
+  .email-footer {
+    background: var(--ivory);
+    border-top: 1px solid var(--border);
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .timing { font-size: 11px; color: var(--success); }
+  .timing::before { content: '⚡ '; }
+  .btn-use {
+    background: var(--corsican-green);
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+
+  /* PRICING */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .pricing-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 28px 24px;
+  }
+  .pricing-card.featured { background: var(--deep); color: white; border-color: var(--deep); }
+  .pricing-name { font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--grey); margin-bottom: 16px; }
+  .pricing-card.featured .pricing-name { color: var(--ochre); }
+  .pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 400; margin-bottom: 4px; }
+  .pricing-period { font-size: 12px; color: var(--grey); margin-bottom: 20px; }
+  .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.5); }
+  .pricing-features { list-style: none; font-size: 13px; }
+  .pricing-features li { padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; gap: 8px; }
+  .pricing-features li::before { content: '—'; color: var(--ochre); }
+  .pricing-card.featured .pricing-features li { border-color: rgba(255,255,255,0.1); }
+
+  .footer {
+    background: var(--deep);
+    color: rgba(255,255,255,0.35);
+    text-align: center;
+    padding: 28px;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    margin-top: 48px;
+  }
+  .footer a { color: var(--ochre); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .roi-grid { grid-template-columns: repeat(2, 1fr); }
+    .email-body { grid-template-columns: 1fr; }
+    .email-in { border-right: none; border-bottom: 1px solid var(--border); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .main, .hero, .tabs, .header, .rc-banner { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <div class="hotel-name">La Signoria & Spa</div>
+    <div class="hotel-sub">Relais & Châteaux · Calvi, Corse · 5 Étoiles</div>
+  </div>
+  <div class="badge">Démo Agent IA</div>
+</header>
+
+<div class="rc-banner">
+  <div class="rc-stars">★★★★★</div>
+  <div class="rc-text">Membre Relais & Châteaux · Manoir Génois du XVIIIe siècle · Calvi, Corse</div>
+</div>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Excellence corse · 30 chambres & suites · Spa & Gastronomie</div>
+    <h1>Le standard Relais & Châteaux,<br><em>en 30 secondes</em></h1>
+    <p>Vos clients attendent des réponses à la hauteur de votre réputation — soignées, rapides, personnalisées. L'Agent Concierge IA rédige des brouillons en 30 secondes, 24h/24, dans la voix qui distingue La Signoria.</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">Boîte de réception</div>
+  <div class="tab">Analyser</div>
+  <div class="tab">Historique</div>
+  <div class="tab">Réservations</div>
+  <div class="tab">Factures</div>
+</div>
+
+<main class="main">
+
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-number">30</div>
+      <div class="roi-label">Chambres & suites</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">~42</div>
+      <div class="roi-label">Emails / jour</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">21h</div>
+      <div class="roi-label">Économisées / semaine</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">&lt;30s</div>
+      <div class="roi-label">Brouillon généré</div>
+    </div>
+  </div>
+
+  <div class="section-title">Emails en conditions réelles</div>
+  <p class="section-sub">Demandes spa, mariages, gastronomie, transferts privés — l'IA répond à la hauteur du standard Relais & Châteaux</p>
+
+  <!-- EMAIL 1 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag booking">Réservation prestige</span>
+      <div class="email-meta">
+        <strong>Nathalie Bertrand</strong> · n.bertrand@lvmh.fr · Aujourd'hui 08:33
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Message reçu</div>
+        <div class="email-text">Bonjour,
+
+Je souhaite réserver une suite pour deux personnes du 18 au 24 juillet. Nous célébrons nos 20 ans de mariage. Pourriez-vous me proposer votre meilleure suite avec terrasse privée ? Je souhaite également des soins spa et un dîner de gala en terrasse le soir de notre anniversaire.
+
+Avec mes remerciements,
+Nathalie Bertrand</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> Brouillon IA — prêt à envoyer</div>
+        <div class="email-text">Chère Madame Bertrand,
+
+Vingt ans de mariage — c'est une occasion que nous aurons à cœur de célébrer dignement.
+
+Notre Suite Signoria, avec terrasse privée sur le parc et la mer, est notre plus bel espace pour un séjour comme le vôtre. Elle est disponible du 18 au 24 juillet.
+
+Pour le dîner de gala en terrasse : notre Chef peut concevoir un menu dégustation personnalisé en accord avec vos préférences. Nous vous réservons la table la plus intimiste du domaine.
+
+Concernant le spa : je vous propose de vous envoyer notre programme de soins afin de pré-réserver vos rituels avant l'arrivée.
+
+Puis-je vous contacter par téléphone pour finaliser chaque détail ?
+
+Avec tout notre soin,
+La Signoria & Spa — Calvi</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Brouillon généré en 29 secondes</span>
+      <button class="btn-use">Utiliser ce brouillon</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 2 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag special">Mariage</span>
+      <div class="email-meta">
+        <strong>Sophie & Renaud Fabre</strong> · fabre.mariage2026@gmail.com · Aujourd'hui 10:48
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Message reçu</div>
+        <div class="email-text">Bonjour,
+
+Nous envisageons d'organiser notre mariage à La Signoria en juin 2027. Nous avons lu que vous accueillez des cérémonies. Pourriez-vous nous donner des informations sur vos espaces, la capacité et vos tarifs ?
+
+Merci d'avance,
+Sophie & Renaud</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> Brouillon IA — prêt à envoyer</div>
+        <div class="email-text">Chère Sophie, cher Renaud,
+
+Félicitations pour votre projet — un mariage dans notre manoir génois du XVIIIe, face au maquis corse, c'est une promesse de beauté absolue.
+
+Oui, La Signoria accueille des cérémonies privées. Notre domaine peut recevoir jusqu'à 80 personnes entre nos espaces intérieurs et nos terrasses. Pour juin 2027, les dates principales sont encore disponibles.
+
+Je vous suggère d'organiser une visite du domaine à votre convenance — l'espace se découvre vraiment en personne. Notre coordinatrice événements serait ravie de vous accompagner.
+
+Souhaitez-vous que je vous transmette notre dossier mariage et que l'on convienne d'une date de visite ?
+
+Avec plaisir,
+La Signoria & Spa — Calvi</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Brouillon généré en 28 secondes</span>
+      <button class="btn-use">Utiliser ce brouillon</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 3 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag info">Transfert & Logistique</span>
+      <div class="email-meta">
+        <strong>Robert Ashworth</strong> · r.ashworth@barclays.co.uk · Aujourd'hui 14:15
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Message reçu</div>
+        <div class="email-text">Hello,
+
+We are arriving from London on 3rd August, landing at Calvi Sainte-Catherine airport at 15:40. Could you arrange a private transfer? We have 4 pieces of luggage.
+
+Also, do you offer boat hire for a day trip around the coastline?
+
+Best,
+Robert Ashworth</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> Brouillon IA — prêt à envoyer</div>
+        <div class="email-text">Dear Mr Ashworth,
+
+Welcome — we look forward to receiving you on the 3rd of August.
+
+Private transfer from Calvi airport: absolutely — we work with a dedicated driver. With 4 pieces of luggage, we'll arrange a suitable vehicle. The journey to La Signoria takes approximately 10 minutes. I'll confirm the booking with our transfer partner and send you the details.
+
+For the boat hire: yes, we can organise a private day charter along the Corsican coastline — including the Scandola Nature Reserve and the Calanche de Piana if desired. Please let me know your preferred date and we'll arrange everything.
+
+Is there anything else you'd like prepared for your arrival?
+
+Warmly,
+La Signoria & Spa — Calvi</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Brouillon généré en 27 secondes</span>
+      <button class="btn-use">Utiliser ce brouillon</button>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-title" style="margin-top: 44px;">Formules</div>
+  <p class="section-sub">Pour un établissement Relais & Châteaux de 30 chambres — le retour sur investissement est immédiat</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-name">Standard</div>
+      <div class="pricing-price">80 €<span style="font-size:18px">/mois</span></div>
+      <div class="pricing-period">+ 800 € de mise en place (une fois)</div>
+      <ul class="pricing-features">
+        <li>Brouillons IA (FR/EN)</li>
+        <li>Dashboard 5 onglets</li>
+        <li>Gestion inbox</li>
+        <li>Historique complet</li>
+      </ul>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-name">Premium ✦ Recommandé</div>
+      <div class="pricing-price">120 €<span style="font-size:18px">/mois</span></div>
+      <div class="pricing-period">+ 800 € de mise en place (une fois)</div>
+      <ul class="pricing-features">
+        <li>Tout le Standard</li>
+        <li>Amélioration IA hebdomadaire</li>
+        <li>Rapport mensuel</li>
+        <li>Support prioritaire</li>
+      </ul>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">Premium+</div>
+      <div class="pricing-price">150 €<span style="font-size:18px">/mois</span></div>
+      <div class="pricing-period">+ 1 200 € de mise en place (une fois)</div>
+      <ul class="pricing-features">
+        <li>Tout le Premium</li>
+        <li>Formation sur vrais échanges</li>
+        <li>Voix Relais & Châteaux</li>
+        <li>Onboarding complet</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>Démo personnalisée pour <strong style="color:var(--parchment)">La Signoria & Spa · Calvi, Corse</strong> · Propulsé par Agent Concierge IA</p>
+  <p style="margin-top:8px">Créé par Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Stagiaire à IBB Palazzo Bettina, Birgu, Malte</p>
+</footer>
+
+</body>
+</html>

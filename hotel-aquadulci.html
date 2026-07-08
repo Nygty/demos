@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hotel Aquadulci Chia — AI Concierge Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --white: #FFFFFF;
+    --sand: #F5EDD9;
+    --warm: #EFE5CA;
+    --sea: #1E7A8C;
+    --sea-light: #4CA8BA;
+    --sea-pale: #A8D8E2;
+    --turquoise: #00A896;
+    --deep: #0D1B1E;
+    --grey: #6A6A5E;
+    --border: #DDD4BA;
+    --success: #2E8B57;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f7f4ee;
+    color: var(--deep);
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--deep);
+    padding: 18px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hotel-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: white;
+  }
+  .hotel-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-pale);
+    margin-top: 4px;
+  }
+  .badge {
+    background: var(--turquoise);
+    color: white;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 7px 18px;
+    border-radius: 3px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(160deg, var(--sea) 0%, #134f5c 50%, var(--deep) 100%);
+    padding: 56px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    bottom: -100px; right: -100px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,168,150,0.15) 0%, transparent 70%);
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 600px; }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sea-pale);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px;
+    font-weight: 300;
+    color: white;
+    line-height: 1.15;
+    margin-bottom: 14px;
+  }
+  .hero h1 em { font-style: italic; color: #7DDFCC; }
+  .hero p {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.72);
+    line-height: 1.75;
+  }
+
+  /* TABS */
+  .tabs {
+    background: #0a1215;
+    display: flex;
+    padding: 0 48px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 14px 22px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--sea-pale); border-bottom-color: var(--turquoise); }
+
+  /* MAIN */
+  .main { padding: 36px 48px; max-width: 1100px; margin: 0 auto; }
+
+  /* ROI */
+  .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 36px; }
+  .roi-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 24px 18px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .roi-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 400;
+    color: var(--sea);
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .roi-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey); }
+
+  /* EMAILS */
+  .section-title { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 300; margin-bottom: 6px; }
+  .section-sub { font-size: 13px; color: var(--grey); margin-bottom: 26px; line-height: 1.6; }
+
+  .email-demo {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+  .email-header {
+    background: #f0ede3;
+    padding: 13px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .email-tag {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .email-tag.booking { background: var(--sea); color: white; }
+  .email-tag.special { background: var(--turquoise); color: white; }
+  .email-tag.info { background: var(--sand); color: var(--deep); border: 1px solid var(--border); }
+  .email-meta { font-size: 12px; color: var(--grey); }
+  .email-meta strong { color: var(--deep); }
+  .email-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .email-in { border-right: 1px solid var(--border); }
+  .email-in, .email-out { padding: 22px; }
+  .email-col-title { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-bottom: 14px; display: flex; gap: 8px; align-items: center; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+  .dot.ai { background: var(--turquoise); }
+  .email-text { font-size: 13px; line-height: 1.75; white-space: pre-line; }
+  .email-footer {
+    background: #faf8f3;
+    border-top: 1px solid var(--border);
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .timing { font-size: 11px; color: var(--success); }
+  .timing::before { content: '⚡ '; }
+  .btn-use {
+    background: var(--sea);
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  /* PRICING */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .pricing-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 28px 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .pricing-card.featured { background: var(--deep); color: white; }
+  .pricing-name { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey); margin-bottom: 16px; }
+  .pricing-card.featured .pricing-name { color: var(--sea-pale); }
+  .pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 400; margin-bottom: 4px; }
+  .pricing-period { font-size: 12px; color: var(--grey); margin-bottom: 20px; }
+  .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.5); }
+  .pricing-features { list-style: none; font-size: 13px; }
+  .pricing-features li { padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; gap: 8px; }
+  .pricing-features li::before { content: '✓'; color: var(--turquoise); font-weight: 700; }
+  .pricing-card.featured .pricing-features li { border-color: rgba(255,255,255,0.1); }
+
+  .footer {
+    background: var(--deep);
+    color: rgba(255,255,255,0.4);
+    text-align: center;
+    padding: 26px;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    margin-top: 48px;
+  }
+  .footer a { color: var(--sea-pale); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .roi-grid { grid-template-columns: repeat(2, 1fr); }
+    .email-body { grid-template-columns: 1fr; }
+    .email-in { border-right: none; border-bottom: 1px solid var(--border); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .main, .hero, .tabs, .header { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <div class="hotel-name">Hotel Aquadulci</div>
+    <div class="hotel-sub">Chia, Sardinia · 4 Stars · Beachfront · Note 9.3/10</div>
+  </div>
+  <div class="badge">AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">41 Rooms · Chia Beach · Mediterranean Garden & Spa</div>
+    <h1>Sardinia's most beautiful beach —<br><em>your guests, answered instantly</em></h1>
+    <p>In peak summer, 41 rooms on one of Sardinia's finest beaches generate a constant flow of emails: availability, water sports, transfers from Cagliari. Your AI Concierge handles it all, 24/7, in seconds.</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">Inbox</div>
+  <div class="tab">Analyze</div>
+  <div class="tab">History</div>
+  <div class="tab">Reservations</div>
+  <div class="tab">Invoices</div>
+</div>
+
+<main class="main">
+
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-number">41</div>
+      <div class="roi-label">Rooms</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">~57</div>
+      <div class="roi-label">Guest emails / day</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">28h</div>
+      <div class="roi-label">Hours saved / week</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">&lt;30s</div>
+      <div class="roi-label">Response time</div>
+    </div>
+  </div>
+
+  <div class="section-title">Live Email Drafts</div>
+  <p class="section-sub">From beach availability to boat rentals — the AI drafts personalised responses that match Aquadulci's relaxed, warm Sardinian hospitality</p>
+
+  <!-- EMAIL 1 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag booking">Booking</span>
+      <div class="email-meta">
+        <strong>Luca Marchetti</strong> · l.marchetti@gmail.com · Today 09:20
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Ciao,
+
+Vorrei prenotare una camera per 2 adulti e 1 bambino (8 anni) dal 5 al 12 agosto. È possibile avere una camera con vista mare? Quanto dista la spiaggia dall'hotel?
+
+Grazie,
+Luca</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Ciao Luca,
+
+Grazie per averci scritto! Abbiamo disponibilità dal 5 al 12 agosto per 2 adulti + 1 bambino.
+
+La nostra camera Superior Vista Mare è perfetta per il vostro soggiorno — finestra sul Mediterraneo e balcone privato.
+
+La spiaggia di Chia è accessibile direttamente dal giardino del nostro hotel, a circa 50 metri. È una delle spiagge più belle della Sardegna del Sud.
+
+Vi confermo la prenotazione non appena ricevo i vostri dati. Gradite qualcosa di speciale per il piccolo?
+
+A presto,
+Hotel Aquadulci — Chia</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 26 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 2 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag special">Activities</span>
+      <div class="email-meta">
+        <strong>James & Patricia O'Brien</strong> · jobrien@eircom.net · Today 11:35
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Hello,
+
+We arrive next Monday and we're very keen on water sports. Can you arrange snorkelling equipment rental and perhaps a kayak trip along the coast? Also, what's the best way to get from Cagliari airport to Chia?
+
+Thanks,
+James</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear James and Patricia,
+
+We look forward to welcoming you next Monday!
+
+For snorkelling: equipment rental is available directly on Chia beach, and the marine area around the headland is excellent — very clear water and good visibility for sea life. We can arrange the rental for you.
+
+For kayaking: we work with a local operator who runs guided coastal tours — usually 2–3 hours along the turquoise bays south of Chia. I'd recommend booking for your first full day.
+
+Transfer from Cagliari airport: the drive is about 55 minutes. We can organise a private transfer (recommended) or share the shuttle minibus details. Which would you prefer?
+
+With pleasure,
+Hotel Aquadulci — Chia</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 28 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 3 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag info">Information</span>
+      <div class="email-meta">
+        <strong>Klaus Hoffmann</strong> · k.hoffmann@t-online.de · Today 13:50
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Guten Tag,
+
+Wir planen einen Aufenthalt von 10 Tagen im Juli. Gibt es einen Spa-Bereich im Hotel? Und ist das Restaurant täglich geöffnet?
+
+Mit freundlichen Grüßen,
+Klaus Hoffmann</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear Klaus,
+
+Thank you for your message — a 10-day stay in July is a wonderful choice.
+
+Yes, we have a wellness area with a pool, surrounded by our Mediterranean garden of palm trees and Mediterranean scrub. It's a peaceful space ideal for relaxation between beach days.
+
+Our restaurant is open daily for lunch and dinner, serving fresh Sardinian cuisine with local seafood.
+
+Would you like me to check availability for your preferred dates in July?
+
+Kind regards,
+Hotel Aquadulci — Chia</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 24 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-title" style="margin-top: 42px;">Pricing</div>
+  <p class="section-sub">For a 41-room beachfront hotel — the ROI is immediate, especially in peak summer season</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-name">Standard</div>
+      <div class="pricing-price">€80<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €800 one-time setup</div>
+      <ul class="pricing-features">
+        <li>AI email drafting</li>
+        <li>Multilingual (EN/IT/DE)</li>
+        <li>Full dashboard</li>
+        <li>Inbox management</li>
+      </ul>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-name">Premium ✦ Recommended</div>
+      <div class="pricing-price">€120<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €800 one-time setup</div>
+      <ul class="pricing-features">
+        <li>Everything in Standard</li>
+        <li>Weekly AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">Premium+</div>
+      <div class="pricing-price">€150<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €1,200 one-time setup</div>
+      <ul class="pricing-features">
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Custom hotel voice</li>
+        <li>Full onboarding</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>Personalised demo for <strong style="color:white">Hotel Aquadulci · Chia, Sardinia</strong> · Powered by Agent Concierge AI</p>
+  <p style="margin-top:8px">Created by Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Intern at IBB Palazzo Bettina, Birgu, Malta</p>
+</footer>
+
+</body>
+</html>

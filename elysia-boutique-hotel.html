@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elysia Boutique Hotel Chania — AI Concierge Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --cream: #F9F5EE;
+    --parchment: #EFE8D8;
+    --terracotta: #B5652A;
+    --terracotta-light: #D4845A;
+    --venetian-red: #8B1A1A;
+    --sand: #C9A87C;
+    --deep: #2A1F0F;
+    --grey-text: #6B5E4E;
+    --success: #5A8A5A;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Lato', sans-serif;
+    background: var(--cream);
+    color: var(--deep);
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--deep);
+    padding: 20px 44px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hotel-name {
+    font-family: 'EB Garamond', serif;
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    color: var(--parchment);
+  }
+  .hotel-tagline {
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--sand);
+    margin-top: 4px;
+  }
+  .demo-badge {
+    background: var(--terracotta);
+    color: white;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 7px 18px;
+    border-radius: 2px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(to bottom right, var(--venetian-red), #5a1010);
+    padding: 52px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,124,0.2);
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 280px; height: 280px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,124,0.15);
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 580px; }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sand);
+    margin-bottom: 18px;
+  }
+  .hero h1 {
+    font-family: 'EB Garamond', serif;
+    font-size: 42px;
+    font-weight: 400;
+    color: var(--parchment);
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .hero h1 em { font-style: italic; color: var(--terracotta-light); }
+  .hero p {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(239,232,216,0.8);
+    line-height: 1.8;
+  }
+
+  /* TABS */
+  .tabs {
+    background: #1f160a;
+    display: flex;
+    padding: 0 44px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 14px 22px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: rgba(201,168,124,0.6);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--sand); border-bottom-color: var(--terracotta); }
+
+  /* MAIN */
+  .main { padding: 36px 44px; max-width: 1100px; margin: 0 auto; }
+
+  /* ROI */
+  .roi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+  .roi-card {
+    background: white;
+    border: 1px solid var(--parchment);
+    border-left: 4px solid var(--terracotta);
+    border-radius: 3px;
+    padding: 22px 18px;
+    text-align: center;
+  }
+  .roi-number {
+    font-family: 'EB Garamond', serif;
+    font-size: 40px;
+    font-weight: 500;
+    color: var(--venetian-red);
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+  .roi-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey-text); }
+
+  /* EMAILS */
+  .section-title {
+    font-family: 'EB Garamond', serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin-bottom: 6px;
+    color: var(--deep);
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--grey-text);
+    margin-bottom: 26px;
+    line-height: 1.6;
+  }
+
+  .email-demo {
+    background: white;
+    border: 1px solid var(--parchment);
+    border-radius: 3px;
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .email-header {
+    background: var(--parchment);
+    padding: 13px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #ddd0bb;
+  }
+  .email-tag {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 2px;
+  }
+  .email-tag.booking { background: var(--terracotta); color: white; }
+  .email-tag.special { background: var(--venetian-red); color: white; }
+  .email-tag.info { background: var(--sand); color: var(--deep); }
+  .email-meta { font-size: 12px; color: var(--grey-text); }
+  .email-meta strong { color: var(--deep); }
+
+  .email-body { display: grid; grid-template-columns: 1fr 1fr; }
+  .email-in { border-right: 1px solid var(--parchment); }
+  .email-in, .email-out { padding: 20px; }
+  .email-col-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--grey-text);
+    margin-bottom: 14px;
+    display: flex; gap: 8px; align-items: center;
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; }
+  .dot.ai { background: var(--terracotta); }
+  .email-text { font-size: 13px; line-height: 1.75; white-space: pre-line; }
+  .email-footer {
+    background: #fdf9f4;
+    border-top: 1px solid var(--parchment);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .timing { font-size: 11px; color: var(--success); }
+  .timing::before { content: '⚡ '; }
+  .btn-use {
+    background: var(--venetian-red);
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 2px;
+  }
+
+  /* PRICING */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 24px; }
+  .pricing-card {
+    background: white;
+    border: 1px solid var(--parchment);
+    border-radius: 3px;
+    padding: 28px 24px;
+  }
+  .pricing-card.featured {
+    background: var(--deep);
+    color: white;
+    border-color: var(--deep);
+  }
+  .pricing-name { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--grey-text); margin-bottom: 16px; }
+  .pricing-card.featured .pricing-name { color: var(--sand); }
+  .pricing-price { font-family: 'EB Garamond', serif; font-size: 36px; margin-bottom: 4px; }
+  .pricing-period { font-size: 12px; color: var(--grey-text); margin-bottom: 20px; }
+  .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.55); }
+  .pricing-features { list-style: none; font-size: 13px; }
+  .pricing-features li { padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; gap: 8px; }
+  .pricing-features li::before { content: '—'; color: var(--terracotta); }
+  .pricing-card.featured .pricing-features li { border-color: rgba(255,255,255,0.1); }
+
+  .footer {
+    background: var(--deep);
+    color: rgba(255,255,255,0.45);
+    text-align: center;
+    padding: 26px;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    margin-top: 48px;
+  }
+  .footer a { color: var(--sand); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .roi-grid { grid-template-columns: repeat(2, 1fr); }
+    .email-body { grid-template-columns: 1fr; }
+    .email-in { border-right: none; border-bottom: 1px solid var(--parchment); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .main, .hero, .tabs, .header { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <div class="hotel-name">Elysia Boutique Hotel</div>
+    <div class="hotel-tagline">Chania, Crete · Venetian Old Town · 5 Stars</div>
+  </div>
+  <div class="demo-badge">AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Venetian Palace · Byzantine & Ottoman Heritage · Coutellerie Restaurant</div>
+    <h1>History-steeped hospitality,<br><em>answered in 30 seconds</em></h1>
+    <p>Elysia's international guests — from London to Tokyo — deserve responses that match the hotel's grandeur. The AI Concierge handles bookings, cultural enquiries and excursion requests with the elegance your setting demands.</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">Inbox</div>
+  <div class="tab">Analyze</div>
+  <div class="tab">History</div>
+  <div class="tab">Reservations</div>
+  <div class="tab">Invoices</div>
+</div>
+
+<main class="main">
+
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-number">13</div>
+      <div class="roi-label">Rooms</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">~18</div>
+      <div class="roi-label">Guest emails / day</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">9h</div>
+      <div class="roi-label">Hours saved / week</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">&lt;30s</div>
+      <div class="roi-label">Response time</div>
+    </div>
+  </div>
+
+  <div class="section-title">Live Email Drafts</div>
+  <p class="section-sub">The AI drafts responses that reflect Elysia's unique character — history, elegance, and personalised Cretan hospitality</p>
+
+  <!-- EMAIL 1 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag booking">Booking</span>
+      <div class="email-meta">
+        <strong>David Thornton</strong> · d.thornton@gmail.com · Today 09:02
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Good morning,
+
+I've been looking at your hotel on TripAdvisor and I'm very interested in booking for September. Could you confirm availability for 10–16 September, 2 adults? We'd prefer a room with character — something that reflects the history of the building.
+
+What would you recommend?
+
+Thank you,
+David</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear David,
+
+Thank you for choosing Elysia — we'd love to welcome you in September.
+
+For guests who wish to feel the history of the building, we recommend our Venetian Suite. Housed in one of our four restored historic homes, it features original stone arches, hand-painted ceilings, and views over the harbour.
+
+Availability for 10–16 September: confirmed. Shall I reserve this suite for you?
+
+I'm happy to share more details about Chania's Old Town and suggest itineraries for your week if that would be helpful.
+
+Warm regards,
+Elysia Boutique Hotel</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 26 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 2 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag special">Cultural / Excursions</span>
+      <div class="email-meta">
+        <strong>Yuki Tanaka</strong> · yuki.t@docomo.jp · Today 11:44
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Hello,
+
+We arrive Thursday. We are very interested in the history of Chania — the Venetian harbour, the mosque, the Byzantine churches. Could you arrange a guided tour? Also, we would like to take a private boat to Balos lagoon one day.
+
+Regards,
+Yuki</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear Yuki,
+
+Welcome — you've chosen one of the most historically layered towns in Greece.
+
+For the guided tour of Chania: our concierge works with an excellent local historian who offers private 2-hour walks covering the Venetian harbour, the Ottoman Great Mosque, and the Byzantine churches of the Old Town. I can arrange this for Friday morning if convenient.
+
+For Balos: we regularly book private boat trips departing from Kissamos — a 3-hour round trip with time to swim in the turquoise lagoon. Saturday would be ideal (weather permitting).
+
+Shall I confirm both for you?
+
+Looking forward to your arrival,
+Elysia Boutique Hotel</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 28 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 3 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag info">Dining Information</span>
+      <div class="email-meta">
+        <strong>Isabelle Moreau</strong> · i.moreau@sfr.fr · Today 14:30
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="dot"></span> Guest message</div>
+        <div class="email-text">Bonjour,
+
+Nous arrivons samedi pour 4 nuits. Est-ce que le restaurant Coutellerie est ouvert chaque soir ? Peut-on réserver une table à l'avance ? Nous sommes végétariens.
+
+Merci,
+Isabelle</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="dot ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear Isabelle,
+
+Thank you for your message — we look forward to welcoming you on Saturday.
+
+Our Coutellerie Restaurant is open every evening. I would strongly recommend reserving a table in advance for the weekend, especially in high season.
+
+Regarding your vegetarian preferences: our chef places great importance on seasonal Cretan produce, and we can prepare a dedicated vegetarian menu for your stay. Please simply confirm your preferred dining times and any specific requirements.
+
+Shall I reserve your tables for all four evenings?
+
+With pleasure,
+Elysia Boutique Hotel</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 24 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-title" style="margin-top: 42px;">Formules</div>
+  <p class="section-sub">Adapted to a 13-room boutique hotel — straightforward pricing, immediate impact</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-name">Standard</div>
+      <div class="pricing-price">€80<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €800 one-time setup</div>
+      <ul class="pricing-features">
+        <li>AI email drafting</li>
+        <li>Multilingual (EN/FR/DE)</li>
+        <li>Full dashboard</li>
+        <li>Inbox management</li>
+      </ul>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-name">Premium ✦ Recommended</div>
+      <div class="pricing-price">€120<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €800 one-time setup</div>
+      <ul class="pricing-features">
+        <li>Everything in Standard</li>
+        <li>Weekly AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">Premium+</div>
+      <div class="pricing-price">€150<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €1,200 one-time setup</div>
+      <ul class="pricing-features">
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Custom hotel voice</li>
+        <li>Full onboarding</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>Personalised demo for <strong style="color:var(--parchment)">Elysia Boutique Hotel · Chania, Crete</strong> · Powered by Agent Concierge AI</p>
+  <p style="margin-top:8px">Created by Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Intern at IBB Palazzo Bettina, Birgu, Malta</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>De.light Boutique Hotel Mykonos — AI Concierge Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@300;400;500&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --white: #FFFFFF;
+    --off-white: #F8F8F8;
+    --mykonos-blue: #1A5276;
+    --sky: #5DADE2;
+    --sky-light: #AED6F1;
+    --charcoal: #1C1C1E;
+    --grey: #6C6C6C;
+    --light-grey: #E8E8E8;
+    --gold: #C9A84C;
+    --success: #27AE60;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--off-white);
+    color: var(--charcoal);
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--white);
+    padding: 18px 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--light-grey);
+    box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+  }
+  .logo-area { display: flex; align-items: center; gap: 14px; }
+  .logo-dot {
+    width: 36px; height: 36px;
+    background: var(--mykonos-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+  .hotel-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 1px;
+    color: var(--charcoal);
+  }
+  .hotel-badge {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+  .demo-tag {
+    background: var(--mykonos-blue);
+    color: white;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 7px 18px;
+    border-radius: 3px;
+  }
+
+  /* HERO */
+  .hero {
+    background: linear-gradient(160deg, var(--mykonos-blue) 0%, #0d3348 60%, #0a2233 100%);
+    padding: 56px 48px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: -40px; bottom: -60px;
+    width: 340px; height: 340px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(93,173,226,0.18), transparent 70%);
+  }
+  .hero-inner { position: relative; z-index: 1; max-width: 600px; }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--sky-light);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 40px;
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 14px;
+  }
+  .hero h1 em { font-style: normal; color: var(--sky); }
+  .hero p {
+    font-size: 14px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.7);
+    line-height: 1.7;
+  }
+
+  /* TABS */
+  .tabs {
+    background: var(--white);
+    border-bottom: 2px solid var(--light-grey);
+    display: flex;
+    padding: 0 48px;
+  }
+  .tab {
+    padding: 14px 22px;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 400;
+    color: var(--grey);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+  }
+  .tab.active { color: var(--mykonos-blue); border-bottom-color: var(--mykonos-blue); }
+
+  /* MAIN */
+  .main { padding: 36px 48px; max-width: 1100px; margin: 0 auto; }
+
+  /* ROI */
+  .roi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+  .roi-card {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border-top: 3px solid var(--sky);
+  }
+  .roi-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    font-weight: 400;
+    color: var(--mykonos-blue);
+    margin-bottom: 6px;
+  }
+  .roi-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--grey); }
+
+  /* EMAILS */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    font-weight: 400;
+    margin-bottom: 6px;
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--grey);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  .email-demo {
+    background: var(--white);
+    border-radius: 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    overflow: hidden;
+  }
+  .email-header {
+    background: #f0f4f8;
+    padding: 14px 22px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--light-grey);
+  }
+  .email-tag {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .email-tag.booking { background: #d4efdf; color: #1e8449; }
+  .email-tag.special { background: #d6eaf8; color: var(--mykonos-blue); }
+  .email-tag.info { background: #fef9e7; color: #9a7d0a; }
+  .email-meta { font-size: 12px; color: var(--grey); }
+  .email-meta strong { color: var(--charcoal); }
+
+  .email-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .email-in { border-right: 1px solid var(--light-grey); }
+  .email-in, .email-out { padding: 22px; }
+  .email-col-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .indicator {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--light-grey);
+  }
+  .indicator.ai { background: var(--sky); }
+  .email-text { font-size: 13px; line-height: 1.75; color: #2c2c2c; white-space: pre-line; }
+  .email-footer {
+    background: #fafafa;
+    border-top: 1px solid var(--light-grey);
+    padding: 12px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .timing { font-size: 11px; color: var(--success); font-weight: 500; }
+  .timing::before { content: '⚡ '; }
+  .btn-use {
+    background: var(--mykonos-blue);
+    color: white;
+    border: none;
+    padding: 9px 20px;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+
+  /* PRICING */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .pricing-card {
+    background: var(--white);
+    border-radius: 8px;
+    padding: 30px 26px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border: 1px solid var(--light-grey);
+  }
+  .pricing-card.featured {
+    background: var(--mykonos-blue);
+    color: white;
+    border-color: var(--mykonos-blue);
+  }
+  .pricing-name {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--grey);
+    margin-bottom: 18px;
+  }
+  .pricing-card.featured .pricing-name { color: var(--sky-light); }
+  .pricing-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 34px;
+    margin-bottom: 4px;
+  }
+  .pricing-period { font-size: 12px; color: var(--grey); margin-bottom: 20px; }
+  .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.6); }
+  .pricing-features { list-style: none; font-size: 13px; }
+  .pricing-features li {
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .pricing-features li::before { content: '✓'; color: var(--sky); font-weight: 600; }
+  .pricing-card.featured .pricing-features li { border-color: rgba(255,255,255,0.1); }
+  .pricing-card.featured .pricing-features li::before { color: var(--sky-light); }
+
+  .footer {
+    background: var(--charcoal);
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    padding: 26px;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    margin-top: 48px;
+  }
+  .footer a { color: var(--sky-light); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .roi-grid { grid-template-columns: repeat(2, 1fr); }
+    .email-body { grid-template-columns: 1fr; }
+    .email-in { border-right: none; border-bottom: 1px solid var(--light-grey); }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .main, .hero, .tabs { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo-area">
+    <div class="logo-dot">D·L</div>
+    <div>
+      <div class="hotel-name">De.light Boutique Hotel</div>
+      <div class="hotel-badge">✦ Small Luxury Hotels of the World · Michelin Selected</div>
+    </div>
+  </div>
+  <div class="demo-tag">AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Agios Ioannis, Mykonos · Adults Only · All-Suite</div>
+    <h1>Luxury guest service,<br><em>amplified by AI</em></h1>
+    <p>De.light's discerning guests expect exceptional responses — instantly. Your AI Concierge drafts personalised replies in 30 seconds, maintaining the SLH standard around the clock.</p>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">Inbox</div>
+  <div class="tab">Analyze</div>
+  <div class="tab">History</div>
+  <div class="tab">Reservations</div>
+  <div class="tab">Invoices</div>
+</div>
+
+<main class="main">
+
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-number">20</div>
+      <div class="roi-label">Suites</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">~28</div>
+      <div class="roi-label">Guest emails / day</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">14h</div>
+      <div class="roi-label">Hours saved / week</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-number">&lt;30s</div>
+      <div class="roi-label">Response time</div>
+    </div>
+  </div>
+
+  <div class="section-title">Live Email Drafts</div>
+  <p class="section-sub">The AI analyses incoming messages and generates responses that match De.light's level of personalisation and refinement</p>
+
+  <!-- EMAIL 1 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag booking">Booking</span>
+      <div class="email-meta">
+        <strong>Charlotte Beaumont</strong> · c.beaumont@icloud.com · Today 08:47
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="indicator"></span> Guest message</div>
+        <div class="email-text">Good morning,
+
+My partner and I are looking for a very special week in Mykonos in September — late season, ideally 8–15. We've read about De.light on the SLH website and it seems perfect.
+
+Could you tell us which suite would offer the best infinity pool and sea view combination? We'd also love a private jacuzzi if available.
+
+Thank you,
+Charlotte</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="indicator ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear Charlotte,
+
+Thank you so much — September is a magical time to be in Mykonos, and we'd love to welcome you both.
+
+For the combination of infinity pool access, sea panorama, and a private jacuzzi, our Infinity Suite is the ideal choice. It offers uninterrupted Aegean views, direct pool access, and a private terrace jacuzzi — perfect for a secluded retreat.
+
+Availability for 8–15 September: confirmed. I would be delighted to hold this suite for you.
+
+Shall I send through the booking details and a personalised offer?
+
+Warmly,
+De.light Reception</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 27 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 2 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag special">Special Request</span>
+      <div class="email-meta">
+        <strong>Alessandro Ferrari</strong> · a.ferrari@ferrari.it · Today 10:15
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="indicator"></span> Guest message</div>
+        <div class="email-text">Ciao,
+
+We are checking in Friday evening. I would like to organise a candlelit dinner on the terrace for my fiancée — it's a surprise proposal. Is this something you can arrange? Also, can you organise a boat trip to Delos the following morning?
+
+Alessandro</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="indicator ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear Alessandro,
+
+What a wonderful occasion — we would be honoured to be part of this moment.
+
+For the private candlelit dinner: our terrace is the perfect setting. We can arrange a bespoke table set-up at sunset with flowers, personalised menu, and champagne. I will coordinate with our culinary team to ensure every detail is in place before your arrival. Your fiancée will have no idea.
+
+For Delos: our concierge works with a private boat operator — I can book a morning departure for Saturday. The island usually takes 2–3 hours to explore.
+
+Please confirm the dinner time and any dietary preferences. Everything will be ready for Friday.
+
+With pleasure,
+De.light Concierge</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 29 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- EMAIL 3 -->
+  <div class="email-demo">
+    <div class="email-header">
+      <span class="email-tag info">Information</span>
+      <div class="email-meta">
+        <strong>Hannah Mueller</strong> · hannah.m@gmx.de · Today 13:22
+      </div>
+    </div>
+    <div class="email-body">
+      <div class="email-in">
+        <div class="email-col-title"><span class="indicator"></span> Guest message</div>
+        <div class="email-text">Hello,
+
+We are thinking about booking for late July. Could you tell us more about the wellness facilities? We're both interested in massages and treatments. Also, is the pool heated?
+
+Thank you,
+Hannah</div>
+      </div>
+      <div class="email-out">
+        <div class="email-col-title"><span class="indicator ai"></span> AI draft — ready to send</div>
+        <div class="email-text">Dear Hannah,
+
+Thank you for your interest in De.light!
+
+Our wellness programme offers a full range of treatments: Swedish and deep tissue massage, aromatherapy, and personalised body rituals, all performed in the privacy of your suite or at our dedicated wellness space.
+
+The infinity pool is naturally warmed by the Mediterranean climate in late July — temperatures are consistently comfortable for swimming throughout the day.
+
+I'd be happy to pre-book treatment sessions for your stay so your schedule is set before arrival. Shall I send you our wellness menu?
+
+Kind regards,
+De.light Reception</div>
+      </div>
+    </div>
+    <div class="email-footer">
+      <span class="timing">Draft generated in 25 seconds</span>
+      <button class="btn-use">Use this draft</button>
+    </div>
+  </div>
+
+  <!-- PRICING -->
+  <div class="section-title" style="margin-top: 40px;">Investment</div>
+  <p class="section-sub">A SLH-level response system at a fraction of a full-time hire</p>
+
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-name">Standard</div>
+      <div class="pricing-price">€80<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €800 one-time setup</div>
+      <ul class="pricing-features">
+        <li>AI email drafting</li>
+        <li>Multilingual (EN/IT/DE)</li>
+        <li>Full dashboard</li>
+        <li>Inbox management</li>
+      </ul>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-name">Premium ✦ Recommended</div>
+      <div class="pricing-price">€120<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €800 one-time setup</div>
+      <ul class="pricing-features">
+        <li>Everything in Standard</li>
+        <li>Weekly AI improvement</li>
+        <li>Monthly report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">Premium+</div>
+      <div class="pricing-price">€150<span style="font-size:18px">/mo</span></div>
+      <div class="pricing-period">+ €1,200 one-time setup</div>
+      <ul class="pricing-features">
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Custom tone fine-tuning</li>
+        <li>Full onboarding</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <p>Personalised demo for <strong style="color:white">De.light Boutique Hotel · Mykonos</strong> · Powered by Agent Concierge AI</p>
+  <p style="margin-top:8px">Created by Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Intern at IBB Palazzo Bettina, Birgu, Malta</p>
+</footer>
+
+</body>
+</html>
