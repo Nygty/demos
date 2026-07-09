@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Palazzo Paisiello Lecce</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #faf6f0; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { background-color: #faf6f0; padding: 30px 40px; border-bottom: 1px solid #e0d0ba; }
+        .stars { color: #c4860a; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: #1e1408; letter-spacing: 2px; margin-bottom: 4px; }
+        .hotel-sub { font-size: 12px; color: #9a6a2a; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; font-style: italic; }
+        .subtitle { font-size: 11px; color: #9a7a5a; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #faf6f0; padding: 0 40px; border-bottom: 1px solid #e0d0ba; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #9a7a5a; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab:hover { color: #1e1408; }
+        .tab.active { color: #1e1408; border-bottom-color: #c4860a; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #1e1408; color: white; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #e0d0ba; background: white; cursor: pointer; transition: all 0.2s; }
+        .filter:hover, .filter.active { background: #1e1408; color: white; border-color: #1e1408; }
+        .filter .count { background: #ecdfc8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #e0d0ba; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #f2e8d8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #fdf9f3; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #1e1408; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .tag.escalated { background: #fce7f3; color: #db2777; }
+        .ai-response { background: #fdf8ef; border-left: 3px solid #c4860a; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #c4860a; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .footer { background: #1e1408; color: #9a7a5a; padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-box { background: white; border: 1px solid #e0d0ba; padding: 35px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #1e1408; margin-bottom: 20px; }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .roi-card { background: #faf6f0; padding: 20px; text-align: center; border: 1px solid #e0d0ba; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #c4860a; font-weight: 500; }
+        .roi-label { font-size: 10px; color: #9a7a5a; letter-spacing: 1.5px; margin-top: 6px; text-transform: uppercase; }
+        .roi-detail { font-size: 12px; color: #666; line-height: 1.7; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .pricing-card { border: 1px solid #e0d0ba; padding: 20px; background: white; }
+        .pricing-card.recommended { border-color: #c4860a; background: #fdf8ef; }
+        .pricing-name { font-size: 11px; letter-spacing: 2px; color: #1e1408; font-weight: 600; margin-bottom: 10px; }
+        .pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #c4860a; }
+        .pricing-month { font-size: 11px; color: #999; }
+        .pricing-features { font-size: 11px; color: #666; margin-top: 12px; line-height: 1.8; }
+        .history-content, .reservations-content { background: white; border: 1px solid #e0d0ba; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #9a7a5a; padding: 14px 18px; border-bottom: 1px solid #e0d0ba; font-weight: 500; background: #fdf9f3; }
+        .history-table td { padding: 15px 18px; font-size: 13px; border-bottom: 1px solid #f2e8d8; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .analyze-content { background: white; border: 1px solid #e0d0ba; padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #1e1408; margin-bottom: 12px; }
+        .analyze-content textarea { width: 100%; height: 180px; border: 1px solid #e0d0ba; padding: 15px; font-family: inherit; font-size: 13px; resize: vertical; margin-top: 15px; margin-bottom: 18px; background: #fdf9f3; }
+        .analyze-btn { background: #c4860a; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; }
+        .new-badge { display: inline-block; margin-left: 10px; font-size: 9px; letter-spacing: 2px; color: #c4860a; border: 1px solid #c4860a; padding: 3px 8px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">PALAZZO PAISIELLO <span class="new-badge">OPENED 2024</span></div>
+        <div class="hotel-sub">18th Century Luxury · Lecce Baroque · 7 Curated Rooms</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · LECCE, PUGLIA, ITALY</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS</div>
+        <div class="tab" data-tab="roi">💡 ROI & PRICING</div>
+    </div>
+
+    <div class="main-content">
+        <!-- INBOX -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">1</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">1</span></div>
+                    <div class="filter">ESCALATED <span class="count">1</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <!-- Email 1: Room named after opera character -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Victoria Ashby</div>
+                        <div class="email-date">Today, 12:40</div>
+                    </div>
+                    <div class="email-subject">Which room inspired by opera? Stay Sept 20-24 — art lovers</div>
+                    <div class="email-preview">Hello, we are a couple passionate about opera and Baroque art. We chose Palazzo Paisiello specifically for its link to the 18th-century composer Giovanni Paisiello. Could you tell us about the rooms inspired by his works? We'd love the most theatrical room available!</div>
+                    <div class="email-tags"><span class="tag to-validate">TO VALIDATE</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 25 sec</div>
+                        Dear Victoria,<br><br>
+                        What a joy to welcome guests who appreciate Palazzo Paisiello's musical soul — you will feel right at home here.<br><br>
+                        Each of our 7 rooms takes inspiration from one of Paisiello's operas. For opera and Baroque art lovers, we highly recommend <strong>«Gli Stravaganti»</strong> — our most theatrical room, named after his 1772 comic opera. It blends contemporary design with 18th-century echoes: hand-painted ceiling details, original exposed stone walls, and a boudoir-style ambiance.<br><br>
+                        The room also faces the ancient Roman gate Porta Napoli — Lecce's most photographed landmark — just 200 metres away.<br><br>
+                        During your stay, we can arrange a private guided tour of Lecce's Baroque masterpieces (Santa Croce Basilica, Piazza del Duomo) and a private Salento wine tasting in the palazzo cellars.<br><br>
+                        Shall I reserve «Gli Stravaganti» for September 20–24?<br><br>
+                        With warm regards,<br>Palazzo Paisiello — Concierge
+                    </div>
+                </div>
+                <!-- Email 2: Italian group request -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Marco Andreotti</div>
+                        <div class="email-date">Today, 10:15</div>
+                    </div>
+                    <div class="email-subject">Disponibilità per 3 camere — fine settimana lungo agosto</div>
+                    <div class="email-preview">Buongiorno, siamo un gruppo di 6 persone (3 coppie) e cercheremo disponibilità per il lungo weekend del 14-17 agosto. Preferiremmo 3 camere doppie. Avete disponibilità? Vorremmo anche prenotare una cena tipica pugliese con degustazione di vini locali.</div>
+                    <div class="email-tags"><span class="tag auto-replied">AUTO-REPLIED</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT (Italian) — generated in 22 sec</div>
+                        Gentile Signor Andreotti,<br><br>
+                        Buongiorno! Siamo lieti di potervi accogliere a Palazzo Paisiello per il weekend di Ferragosto.<br><br>
+                        Abbiamo disponibilità per 3 camere doppie nel periodo 14–17 agosto. Le nostre camere sono tutte ispirate alle opere di Giovanni Paisiello e offrono un'atmosfera barocca raffinata nel cuore del centro storico di Lecce.<br><br>
+                        Per la cena tipica pugliese con degustazione, collaboriamo con un cuoco locale che prepara un menù degustazione di 5 portate (orecchiette al ragù, fave e cicorie, bombette di Alberobello, pastiera leccese) abbinato a una selezione di primitivo e negroamaro di produttori artigianali del Salento.<br><br>
+                        <strong>Cena degustazione (6 persone):</strong> €65 a persona<br><br>
+                        Posso procedere con la prenotazione delle 3 camere? Resto a disposizione.<br><br>
+                        Cordialmente,<br>Palazzo Paisiello — Reception
+                    </div>
+                </div>
+                <!-- Email 3: Review management -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Booking.com — New Review</div>
+                        <div class="email-date">Yesterday, 21:00</div>
+                    </div>
+                    <div class="email-subject">New 5-star review — Rebecca L. — "Absolutely magical"</div>
+                    <div class="email-preview">New review posted: ⭐⭐⭐⭐⭐ — "Absolutely magical stay. The room Gli Stravaganti is a masterpiece. Staff incredibly attentive. Best hotel we've stayed in Italy. Will be back." — Responding within 24h recommended.</div>
+                    <div class="email-tags"><span class="tag auto-replied">AUTO-REPLIED</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI RESPONSE DRAFTED FOR VALIDATION — 30 sec</div>
+                        Dear Rebecca,<br><br>
+                        Thank you so much for your kind and generous words — they truly warm our hearts. «Gli Stravaganti» was designed to surprise and enchant, just as Paisiello's opera did in 1772.<br><br>
+                        We look forward to welcoming you back to Palazzo Paisiello — and next time, perhaps you'll discover another of our seven rooms, each with its own story to tell.<br><br>
+                        Until then, a presto!<br>
+                        The Palazzo Paisiello Team
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste any incoming email to analyse</h3>
+                <p style="font-size:12px; color:#9a7a5a; margin-bottom:5px;">Handles Italian, English, French, German — with the warm, cultured tone befitting Lecce's finest boutique palazzo.</p>
+                <textarea placeholder="Incolla qui il testo / Paste email content here…"></textarea>
+                <button class="analyze-btn">✨ ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead><tr><th>DATE</th><th>GUEST</th><th>SUBJECT</th><th>STATUS</th><th>TIME</th></tr></thead>
+                    <tbody>
+                        <tr><td>Jul 8, 2026</td><td>Hannah Fischer</td><td>Cycling tour Salento countryside</td><td><span class="status-badge sent">SENT</span></td><td>23 sec</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Giulia Romano</td><td>Corso di ceramica leccese</td><td><span class="status-badge sent">SENT</span></td><td>27 sec</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>James Thornton</td><td>Airport transfer — Brindisi</td><td><span class="status-badge sent">SENT</span></td><td>19 sec</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>Sophie Laurent</td><td>Late arrival 23:00 — key access</td><td><span class="status-badge sent">SENT</span></td><td>16 sec</td></tr>
+                        <tr><td>Jul 5, 2026</td><td>Riccardo Ferrari</td><td>Massaggio + visita guidata barocco</td><td><span class="status-badge pending">PENDING</span></td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESERVATIONS -->
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead><tr><th>CREATED</th><th>GUEST</th><th>DATES</th><th>ROOM</th><th>VALUE</th></tr></thead>
+                    <tbody>
+                        <tr><td>Jul 8, 2026</td><td>Victoria Ashby (×2)</td><td>Sep 20–24</td><td>Gli Stravaganti</td><td>€1,080</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Marco Andreotti (×6)</td><td>Aug 14–17</td><td>3× Deluxe Double Rooms</td><td>€2,160</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>Hannah Fischer</td><td>Aug 8–11</td><td>La Zingara Room</td><td>€720</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ROI -->
+        <div class="tab-content" id="roi">
+            <div class="roi-box">
+                <div class="roi-title">Return on Investment — Palazzo Paisiello (7 rooms) — Rating 9.6/10</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">~12</div>
+                        <div class="roi-label">Emails per day</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">3h</div>
+                        <div class="roi-label">Saved per week</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~€130</div>
+                        <div class="roi-label">Staff value / month</div>
+                    </div>
+                </div>
+                <div class="roi-detail">
+                    Opened in 2024 with only 7 rooms and an exceptional 9.6/10 rating, Palazzo Paisiello already attracts a cultured, demanding clientele who expect personalised, culturally-rich responses. As the property grows, email volume will scale quickly. The AI Concierge ensures every guest inquiry — room descriptions, opera history, Salento itineraries, review replies — receives a response worthy of a 9.6/10 establishment, every time, instantly.<br><br>
+                    Already in production at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — same newly-opened boutique palazzo format.
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-name">STANDARD</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 80€ / month</div>
+                        <div class="pricing-features">✓ AI email drafts<br>✓ IT / EN / FR / DE<br>✓ Dashboard V3.0</div>
+                    </div>
+                    <div class="pricing-card recommended">
+                        <div class="pricing-name">PREMIUM ⭐ RECOMMENDED</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 120€ / month</div>
+                        <div class="pricing-features">✓ All Standard features<br>✓ Weekly auto-improvement<br>✓ Monthly performance report</div>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="pricing-name">PREMIUM+</div>
+                        <div class="pricing-price">1 200€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 150€ / month</div>
+                        <div class="pricing-features">✓ All Premium features<br>✓ Trained on your real emails<br>✓ Onboarding & training session</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        AI CONCIERGE V3.0 — PALAZZO PAISIELLO · LECCE, PUGLIA, ITALY
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

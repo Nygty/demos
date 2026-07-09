@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Hotel Palau Macelli</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f6f4f0; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { background-color: #f6f4f0; padding: 30px 40px; border-bottom: 1px solid #d5cfc5; }
+        .stars { color: #9c7c4a; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: #1c1810; letter-spacing: 2px; margin-bottom: 4px; }
+        .hotel-sub { font-size: 12px; color: #8c7a5c; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; font-style: italic; }
+        .subtitle { font-size: 11px; color: #9c8870; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #f6f4f0; padding: 0 40px; border-bottom: 1px solid #d5cfc5; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #9c8870; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab:hover { color: #1c1810; }
+        .tab.active { color: #1c1810; border-bottom-color: #9c7c4a; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #1c1810; color: white; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #d5cfc5; background: white; cursor: pointer; transition: all 0.2s; }
+        .filter:hover, .filter.active { background: #1c1810; color: white; border-color: #1c1810; }
+        .filter .count { background: #e5ddd0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #d5cfc5; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #eee8e0; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf8f5; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #1c1810; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .tag.escalated { background: #fce7f3; color: #db2777; }
+        .ai-response { background: #faf7f3; border-left: 3px solid #9c7c4a; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #9c7c4a; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .footer { background: #1c1810; color: #9c8870; padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-box { background: white; border: 1px solid #d5cfc5; padding: 35px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #1c1810; margin-bottom: 20px; }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .roi-card { background: #f6f4f0; padding: 20px; text-align: center; border: 1px solid #d5cfc5; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #9c7c4a; font-weight: 500; }
+        .roi-label { font-size: 10px; color: #9c8870; letter-spacing: 1.5px; margin-top: 6px; text-transform: uppercase; }
+        .roi-detail { font-size: 12px; color: #666; line-height: 1.7; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .pricing-card { border: 1px solid #d5cfc5; padding: 20px; background: white; }
+        .pricing-card.recommended { border-color: #9c7c4a; background: #faf7f3; }
+        .pricing-name { font-size: 11px; letter-spacing: 2px; color: #1c1810; font-weight: 600; margin-bottom: 10px; }
+        .pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #9c7c4a; }
+        .pricing-month { font-size: 11px; color: #999; }
+        .pricing-features { font-size: 11px; color: #666; margin-top: 12px; line-height: 1.8; }
+        .history-content, .reservations-content { background: white; border: 1px solid #d5cfc5; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #9c8870; padding: 14px 18px; border-bottom: 1px solid #d5cfc5; font-weight: 500; background: #faf8f5; }
+        .history-table td { padding: 15px 18px; font-size: 13px; border-bottom: 1px solid #eee8e0; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .analyze-content { background: white; border: 1px solid #d5cfc5; padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #1c1810; margin-bottom: 12px; }
+        .analyze-content textarea { width: 100%; height: 180px; border: 1px solid #d5cfc5; padding: 15px; font-family: inherit; font-size: 13px; resize: vertical; margin-top: 15px; margin-bottom: 18px; background: #faf8f5; }
+        .analyze-btn { background: #9c7c4a; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">HOTEL PALAU MACELLI</div>
+        <div class="hotel-sub">Historic Palace · Spa · Gothic Basilica · Costa Brava</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · CASTELLÓ D'EMPÚRIES, SPAIN</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS</div>
+        <div class="tab" data-tab="roi">💡 ROI & PRICING</div>
+    </div>
+
+    <div class="main-content">
+        <!-- INBOX -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">1</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">1</span></div>
+                    <div class="filter">ESCALATED <span class="count">1</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <!-- Email 1: Wedding inquiry -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Isabel & Tom Grayson</div>
+                        <div class="email-date">Today, 14:20</div>
+                    </div>
+                    <div class="email-subject">Wedding venue enquiry — June 2027 — 45 guests</div>
+                    <div class="email-preview">Hello, we are looking for a unique venue for our wedding in June 2027. Your historic palace adjacent to the Gothic basilica looks absolutely perfect. Could you provide details on capacity, catering options, accommodation for guests, and a rough price estimate?</div>
+                    <div class="email-tags"><span class="tag to-validate">TO VALIDATE</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 33 sec</div>
+                        Dear Isabel and Tom,<br><br>
+                        Congratulations on your upcoming wedding — what a wonderful choice. Palau Macelli is indeed one of the most unique event venues on the Costa Brava.<br><br>
+                        Our historic courtyard and panoramic rooftop terrace can accommodate up to 60 guests for a seated dinner. The adjacent 12th-century Gothic Basilica of Santa Maria provides a breathtaking backdrop for ceremonies.<br><br>
+                        <strong>Wedding package (45 guests) includes:</strong><br>
+                        · Exclusive use of palace garden &amp; courtyard<br>
+                        · Catered dinner with local Catalan produce (€95/person)<br>
+                        · 14 rooms available for guest accommodation<br>
+                        · Spa access for the wedding party<br><br>
+                        Our Events Manager, María, will contact you within 24h to discuss your vision in detail and provide a personalised proposal.<br><br>
+                        Warmly,<br>Hotel Palau Macelli — Concierge
+                    </div>
+                </div>
+                <!-- Email 2: Spa + Empordà activities -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Jean-Pierre Renaud</div>
+                        <div class="email-date">Today, 09:45</div>
+                    </div>
+                    <div class="email-subject">Réservation spa + activités autour de Castelló d'Empúries</div>
+                    <div class="email-preview">Bonjour, nous arrivons le 15 août pour 4 nuits avec ma femme. Nous souhaitons réserver 2 séances au spa (sauna finlandais + hammam chromothérapie) et aimerions des conseils sur les activités dans la région : kayak, visite des marais de l'Alt Empordà, restaurants locaux…</div>
+                    <div class="email-tags"><span class="tag auto-replied">AUTO-REPLIED</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT (in French) — generated in 28 sec</div>
+                        Cher Monsieur Renaud,<br><br>
+                        Bienvenue à Palau Macelli ! Nous avons hâte de vous accueillir le 15 août.<br><br>
+                        Pour le spa, nous vous réservons le <strong>16 août à 11h</strong> : sauna finlandais (45 min) suivi de la session hammam avec chromothérapie et douche à effet pluie (45 min). Durée totale : environ 2h pour deux.<br>
+                        <strong>Tarif spa duo :</strong> €110<br><br>
+                        Pour les activités dans l'Empordà :<br>
+                        · <strong>Kayak sur le Muga</strong> : départ à 500m de l'hôtel, location disponible<br>
+                        · <strong>Parc naturel des Aiguamolls de l'Empordà</strong> : visite guidée ornithologie (2h, €35/pers.)<br>
+                        · <strong>Restaurant El Motel</strong> à Figueres (cuisine catalane gastronomique) — réservation conseillée<br><br>
+                        Je reste à votre disposition pour tout complément.<br><br>
+                        Cordialement,<br>Palau Macelli — Conciergerie
+                    </div>
+                </div>
+                <!-- Email 3: Business seminar -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Carla Puig — Events Manager, Roca Corp.</div>
+                        <div class="email-date">Yesterday, 16:30</div>
+                    </div>
+                    <div class="email-subject">Corporate seminar — 20 participants — October 2026</div>
+                    <div class="email-preview">Hi, we're looking to host a 2-day strategy seminar for 20 executives in October. We need a meeting room, 10 double rooms, team dinner the first night, and ideally a team-building activity in the area. Could you share availability and a complete package?</div>
+                    <div class="email-tags"><span class="tag escalated">ESCALATED TO SALES</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">⚠️ ESCALATED — Sales Manager notified for group proposal</div>
+                        <strong>Client:</strong> Roca Corp. — 20 executives<br>
+                        <strong>Needs:</strong> Meeting room, 10 doubles, gala dinner, team-building<br>
+                        <strong>Dates:</strong> October 2026 (TBC)<br>
+                        <strong>Revenue potential:</strong> Est. €8,000–12,000<br>
+                        <strong>Next step:</strong> Sales Manager to send MICE proposal within 48h.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste any incoming email to analyse</h3>
+                <p style="font-size:12px; color:#9c8870; margin-bottom:5px;">Handles English, French, Spanish, Catalan — with contextual knowledge of Palau Macelli's spa, gardens, basilica and Empordà activities.</p>
+                <textarea placeholder="Paste email content here / Coller le contenu de l'email ici…"></textarea>
+                <button class="analyze-btn">✨ ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead><tr><th>DATE</th><th>GUEST</th><th>SUBJECT</th><th>STATUS</th><th>TIME</th></tr></thead>
+                    <tbody>
+                        <tr><td>Jul 8, 2026</td><td>Sophie & Mark Harrison</td><td>Rooftop pool access hours</td><td><span class="status-badge sent">SENT</span></td><td>22 sec</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Matthias Vogel</td><td>Dali Museum transfer — Figueres</td><td><span class="status-badge sent">SENT</span></td><td>27 sec</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Patricia Soler</td><td>Boda 2027 — disponibilitat</td><td><span class="status-badge sent">SENT</span></td><td>35 sec</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>Andrew Blair</td><td>Allergy info — nuts, shellfish</td><td><span class="status-badge sent">SENT</span></td><td>20 sec</td></tr>
+                        <tr><td>Jul 5, 2026</td><td>Helena Vidal</td><td>Spa package for birthday stay</td><td><span class="status-badge pending">PENDING</span></td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESERVATIONS -->
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead><tr><th>CREATED</th><th>GUEST</th><th>DATES</th><th>ROOM</th><th>VALUE</th></tr></thead>
+                    <tbody>
+                        <tr><td>Jul 8, 2026</td><td>Jean-Pierre Renaud (×2)</td><td>Aug 15–19</td><td>Junior Suite — Garden View</td><td>€1,520</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Sophie & Mark Harrison</td><td>Sep 6–9</td><td>Deluxe Room — Basilica View</td><td>€1,080</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>Andrew Blair</td><td>Jul 20–23</td><td>Standard Superior Room</td><td>€780</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ROI -->
+        <div class="tab-content" id="roi">
+            <div class="roi-box">
+                <div class="roi-title">Return on Investment — Hotel Palau Macelli (14 rooms)</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">~22</div>
+                        <div class="roi-label">Emails per day</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">6h</div>
+                        <div class="roi-label">Saved per week</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~€260</div>
+                        <div class="roi-label">Staff value / month</div>
+                    </div>
+                </div>
+                <div class="roi-detail">
+                    With 14 rooms and a diverse service offering — spa, garden events, weddings, corporate seminars, regional tours — Hotel Palau Macelli receives an estimated <strong>22+ emails per day</strong> in Spanish, English, French and Catalan. Wedding inquiries and event requests alone require lengthy, detailed responses. The AI Concierge handles first-contact replies instantly, routing complex requests to the right manager.<br><br>
+                    Already in production at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — similar boutique format and international audience.
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-name">STANDARD</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 80€ / month</div>
+                        <div class="pricing-features">✓ AI email drafts<br>✓ ES / EN / FR / CA<br>✓ Dashboard V3.0</div>
+                    </div>
+                    <div class="pricing-card recommended">
+                        <div class="pricing-name">PREMIUM ⭐ RECOMMENDED</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 120€ / month</div>
+                        <div class="pricing-features">✓ All Standard features<br>✓ Weekly auto-improvement<br>✓ Monthly performance report</div>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="pricing-name">PREMIUM+</div>
+                        <div class="pricing-price">1 200€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 150€ / month</div>
+                        <div class="pricing-features">✓ All Premium features<br>✓ Trained on your real emails<br>✓ Onboarding & training session</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        AI CONCIERGE V3.0 — HOTEL PALAU MACELLI · CASTELLÓ D'EMPÚRIES, COSTA BRAVA
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

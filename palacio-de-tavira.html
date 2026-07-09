@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Palácio de Tavira</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f7f3ee; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { background-color: #f7f3ee; padding: 30px 40px; border-bottom: 1px solid #ddd5c8; }
+        .stars { color: #b8860b; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: #2a2018; letter-spacing: 2px; margin-bottom: 6px; }
+        .subtitle { font-size: 11px; color: #997755; letter-spacing: 3px; text-transform: uppercase; }
+        .badge-slh { display: inline-block; margin-top: 8px; font-size: 9px; letter-spacing: 2px; color: #b8860b; border: 1px solid #b8860b; padding: 3px 8px; }
+        .tabs { display: flex; background-color: #f7f3ee; padding: 0 40px; border-bottom: 1px solid #ddd5c8; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #997755; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab:hover { color: #2a2018; }
+        .tab.active { color: #2a2018; border-bottom-color: #b8860b; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #2a2018; color: white; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .refresh-btn:hover { background: #4a3828; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #ddd5c8; background: white; cursor: pointer; transition: all 0.2s; }
+        .filter:hover, .filter.active { background: #2a2018; color: white; border-color: #2a2018; }
+        .filter .count { background: #e8e0d8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #ddd5c8; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #f0ebe4; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf7f3; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #2a2018; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; }
+        .tag.urgent { background: #fee2e2; color: #dc2626; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .tag.processed { background: #e0e7ff; color: #4f46e5; }
+        .tag.escalated { background: #fce7f3; color: #db2777; }
+        .ai-response { background: #faf7f2; border-left: 3px solid #b8860b; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #b8860b; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .footer { background: #2a2018; color: #997755; padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-box { background: white; border: 1px solid #ddd5c8; padding: 35px 40px; margin-bottom: 25px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #2a2018; margin-bottom: 20px; }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .roi-card { background: #f7f3ee; padding: 20px; text-align: center; border: 1px solid #ddd5c8; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #b8860b; font-weight: 500; }
+        .roi-label { font-size: 10px; color: #997755; letter-spacing: 1.5px; margin-top: 6px; text-transform: uppercase; }
+        .roi-detail { font-size: 12px; color: #666; line-height: 1.7; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .pricing-card { border: 1px solid #ddd5c8; padding: 20px; background: white; }
+        .pricing-card.recommended { border-color: #b8860b; background: #fdf9f3; }
+        .pricing-name { font-size: 11px; letter-spacing: 2px; color: #2a2018; font-weight: 600; margin-bottom: 10px; }
+        .pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #b8860b; }
+        .pricing-month { font-size: 11px; color: #999; }
+        .pricing-features { font-size: 11px; color: #666; margin-top: 12px; line-height: 1.8; }
+        .history-content { background: white; border: 1px solid #ddd5c8; padding: 0; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #997755; padding: 14px 18px; border-bottom: 1px solid #ddd5c8; font-weight: 500; background: #faf7f3; }
+        .history-table td { padding: 15px 18px; font-size: 13px; border-bottom: 1px solid #f0ebe4; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .analyze-content { background: white; border: 1px solid #ddd5c8; padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #2a2018; margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 180px; border: 1px solid #ddd5c8; padding: 15px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 18px; background: #faf7f3; }
+        .analyze-btn { background: #b8860b; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; }
+        .reservations-content { background: white; border: 1px solid #ddd5c8; }
+        .invoices-content { background: white; border: 1px solid #ddd5c8; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★ ★</div>
+        <div class="hotel-name">PALÁCIO DE TAVIRA</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · TAVIRA, ALGARVE, PORTUGAL</div>
+        <div class="badge-slh">SMALL LUXURY HOTELS OF THE WORLD</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS</div>
+        <div class="tab" data-tab="roi">💡 ROI & PRICING</div>
+    </div>
+
+    <div class="main-content">
+        <!-- INBOX -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">1</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">1</span></div>
+                    <div class="filter">ESCALATED <span class="count">1</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <!-- Email 1: Spa booking + special request -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Charlotte Beaumont</div>
+                        <div class="email-date">Today, 10:42</div>
+                    </div>
+                    <div class="email-subject">Hammam & couples massage — honeymoon stay July 18-22</div>
+                    <div class="email-preview">Dear Palácio de Tavira, we are arriving for our honeymoon next month. We would love a hammam session followed by a couples massage on our first evening. We also have a dietary restriction — my husband is gluten-intolerant…</div>
+                    <div class="email-tags"><span class="tag to-validate">TO VALIDATE</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 28 sec</div>
+                        Dear Ms. Beaumont,<br><br>
+                        Congratulations on your upcoming honeymoon — we are so pleased you will be celebrating with us at Palácio de Tavira!<br><br>
+                        We would be delighted to arrange a private hammam session followed by a 60-minute couples' aromatherapy massage on the evening of July 18th. We recommend booking for 7:00pm, allowing you to enjoy the golden sunset over the Gilão River afterwards.<br><br>
+                        Regarding your husband's gluten intolerance: our Executive Chef has been informed and will prepare a dedicated gluten-free menu for all your meals during the stay, including breakfast.<br><br>
+                        <strong>Hammam + Couples Massage:</strong> €185 for two guests · Duration approx. 2h<br><br>
+                        Shall I confirm this booking? We look forward to making your stay truly unforgettable.<br><br>
+                        Warm regards,<br>Palácio de Tavira Concierge
+                    </div>
+                </div>
+                <!-- Email 2: Early check-in group -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Marcus van der Berg</div>
+                        <div class="email-date">Today, 08:15</div>
+                    </div>
+                    <div class="email-subject">Early check-in request — group of 6, arriving 9am</div>
+                    <div class="email-preview">Hello, we are a group of 6 guests with 3 rooms booked for August 2-5. Our flight lands in Faro at 7:45am and we'd arrive at the hotel around 9am. Is early check-in possible? Also, can you arrange a private guided tour of Tavira old town?</div>
+                    <div class="email-tags"><span class="tag auto-replied">AUTO-REPLIED</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT — generated in 31 sec</div>
+                        Dear Mr. van der Berg,<br><br>
+                        Thank you for your message. We are delighted to welcome your group of six to Palácio de Tavira!<br><br>
+                        Early check-in at 9am is available for a supplement of €35 per room, subject to room availability the evening prior. We have placed a note on your reservation and our team will confirm availability 48 hours before your arrival.<br><br>
+                        We would be happy to arrange a private guided tour of Tavira's historic centre, Roman bridge, and traditional tile-making workshops — approximately 2.5 hours. Our preferred local guide is available mornings at 10:30am.<br><br>
+                        <strong>Private group tour (6 guests):</strong> €120 total<br><br>
+                        We will follow up with confirmation shortly. Safe travels!<br><br>
+                        Palácio de Tavira Guest Relations
+                    </div>
+                </div>
+                <!-- Email 3: Complaint -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Booking.com — Guest message</div>
+                        <div class="email-date">Yesterday, 23:08</div>
+                    </div>
+                    <div class="email-subject">Issue with room — noise from adjacent terrace</div>
+                    <div class="email-preview">We have been unable to sleep due to loud music from what seems to be the rooftop terrace. It is past midnight and the noise is still going. This is completely unacceptable for a 5-star property at these prices. We expect a response immediately.</div>
+                    <div class="email-tags"><span class="tag escalated">ESCALATED TO MANAGER</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">⚠️ ESCALATED — Night Manager notified automatically</div>
+                        <strong>Guest complaint:</strong> Noise disturbance past midnight — rooftop terrace<br>
+                        <strong>Priority:</strong> High — SLH quality standards at risk<br>
+                        <strong>Action suggested:</strong> Immediate call to guest room + offer room change to quieter wing + complimentary breakfast. Investigate terrace noise source with F&amp;B team.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste any incoming email to analyse</h3>
+                <p style="font-size:12px; color:#997755; margin-bottom:20px; letter-spacing:0.5px;">The AI will classify intent, suggest a draft response in the appropriate language, and flag any action required — in under 30 seconds.</p>
+                <textarea placeholder="Paste the email content here (English, French, Portuguese, German…)"></textarea>
+                <button class="analyze-btn">✨ ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th><th>GUEST</th><th>SUBJECT</th><th>STATUS</th><th>RESPONSE TIME</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 8, 2026</td><td>Emma Richardson</td><td>Wine pairing dinner request</td><td><span class="status-badge sent">SENT</span></td><td>27 sec</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>François Delacroix</td><td>Disponibilité suite vue rivière</td><td><span class="status-badge sent">SENT</span></td><td>34 sec</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Anna Schmidt</td><td>Rooftop pool access times</td><td><span class="status-badge sent">SENT</span></td><td>22 sec</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>James O'Sullivan</td><td>Airport transfer — Faro</td><td><span class="status-badge sent">SENT</span></td><td>29 sec</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>Sofía Martínez</td><td>Excursión Ría Formosa</td><td><span class="status-badge pending">PENDING</span></td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESERVATIONS -->
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>CREATED</th><th>GUEST</th><th>DATES</th><th>ROOM TYPE</th><th>VALUE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 8, 2026</td><td>Charlotte Beaumont</td><td>Jul 18–22</td><td>Junior Suite — River View</td><td>€2,280</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Marcus van der Berg</td><td>Aug 2–5</td><td>3× Superior Rooms</td><td>€4,140</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>François Delacroix</td><td>Sep 10–14</td><td>Grand Suite</td><td>€3,960</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ROI & PRICING -->
+        <div class="tab-content" id="roi">
+            <div class="roi-box">
+                <div class="roi-title">Return on Investment — Palácio de Tavira (36 rooms)</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">~50</div>
+                        <div class="roi-label">Emails per day</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">12h</div>
+                        <div class="roi-label">Saved per week</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~€520</div>
+                        <div class="roi-label">Staff value / month</div>
+                    </div>
+                </div>
+                <div class="roi-detail">
+                    With 36 rooms and memberships to SLH (international clientele, spa bookings, excursion requests, F&amp;B reservations), Palácio de Tavira receives an estimated <strong>50+ emails per day</strong> — reservations, dietary questions, spa bookings, event inquiries. At an average of 8 minutes per reply, that is <strong>~6.7 hours of reception work daily</strong>. The AI Concierge handles routine replies in 28–35 seconds, freeing your team to focus on in-person guest experiences.<br><br>
+                    Already in production at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — another 5★ boutique property with a comparable guest profile.
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-name">STANDARD</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 80€ / month</div>
+                        <div class="pricing-features">✓ AI email drafts<br>✓ Multilingual (EN/FR/PT/DE)<br>✓ Dashboard V3.0</div>
+                    </div>
+                    <div class="pricing-card recommended">
+                        <div class="pricing-name">PREMIUM ⭐ RECOMMENDED</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 120€ / month</div>
+                        <div class="pricing-features">✓ All Standard features<br>✓ Weekly auto-improvement<br>✓ Monthly performance report</div>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="pricing-name">PREMIUM+</div>
+                        <div class="pricing-price">1 200€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 150€ / month</div>
+                        <div class="pricing-features">✓ All Premium features<br>✓ Training on your real emails<br>✓ Dedicated onboarding session</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        AI CONCIERGE V3.0 — PALÁCIO DE TAVIRA · TAVIRA, PORTUGAL
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

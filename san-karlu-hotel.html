@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - San Karlu Hotel Valletta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f1f0; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { background-color: #f4f1f0; padding: 30px 40px; border-bottom: 1px solid #d5ccc6; }
+        .stars { color: #8b3a2a; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: #1c1210; letter-spacing: 2px; margin-bottom: 4px; }
+        .hotel-sub { font-size: 12px; color: #8b5a4a; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; font-style: italic; }
+        .subtitle { font-size: 11px; color: #9a7060; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #f4f1f0; padding: 0 40px; border-bottom: 1px solid #d5ccc6; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #9a7060; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab:hover { color: #1c1210; }
+        .tab.active { color: #1c1210; border-bottom-color: #8b3a2a; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #1c1210; color: white; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #d5ccc6; background: white; cursor: pointer; transition: all 0.2s; }
+        .filter:hover, .filter.active { background: #1c1210; color: white; border-color: #1c1210; }
+        .filter .count { background: #e5dbd8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #d5ccc6; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #ede8e6; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf8f7; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #1c1210; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .tag.escalated { background: #fce7f3; color: #db2777; }
+        .ai-response { background: #faf6f5; border-left: 3px solid #8b3a2a; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #8b3a2a; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .footer { background: #1c1210; color: #9a7060; padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-box { background: white; border: 1px solid #d5ccc6; padding: 35px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #1c1210; margin-bottom: 20px; }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .roi-card { background: #f4f1f0; padding: 20px; text-align: center; border: 1px solid #d5ccc6; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #8b3a2a; font-weight: 500; }
+        .roi-label { font-size: 10px; color: #9a7060; letter-spacing: 1.5px; margin-top: 6px; text-transform: uppercase; }
+        .roi-detail { font-size: 12px; color: #666; line-height: 1.7; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .pricing-card { border: 1px solid #d5ccc6; padding: 20px; background: white; }
+        .pricing-card.recommended { border-color: #8b3a2a; background: #faf6f5; }
+        .pricing-name { font-size: 11px; letter-spacing: 2px; color: #1c1210; font-weight: 600; margin-bottom: 10px; }
+        .pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #8b3a2a; }
+        .pricing-month { font-size: 11px; color: #999; }
+        .pricing-features { font-size: 11px; color: #666; margin-top: 12px; line-height: 1.8; }
+        .history-content, .reservations-content { background: white; border: 1px solid #d5ccc6; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #9a7060; padding: 14px 18px; border-bottom: 1px solid #d5ccc6; font-weight: 500; background: #faf8f7; }
+        .history-table td { padding: 15px 18px; font-size: 13px; border-bottom: 1px solid #ede8e6; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .analyze-content { background: white; border: 1px solid #d5ccc6; padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #1c1210; margin-bottom: 12px; }
+        .analyze-content textarea { width: 100%; height: 180px; border: 1px solid #d5ccc6; padding: 15px; font-family: inherit; font-size: 13px; resize: vertical; margin-top: 15px; margin-bottom: 18px; background: #faf8f7; }
+        .analyze-btn { background: #8b3a2a; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; }
+        .local-badge { display: inline-block; margin-top: 8px; font-size: 9px; letter-spacing: 2px; color: #8b3a2a; border: 1px solid #8b3a2a; padding: 3px 8px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">SAN KARLU HOTEL</div>
+        <div class="hotel-sub">19th Century Townhouse · Rooftop Pool · Jacuzzi · Valletta</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · VALLETTA, MALTA</div>
+        <div class="local-badge">🇲🇹 SAME ISLAND AS IBB PALAZZO BETTINA — AI PROVEN IN MALTA</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS</div>
+        <div class="tab" data-tab="roi">💡 ROI & PRICING</div>
+    </div>
+
+    <div class="main-content">
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">&#8635; REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">1</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">1</span></div>
+                    <div class="filter">ESCALATED <span class="count">1</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <!-- Email 1: Rooftop pool + Valletta exploration -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Rachel &amp; Tom Sutherland</div>
+                        <div class="email-date">Today, 12:00</div>
+                    </div>
+                    <div class="email-subject">Private rooftop jacuzzi booking + guided Valletta tour — stay Oct 5-9</div>
+                    <div class="email-preview">Hello, we are huge history enthusiasts visiting Malta for the first time. Could we book the private rooftop jacuzzi for one evening? We'd also love recommendations for a guided walking tour of Valletta — we want to see the Grand Harbour, St John's Co-Cathedral and the Upper Barrakka Gardens.</div>
+                    <div class="email-tags"><span class="tag to-validate">TO VALIDATE</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 27 sec</div>
+                        Dear Rachel and Tom,<br><br>
+                        Welcome to San Karlu — your first visit to Malta promises to be unforgettable!<br><br>
+                        We can reserve the <strong>private rooftop jacuzzi</strong> for you on October 7th from 7:00pm to 9:00pm. At that hour, the illuminated domes of Valletta and the Grand Harbour lights create a truly magical backdrop.<br><br>
+                        For your Valletta historical tour, we recommend our partner guide Carmelo — a certified heritage expert with 20 years of experience:<br><br>
+                        · <strong>2-hour private walking tour:</strong> Grand Harbour views, St. John's Co-Cathedral (Caravaggio's masterpiece), Upper Barrakka Gardens and the Saluting Battery — €75 for two<br>
+                        · <strong>Best timing:</strong> Early morning (9:00am) to beat the heat and the cruise ship crowds<br><br>
+                        Shall I confirm the jacuzzi reservation and book Carmelo for October 6th at 9:00am?<br><br>
+                        Warm regards,<br>San Karlu Hotel Concierge
+                    </div>
+                </div>
+                <!-- Email 2: Mediterranean cruise stopover -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Hans-Peter Gruber</div>
+                        <div class="email-date">Today, 09:10</div>
+                    </div>
+                    <div class="email-subject">1 Nacht Zwischenstopp Valletta — Kreuzfahrt — Empfehlungen</div>
+                    <div class="email-preview">Guten Morgen, wir machen eine Mittelmeer-Kreuzfahrt und haben einen Zwischenstopp in Valletta für eine Nacht am 12. August. Wir suchen eine ruhige und zentrale Unterkunft und würden gerne eine kurze Empfehlung für den Abend und den nächsten Morgen erhalten.</div>
+                    <div class="email-tags"><span class="tag auto-replied">AUTO-REPLIED</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT (German) — generated in 24 sec</div>
+                        Guten Morgen, Herr Gruber,<br><br>
+                        Herzlich willkommen im San Karlu Hotel — wir freuen uns, Sie bei Ihrem Zwischenstopp in Valletta begrüßen zu dürfen!<br><br>
+                        Unser Hotel befindet sich direkt im Herzen von Valletta, nur 10 Gehminuten vom Kreuzfahrtterminal entfernt.<br><br>
+                        <strong>Für Ihren Abend (12. August):</strong><br>
+                        · Spaziergang zur Republic Street und zum Großen Hafen bei Sonnenuntergang<br>
+                        · Abendessen empfohlen: Trabuxu Bistro (mediterranische Küche, ruhige Terrasse)<br>
+                        · Rooftop-Terrasse unseres Hotels für einen Absacker mit Blick auf die Kuppeln<br><br>
+                        <strong>Am nächsten Morgen:</strong><br>
+                        · St. John's Co-Cathedral öffnet um 9:30 Uhr — absolut sehenswert<br>
+                        · Upper Barrakka Gardens: bester Ausblick auf den Grand Harbour (kostenlos)<br><br>
+                        Check-in jederzeit ab 14:00 Uhr. Soll ich Ihnen ein Zimmer mit Aussicht reservieren?<br><br>
+                        Mit freundlichen Grüßen,<br>San Karlu Hotel Concierge
+                    </div>
+                </div>
+                <!-- Email 3: Review -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Tripadvisor — New Review Alert</div>
+                        <div class="email-date">Yesterday, 21:30</div>
+                    </div>
+                    <div class="email-subject">New 5-star review — Sophie T. — "Stunning and perfectly located"</div>
+                    <div class="email-preview">New review: ⭐⭐⭐⭐⭐ — "Stunning renovation of a 19th-century townhouse. The rooftop pool was incredible. Staff were exceptionally attentive. Perfect base for exploring Valletta. Will absolutely return." Response recommended within 24h.</div>
+                    <div class="email-tags"><span class="tag auto-replied">AUTO-REPLIED</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI REVIEW RESPONSE DRAFTED — 22 sec</div>
+                        Dear Sophie,<br><br>
+                        Thank you so much for these wonderful words — they truly warm our hearts at San Karlu!<br><br>
+                        We are so pleased the restoration of our 19th-century townhouse gave you a special experience, and that our rooftop pool and team exceeded your expectations. Valletta has so much to offer, and it is a joy to be at its heart.<br><br>
+                        We very much look forward to welcoming you back. Until then, warm Maltese wishes!<br>
+                        The San Karlu Team
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste any incoming email to analyse</h3>
+                <p style="font-size:12px; color:#9a7060; margin-bottom:5px;">Handles English, German, French, Italian — with specific knowledge of Valletta, Grand Harbour, Maltese culture and San Karlu's rooftop facilities.</p>
+                <textarea placeholder="Paste email content here…"></textarea>
+                <button class="analyze-btn">✨ ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead><tr><th>DATE</th><th>GUEST</th><th>SUBJECT</th><th>STATUS</th><th>TIME</th></tr></thead>
+                    <tbody>
+                        <tr><td>Jul 8, 2026</td><td>Amanda Price</td><td>Blue Lagoon day trip — Comino</td><td><span class="status-badge sent">SENT</span></td><td>23 sec</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Marco Ferrari</td><td>Transfer aeroporto Malta</td><td><span class="status-badge sent">SENT</span></td><td>19 sec</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Claire Morin</td><td>Dinner recommendation — halal food</td><td><span class="status-badge sent">SENT</span></td><td>26 sec</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>James O'Brien</td><td>Early check-in — 8am flight arrival</td><td><span class="status-badge sent">SENT</span></td><td>21 sec</td></tr>
+                        <tr><td>Jul 5, 2026</td><td>Hana Novak</td><td>Mdina guided tour — half day</td><td><span class="status-badge pending">PENDING</span></td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead><tr><th>CREATED</th><th>GUEST</th><th>DATES</th><th>ROOM</th><th>VALUE</th></tr></thead>
+                    <tbody>
+                        <tr><td>Jul 8, 2026</td><td>Rachel &amp; Tom Sutherland</td><td>Oct 5–9</td><td>Superior Room — Grand Harbour View</td><td>€1,440</td></tr>
+                        <tr><td>Jul 7, 2026</td><td>Amanda Price (×2)</td><td>Aug 18–22</td><td>Deluxe Double Room</td><td>€1,280</td></tr>
+                        <tr><td>Jul 6, 2026</td><td>James O'Brien</td><td>Sep 12–15</td><td>Standard Room — City View</td><td>€750</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="roi">
+            <div class="roi-box">
+                <div class="roi-title">Return on Investment — San Karlu Hotel (31 rooms) — Valletta, Malta</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">~45</div>
+                        <div class="roi-label">Emails per day</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">11h</div>
+                        <div class="roi-label">Saved per week</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~€480</div>
+                        <div class="roi-label">Staff value / month</div>
+                    </div>
+                </div>
+                <div class="roi-detail">
+                    With 31 rooms, a rooftop pool, private jacuzzi, and a prime Valletta location attracting cruise passengers, history enthusiasts and Mediterranean travellers, San Karlu receives an estimated <strong>45+ emails per day</strong> in English, German, French and Italian. The AI Concierge already operates on the same island — at <strong>IBB Palazzo Bettina</strong> in Birgu — meaning the Maltese context, local excursions, Grand Harbour knowledge and cultural nuances are already embedded in the system. Deployment at San Karlu would be straightforward and fast.
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-name">STANDARD</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 80€ / month</div>
+                        <div class="pricing-features">✓ AI email drafts<br>✓ EN / DE / FR / IT<br>✓ Dashboard V3.0</div>
+                    </div>
+                    <div class="pricing-card recommended">
+                        <div class="pricing-name">PREMIUM ⭐ RECOMMENDED</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 120€ / month</div>
+                        <div class="pricing-features">✓ All Standard features<br>✓ Weekly auto-improvement<br>✓ Monthly performance report</div>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="pricing-name">PREMIUM+</div>
+                        <div class="pricing-price">1 200€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 150€ / month</div>
+                        <div class="pricing-features">✓ All Premium features<br>✓ Trained on your real emails<br>✓ Onboarding &amp; training session</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        AI CONCIERGE V3.0 — SAN KARLU HOTEL · VALLETTA, MALTA
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

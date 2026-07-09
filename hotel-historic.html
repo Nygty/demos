@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concierge IA - Hotel Històric</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f1f5; min-height: 100vh; display: flex; flex-direction: column; }
+        .header { background-color: #f3f1f5; padding: 30px 40px; border-bottom: 1px solid #ccc5d8; }
+        .stars { color: #5c4a7a; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: #18101e; letter-spacing: 2px; margin-bottom: 4px; }
+        .hotel-sub { font-size: 12px; color: #5c4a7a; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; font-style: italic; }
+        .subtitle { font-size: 11px; color: #806888; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #f3f1f5; padding: 0 40px; border-bottom: 1px solid #ccc5d8; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #806888; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .tab:hover { color: #18101e; }
+        .tab.active { color: #18101e; border-bottom-color: #5c4a7a; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #18101e; color: white; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #ccc5d8; background: white; cursor: pointer; transition: all 0.2s; }
+        .filter:hover, .filter.active { background: #18101e; color: white; border-color: #18101e; }
+        .filter .count { background: #ddd8e8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #ccc5d8; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #ece8f2; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f9f7fc; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #18101e; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .tag.escalated { background: #fce7f3; color: #db2777; }
+        .ai-response { background: #f4f1f9; border-left: 3px solid #5c4a7a; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #5c4a7a; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .footer { background: #18101e; color: #806888; padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-box { background: white; border: 1px solid #ccc5d8; padding: 35px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: #18101e; margin-bottom: 20px; }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
+        .roi-card { background: #f3f1f5; padding: 20px; text-align: center; border: 1px solid #ccc5d8; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #5c4a7a; font-weight: 500; }
+        .roi-label { font-size: 10px; color: #806888; letter-spacing: 1.5px; margin-top: 6px; text-transform: uppercase; }
+        .roi-detail { font-size: 12px; color: #666; line-height: 1.7; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .pricing-card { border: 1px solid #ccc5d8; padding: 20px; background: white; }
+        .pricing-card.recommended { border-color: #5c4a7a; background: #f4f1f9; }
+        .pricing-name { font-size: 11px; letter-spacing: 2px; color: #18101e; font-weight: 600; margin-bottom: 10px; }
+        .pricing-price { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #5c4a7a; }
+        .pricing-month { font-size: 11px; color: #999; }
+        .pricing-features { font-size: 11px; color: #666; margin-top: 12px; line-height: 1.8; }
+        .history-content, .reservations-content { background: white; border: 1px solid #ccc5d8; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #806888; padding: 14px 18px; border-bottom: 1px solid #ccc5d8; font-weight: 500; background: #f9f7fc; }
+        .history-table td { padding: 15px 18px; font-size: 13px; border-bottom: 1px solid #ece8f2; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        .analyze-content { background: white; border: 1px solid #ccc5d8; padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #18101e; margin-bottom: 12px; }
+        .analyze-content textarea { width: 100%; height: 180px; border: 1px solid #ccc5d8; padding: 15px; font-family: inherit; font-size: 13px; resize: vertical; margin-top: 15px; margin-bottom: 18px; background: #f9f7fc; }
+        .analyze-btn { background: #5c4a7a; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">HOTEL HISTÒRIC</div>
+        <div class="hotel-sub">Fondations romaines · Quartier Juif · Cathédrale de Gérone</div>
+        <div class="subtitle">CONCIERGE IA · RÉCEPTION · GÉRONE, CATALOGNE, ESPAGNE</div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">BOÎTE DE RÉCEPTION</div>
+        <div class="tab" data-tab="analyze">ANALYSER UN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORIQUE</div>
+        <div class="tab" data-tab="reservations">RÉSERVATIONS</div>
+        <div class="tab" data-tab="roi">💡 ROI &amp; TARIFS</div>
+    </div>
+
+    <div class="main-content">
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">&#8635; ACTUALISER</button>
+                <div class="filters">
+                    <div class="filter active">TOUS <span class="count">3</span></div>
+                    <div class="filter">À VALIDER <span class="count">1</span></div>
+                    <div class="filter">AUTO-RÉPONDU <span class="count">1</span></div>
+                    <div class="filter">ESCALADÉ <span class="count">1</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <!-- Email 1: French couple, history lovers -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Isabelle &amp; François Leconte</div>
+                        <div class="email-date">Aujourd'hui, 11:15</div>
+                    </div>
+                    <div class="email-subject">Visite du quartier juif + visite cathédrale — séjour 18-21 août</div>
+                    <div class="email-preview">Bonjour, nous sommes passionnés d'histoire médiévale et c'est la raison pour laquelle nous avons choisi l'Hôtel Històric. Pourriez-vous nous organiser une visite guidée privée du Call (quartier juif) et de la cathédrale ? Nous arrivons le 18 août en fin d'après-midi.</div>
+                    <div class="email-tags"><span class="tag to-validate">À VALIDER</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ RÉPONSE IA SUGGÉRÉE — générée en 27 secondes</div>
+                        Chers Isabelle et François,<br><br>
+                        Bienvenue à l'Hôtel Històric — vous avez choisi l'adresse parfaite pour les amoureux de l'histoire médiévale. Notre hôtel repose lui-même sur des fondations romaines du IXe siècle.<br><br>
+                        Nous pouvons organiser une <strong>visite guidée privée</strong> avec notre guide partenaire spécialiste de la Gérone médiévale :<br><br>
+                        · <strong>Le Call</strong> (quartier juif) : l'un des mieux préservés d'Europe — 1h30, commentaire en français<br>
+                        · <strong>Cathédrale de Gérone</strong> et son cloître roman : nef gothique la plus large d'Europe — 1h<br>
+                        · Option combinée : 3h de visite, départ depuis l'hôtel à 10h le 19 août<br><br>
+                        <strong>Visite privée 2 personnes :</strong> 95€ au total<br><br>
+                        Souhaitez-vous que je confirme pour le mardi 19 août à 10h ?<br><br>
+                        Bien cordialement,<br>Hôtel Històric — Conciergerie
+                    </div>
+                </div>
+                <!-- Email 2: English tourists, Game of Thrones -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Emma &amp; Daniel Clarke</div>
+                        <div class="email-date">Aujourd'hui, 09:30</div>
+                    </div>
+                    <div class="email-subject">Game of Thrones filming locations tour + restaurant recommendation</div>
+                    <div class="email-preview">Hi! We're huge Game of Thrones fans and we know Girona was used extensively for filming. Could you arrange a tour of the filming locations? Also, any restaurant recommendations for authentic Catalan cuisine?</div>
+                    <div class="email-tags"><span class="tag auto-replied">AUTO-RÉPONDU</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT (English) — generated in 25 sec</div>
+                        Dear Emma and Daniel,<br><br>
+                        You are in luck — Girona was one of the most iconic filming locations for Game of Thrones (Seasons 6 and 7), and our hotel is literally a stone's throw from several key spots!<br><br>
+                        We recommend the <strong>2-hour Game of Thrones Walking Tour</strong>: the Cathedral steps (King's Landing Sept of Baelor), the Arab Baths (the Red Keep), the Jewish Quarter (Braavos streets). Tours run daily at 10:00am and 4:00pm from the old city entrance — tickets €18/person.<br><br>
+                        <strong>For authentic Catalan cuisine:</strong><br>
+                        · <strong>Divinum</strong> — refined Catalan gastronomy near the cathedral<br>
+                        · <strong>Nu</strong> — creative seasonal menu, Michelin-recommended<br>
+                        · <strong>Café Le Bistrot</strong> — cosy terrace in the Jewish Quarter, traditional escudella<br><br>
+                        Shall I reserve a table for you?<br><br>
+                        Hotel Històric Concierge
+                    </div>
+                </div>
+                <!-- Email 3: Complaint/special need -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Klaus &amp; Brigitte Müller</div>
+                        <div class="email-date">Hier, 20:45</div>
+                    </div>
+                    <div class="email-subject">Barrierefreiheit — Rollstuhl — Zimmer und Zugang</div>
+                    <div class="email-preview">Guten Tag, meine Frau ist auf einen Rollstuhl angewiesen. Wir möchten wissen, ob Ihr Hotel für Rollstuhlfahrer zugänglich ist — Zimmer, Bad, Eingang und Restaurantbereich. Es wäre wichtig, die genauen Details zu kennen, bevor wir buchen.</div>
+                    <div class="email-tags"><span class="tag escalated">ESCALADÉ — DIRECTION</span></div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">⚠️ ESCALADÉ — Direction + Réception notifiées</div>
+                        <strong>Clients :</strong> Klaus &amp; Brigitte Müller — mobilité réduite (fauteuil roulant)<br>
+                        <strong>Question :</strong> Accessibilité complète — chambre, salle de bain, entrée, restaurant<br>
+                        <strong>Priorité :</strong> Haute — réponse précise requise avant réservation<br>
+                        <strong>Action :</strong> La direction doit vérifier et décrire précisément l'accessibilité de chaque espace, puis répondre en allemand dans les 2h.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Coller n'importe quel email entrant pour l'analyser</h3>
+                <p style="font-size:12px; color:#806888; margin-bottom:5px;">L'IA traite le français, l'anglais, l'espagnol, l'allemand, le catalan — et génère des réponses dans la langue du client, avec le ton et le contenu adaptés à l'Hôtel Històric.</p>
+                <textarea placeholder="Collez ici le contenu de l'email / Paste email content here…"></textarea>
+                <button class="analyze-btn">✨ ANALYSER AVEC L'IA</button>
+            </div>
+        </div>
+
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead><tr><th>DATE</th><th>CLIENT</th><th>SUJET</th><th>STATUT</th><th>TEMPS</th></tr></thead>
+                    <tbody>
+                        <tr><td>8 jul. 2026</td><td>Marie-Claire Fontaine</td><td>Disponibilité suite cathédrale</td><td><span class="status-badge sent">ENVOYÉ</span></td><td>24 sec</td></tr>
+                        <tr><td>7 jul. 2026</td><td>Andrew Thompson</td><td>Cycle tour Costa Brava</td><td><span class="status-badge sent">ENVOYÉ</span></td><td>31 sec</td></tr>
+                        <tr><td>7 jul. 2026</td><td>Nuria Puigdomènech</td><td>Sopar de noces — reserva — 8 persones</td><td><span class="status-badge sent">ENVOYÉ</span></td><td>28 sec</td></tr>
+                        <tr><td>6 jul. 2026</td><td>Sigrid Hansen</td><td>Dagsudflugt til Dalí-museet i Figueres</td><td><span class="status-badge sent">ENVOYÉ</span></td><td>22 sec</td></tr>
+                        <tr><td>5 jul. 2026</td><td>Arnaud Delacroix</td><td>Check-in tardif — 23h30</td><td><span class="status-badge pending">EN ATTENTE</span></td><td>—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead><tr><th>CRÉÉE LE</th><th>CLIENT</th><th>DATES</th><th>CHAMBRE</th><th>VALEUR</th></tr></thead>
+                    <tbody>
+                        <tr><td>8 jul. 2026</td><td>Isabelle &amp; François Leconte</td><td>18–21 août</td><td>Suite Cathédrale — vue vieille ville</td><td>€1 560</td></tr>
+                        <tr><td>7 jul. 2026</td><td>Emma &amp; Daniel Clarke</td><td>5–8 sept.</td><td>Chambre Supérieure — quartier juif</td><td>€1 050</td></tr>
+                        <tr><td>6 jul. 2026</td><td>Marie-Claire Fontaine</td><td>22–25 août</td><td>Chambre Deluxe Fondations Romaines</td><td>€1 230</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="tab-content" id="roi">
+            <div class="roi-box">
+                <div class="roi-title">Retour sur investissement — Hotel Històric (23 chambres)</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">~35</div>
+                        <div class="roi-label">Emails par jour</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">9h</div>
+                        <div class="roi-label">Économisées / semaine</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~380€</div>
+                        <div class="roi-label">Valeur staff / mois</div>
+                    </div>
+                </div>
+                <div class="roi-detail">
+                    Avec 23 chambres au cœur de la vieille ville de Gérone, l'Hôtel Històric reçoit une clientèle internationale très variée — français, anglais, allemands, espagnols — qui envoie environ <strong>35 emails par jour</strong> en plusieurs langues : demandes de visites guidées, Game of Thrones, cuisine catalane, accessibilité, événements... Chaque réponse doit être personnalisée, culturellement précise, et dans la langue du client. L'Agent Concierge IA gère tout cela en moins de 30 secondes.<br><br>
+                    Déjà en production à <strong>IBB Palazzo Bettina</strong> (Birgu, Malte) — même format boutique, même clientèle internationale exigeante.
+                </div>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div class="pricing-name">STANDARD</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 80€ / mois</div>
+                        <div class="pricing-features">✓ Brouillons IA<br>✓ FR / EN / ES / DE<br>✓ Dashboard V3.0</div>
+                    </div>
+                    <div class="pricing-card recommended">
+                        <div class="pricing-name">PREMIUM ⭐ RECOMMANDÉ</div>
+                        <div class="pricing-price">800€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 120€ / mois</div>
+                        <div class="pricing-features">✓ Tout Standard<br>✓ Amélioration auto hebdo<br>✓ Rapport mensuel</div>
+                    </div>
+                    <div class="pricing-card">
+                        <div class="pricing-name">PREMIUM+</div>
+                        <div class="pricing-price">1 200€ <span style="font-size:13px">setup</span></div>
+                        <div class="pricing-month">+ 150€ / mois</div>
+                        <div class="pricing-features">✓ Tout Premium<br>✓ Formé sur vos vrais emails<br>✓ Session d'onboarding dédiée</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        CONCIERGE IA V3.0 — HOTEL HISTÒRIC · GÉRONE, CATALOGNE, ESPAGNE
+    </div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
