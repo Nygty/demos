@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Concierge — Herdade do Sobroso Wine Luxury Hotel</title>
+  <style>
+    :root {
+      --primary: #2A1A0A;
+      --wine: #7B2D2D;
+      --cork: #A0704A;
+      --harvest: #C4963A;
+      --cream: #FAF6EF;
+      --parchment: #F0E8D8;
+      --text: #111;
+      --muted: #7a6050;
+      --success: #2E6B2A;
+      --border: #E0D4C0;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); }
+    .header { background: var(--primary); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--harvest); }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .hotel-icon { width: 48px; height: 48px; background: var(--harvest); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .hotel-name { font-size: 1.3rem; font-weight: bold; }
+    .hotel-sub { font-size: 0.75rem; color: #d4b890; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+    .demo-badge { background: var(--harvest); color: var(--primary); padding: 6px 14px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; font-family: sans-serif; letter-spacing: 1px; }
+    .award-bar { background: #3A2A1A; padding: 9px 40px; font-family: sans-serif; font-size: 0.75rem; color: #d4b890; display: flex; gap: 20px; }
+    .award-bar span { font-weight: 700; color: var(--harvest); }
+    .tabs { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 40px; }
+    .tab { padding: 16px 20px; font-family: sans-serif; font-size: 0.84rem; cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted); }
+    .tab.active { border-bottom-color: var(--harvest); color: var(--primary); font-weight: 600; }
+    .stats-bar { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 14px 40px; gap: 40px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
+    .stat-label { font-size: 0.7rem; color: var(--muted); font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+    .main { display: grid; grid-template-columns: 330px 1fr; min-height: calc(100vh - 205px); }
+    .inbox { border-right: 1px solid var(--border); background: white; }
+    .inbox-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .unread-count { background: var(--harvest); color: var(--primary); border-radius: 12px; padding: 2px 8px; font-size: 0.67rem; font-weight: 700; }
+    .email-item { padding: 15px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .email-item.active { background: #FBF5EB; border-left: 3px solid var(--harvest); }
+    .email-sender { font-weight: 600; font-size: 0.87rem; font-family: sans-serif; }
+    .email-subject { font-size: 0.79rem; color: var(--muted); font-family: sans-serif; margin-top: 4px; }
+    .email-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .email-time { font-size: 0.7rem; color: #bbb; font-family: sans-serif; }
+    .tag { font-size: 0.63rem; padding: 2px 7px; border-radius: 10px; font-family: sans-serif; font-weight: 600; }
+    .tag-wine { background: #F8EEF0; color: #7B2D2D; }
+    .tag-villa { background: #FFF5E8; color: #A06000; }
+    .tag-harvest { background: #EDFAF0; color: #1A7A4A; }
+    .tag-booking { background: #EEF0FF; color: #2040B0; }
+    .draft-panel { padding: 28px 34px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .panel-title { font-size: 1.08rem; font-weight: bold; color: var(--primary); }
+    .ai-badge { background: var(--success); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.69rem; font-family: sans-serif; font-weight: 600; }
+    .original-email { background: var(--parchment); border: 1px solid var(--border); border-radius: 6px; padding: 18px; margin-bottom: 20px; }
+    .section-label { font-family: sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+    .email-from { font-family: sans-serif; font-size: 0.82rem; margin-bottom: 5px; }
+    .email-from strong { color: var(--primary); }
+    .email-body { font-size: 0.9rem; line-height: 1.7; color: #333; }
+    .draft-box { background: white; border: 2px solid var(--harvest); border-radius: 6px; padding: 22px; margin-bottom: 16px; position: relative; }
+    .draft-box::before { content: '✦ AI Draft · Generated in 32s'; position: absolute; top: -12px; left: 16px; background: var(--harvest); color: var(--primary); font-size: 0.66rem; font-family: sans-serif; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+    .draft-body { font-size: 0.9rem; line-height: 1.8; color: #1a1a1a; }
+    .draft-body p { margin-bottom: 12px; }
+    .example-nav { display: flex; gap: 8px; margin-bottom: 20px; }
+    .ex-btn { padding: 7px 13px; border-radius: 6px; font-size: 0.76rem; font-family: sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); }
+    .ex-btn.active { border-color: var(--harvest); background: #FBF5EB; color: var(--primary); font-weight: 600; }
+    .draft-actions { display: flex; gap: 10px; }
+    .btn { padding: 9px 18px; border-radius: 4px; font-family: sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-harvest { background: var(--harvest); color: var(--primary); }
+    .roi-section { background: var(--primary); color: white; padding: 34px 40px; }
+    .roi-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 6px; }
+    .roi-subtitle { color: #c4a882; font-family: sans-serif; font-size: 0.8rem; margin-bottom: 24px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .roi-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 6px; padding: 16px; }
+    .roi-number { font-size: 1.85rem; font-weight: bold; color: var(--harvest); }
+    .roi-desc { font-size: 0.74rem; color: #ccc; font-family: sans-serif; margin-top: 5px; line-height: 1.5; }
+    .pricing-row { display: flex; gap: 12px; }
+    .price-card { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 16px; }
+    .price-card.highlight { background: var(--harvest); border-color: var(--harvest); color: var(--primary); }
+    .price-name { font-family: sans-serif; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+    .price-amount { font-size: 1.2rem; font-weight: bold; }
+    .price-monthly { font-size: 0.72rem; margin-top: 2px; opacity: 0.85; font-family: sans-serif; }
+    .price-features { margin-top: 10px; font-size: 0.74rem; font-family: sans-serif; line-height: 1.8; opacity: 0.9; }
+    .footer-note { background: white; padding: 16px 40px; text-align: center; font-family: sans-serif; font-size: 0.77rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .footer-note strong { color: var(--primary); }
+    .example { display: none; }
+    .example.visible { display: block; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="hotel-icon">🍷</div>
+    <div>
+      <div class="hotel-name">Herdade do Sobroso Wine Luxury Hotel & Villas</div>
+      <div class="hotel-sub">Alentejo · Portugal · Small Luxury Hotels of the World</div>
+    </div>
+  </div>
+  <div class="demo-badge">✦ AI CONCIERGE DEMO</div>
+</div>
+<div class="award-bar">
+  🏆 <span>Small Luxury Hotels of the World</span>
+  &nbsp;|&nbsp; 🍇 <span>1,600-hectare wine estate</span>
+  &nbsp;|&nbsp; 11 rooms · Private villas with pools · Winery · Vineyard experiences
+</div>
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🏨 Reservations</div>
+  <div class="tab">📊 Reports</div>
+</div>
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">11</div><div class="stat-label">Emails today</div></div>
+  <div class="stat"><div class="stat-value">32s</div><div class="stat-label">Avg draft time</div></div>
+  <div class="stat"><div class="stat-value">2</div><div class="stat-label">Awaiting review</div></div>
+  <div class="stat"><div class="stat-value">97%</div><div class="stat-label">Drafts approved</div></div>
+</div>
+<div class="main">
+  <div class="inbox">
+    <div class="inbox-header">Inbox <span class="unread-count">2 new</span></div>
+    <div class="email-item active">
+      <div class="email-meta"><span class="email-sender">William & Eleanor Grant</span><span class="email-time">11:35</span></div>
+      <div class="email-subject">Private wine tasting + cellar tour request</div>
+      <div class="tag tag-wine">Wine Experience</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Isabel Fontes</span><span class="email-time">10:50</span></div>
+      <div class="email-subject">Villa with pool — availability September?</div>
+      <div class="tag tag-villa">Villa Booking</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">James & Sophie Morton</span><span class="email-time">09:40</span></div>
+      <div class="email-subject">Harvest season — can guests participate?</div>
+      <div class="tag tag-harvest">Harvest</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Dirk van Hout</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Horse riding on the estate — is it possible?</div>
+      <div class="tag tag-booking">Activity</div>
+    </div>
+  </div>
+  <div class="draft-panel">
+    <div class="panel-header">
+      <div class="panel-title">Draft reply — William & Eleanor Grant</div>
+      <div class="ai-badge">⚡ Generated in 32s</div>
+    </div>
+    <div class="example-nav">
+      <button class="ex-btn active" onclick="showEx(0)">🍷 Wine tasting</button>
+      <button class="ex-btn" onclick="showEx(1)">🏠 Villa booking</button>
+      <button class="ex-btn" onclick="showEx(2)">🍇 Harvest experience</button>
+    </div>
+    <div class="example visible" id="ex0">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> William & Eleanor Grant &lt;w.grant@uk.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Private wine tasting + cellar tour request</div>
+        <div class="email-body" style="margin-top:10px;">Dear team,<br><br>We are wine enthusiasts staying with you for 4 nights in July and would love a proper, in-depth private tasting of the estate wines — ideally with the winemaker or someone very knowledgeable about Herdade do Sobroso's viticulture. A cellar tour would be wonderful too. Is this something you can arrange?<br><br>William & Eleanor</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear William and Eleanor,</p>
+          <p>This is exactly what Herdade do Sobroso is built for, and I'm delighted to arrange it for you.</p>
+          <p>We can organise a private tasting with our estate winemaker — a 90-minute session in the barrel cellar that covers the full range of our Alentejo wines, from our native Aragonez and Trincadeira to the reserve selections, with the winemaker walking you through each vintage and the estate's terroir. The cellar tour that precedes it takes in the vat room and the oak ageing room where our reds spend time in French barriques.</p>
+          <p>I'll schedule this for your second afternoon (Wednesday) when the pace is relaxed. Please let me know if there are any particular styles you'd like to explore more deeply — and I'll make sure a charcutaria spread of Alentejo cheeses and cured meats accompanies the tasting.</p>
+          <p>Looking forward to your visit,<br><strong>[Guest Experience Team]</strong><br>Herdade do Sobroso | Alentejo, Portugal</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-harvest">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex1">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Isabel Fontes &lt;i.fontes@pt.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Villa with pool — availability September?</div>
+        <div class="email-body" style="margin-top:10px;">Bom dia,<br><br>I am looking for a private villa with a pool for 5 nights in September for two couples. Do you have availability? And what is included — can we use the main hotel facilities as well?<br><br>Isabel</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Isabel,</p>
+          <p>Bom dia! September in the Alentejo is one of the finest times to visit — the light is extraordinary, the harvest energy is in the air, and the estate is at its most beautiful. A perfect month for your villa stay.</p>
+          <p>We do have a private villa with pool available for the week you have in mind, comfortably accommodating four guests in total. The villa is fully self-contained with its own terrace and garden, and you will of course have full access to all estate facilities — the winery, the restaurant, the pool area, and any vineyard experiences you'd like to arrange.</p>
+          <p>Could you let me know your preferred arrival date in September and I will check the exact availability and send you a detailed proposal? I look forward to welcoming you.</p>
+          <p>Warmly,<br><strong>[Reservations Team]</strong><br>Herdade do Sobroso | Alentejo, Portugal</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-harvest">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex2">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> James & Sophie Morton &lt;jsmorton@gmail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Harvest season — can guests participate?</div>
+        <div class="email-body" style="margin-top:10px;">Hi,<br><br>We are thinking of visiting in late September and we noticed this is harvest season. Is it possible for guests to actually participate in the harvest in some way? We'd love a hands-on experience rather than just watching.<br><br>James & Sophie</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear James and Sophie,</p>
+          <p>You've timed this beautifully — late September is exactly when our Alentejo harvest is at its peak, and yes, we absolutely welcome guests who want to be part of it rather than just spectators.</p>
+          <p>We offer a half-day harvest participation experience: you'll work alongside our team picking in the vineyards in the morning, then follow the grapes into the winery where you'll see the pressing and be involved in the early steps of vinification. It ends with a traditional harvest lunch under the cork oaks with the estate team — one of the most authentic experiences we offer all year.</p>
+          <p>Dates depend on the precise harvest timing (we follow the grapes, not the calendar), but late September is typically peak for our red varieties. Shall I put you on the harvest guest list and update you as we get closer?</p>
+          <p>Looking forward to having you with us,<br><strong>[Estate Team]</strong><br>Herdade do Sobroso | Alentejo, Portugal</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-harvest">↺ Regenerate</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="roi-section">
+  <div class="roi-title">Your return on investment — Herdade do Sobroso</div>
+  <div class="roi-subtitle">Based on 11 rooms + villas and the unique, experience-rich email volume of a Small Luxury Hotels wine estate</div>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="roi-number">~11</div><div class="roi-desc">emails per day — wine tastings, villa bookings, harvest requests, activities</div></div>
+    <div class="roi-card"><div class="roi-number">7 min</div><div class="roi-desc">avg time to craft a personalised estate reply — down to 32s with AI</div></div>
+    <div class="roi-card"><div class="roi-number">~1.3 hrs</div><div class="roi-desc">saved every day — during harvest, this matters even more</div></div>
+    <div class="roi-card"><div class="roi-number">~€1,170</div><div class="roi-desc">in staff hours saved per month (€15/hr equivalent)</div></div>
+  </div>
+  <div class="pricing-row">
+    <div class="price-card"><div class="price-name">Standard</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 80€ / month</div><div class="price-features">✓ AI concierge agent<br>✓ Inbox analysis<br>✓ Draft generation</div></div>
+    <div class="price-card highlight"><div class="price-name">⭐ Premium — Recommended</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 120€ / month</div><div class="price-features">✓ Everything in Standard<br>✓ Auto weekly improvement<br>✓ Monthly performance report</div></div>
+    <div class="price-card"><div class="price-name">Premium+</div><div class="price-amount">1,200€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 150€ / month</div><div class="price-features">✓ Everything in Premium<br>✓ Training on your real emails<br>✓ Matches Herdade's voice</div></div>
+  </div>
+</div>
+<div class="footer-note">
+  This personalised demo was created by <strong>Enzo Cosnard</strong>, Intern at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — where this AI Concierge is already live in production.
+  Contact: <strong>enzo26cosnard@gmail.com</strong>
+</div>
+<script>
+function showEx(n) {
+  document.querySelectorAll('.example').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.ex-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('ex' + n).classList.add('visible');
+  document.querySelectorAll('.ex-btn')[n].classList.add('active');
+}
+</script>
+</body>
+</html>

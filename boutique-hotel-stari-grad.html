@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Concierge — Boutique Hotel Stari Grad Dubrovnik</title>
+  <style>
+    :root {
+      --primary: #1A0A02;
+      --terracotta: #B8460A;
+      --gold: #C4900A;
+      --sand: #D4B070;
+      --cream: #FAF6F0;
+      --warm: #F0EAE0;
+      --text: #111;
+      --muted: #7a6050;
+      --success: #2E6B3A;
+      --border: #E0D4C4;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); }
+    .header { background: var(--primary); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--terracotta); }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .hotel-icon { width: 48px; height: 48px; background: var(--terracotta); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .hotel-name { font-size: 1.4rem; font-weight: bold; }
+    .hotel-sub { font-size: 0.75rem; color: var(--sand); letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+    .demo-badge { background: var(--terracotta); color: white; padding: 6px 14px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; font-family: sans-serif; letter-spacing: 1px; }
+    .award-bar { background: #2E1A0A; padding: 9px 40px; font-family: sans-serif; font-size: 0.75rem; color: #d4b070; display: flex; gap: 20px; }
+    .award-bar span { font-weight: 700; color: var(--sand); }
+    .tabs { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 40px; }
+    .tab { padding: 16px 20px; font-family: sans-serif; font-size: 0.84rem; cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted); }
+    .tab.active { border-bottom-color: var(--terracotta); color: var(--primary); font-weight: 600; }
+    .stats-bar { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 14px 40px; gap: 40px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
+    .stat-label { font-size: 0.7rem; color: var(--muted); font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+    .main { display: grid; grid-template-columns: 330px 1fr; min-height: calc(100vh - 205px); }
+    .inbox { border-right: 1px solid var(--border); background: white; }
+    .inbox-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .unread-count { background: var(--terracotta); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.67rem; }
+    .email-item { padding: 15px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .email-item.active { background: #F8EEE8; border-left: 3px solid var(--terracotta); }
+    .email-sender { font-weight: 600; font-size: 0.87rem; font-family: sans-serif; }
+    .email-subject { font-size: 0.79rem; color: var(--muted); font-family: sans-serif; margin-top: 4px; }
+    .email-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .email-time { font-size: 0.7rem; color: #bbb; font-family: sans-serif; }
+    .tag { font-size: 0.63rem; padding: 2px 7px; border-radius: 10px; font-family: sans-serif; font-weight: 600; }
+    .tag-walls { background: #FFF5E8; color: #A06000; }
+    .tag-restaurant { background: #EDFAF0; color: #1A7A4A; }
+    .tag-sunset { background: #FFF0F5; color: #B03060; }
+    .tag-tour { background: #EEF0FF; color: #3040B0; }
+    .draft-panel { padding: 28px 34px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .panel-title { font-size: 1.08rem; font-weight: bold; color: var(--primary); }
+    .ai-badge { background: var(--success); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.69rem; font-family: sans-serif; font-weight: 600; }
+    .original-email { background: var(--warm); border: 1px solid var(--border); border-radius: 6px; padding: 18px; margin-bottom: 20px; }
+    .section-label { font-family: sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+    .email-from { font-family: sans-serif; font-size: 0.82rem; margin-bottom: 5px; }
+    .email-from strong { color: var(--primary); }
+    .email-body { font-size: 0.9rem; line-height: 1.7; color: #333; }
+    .draft-box { background: white; border: 2px solid var(--terracotta); border-radius: 6px; padding: 22px; margin-bottom: 16px; position: relative; }
+    .draft-box::before { content: '✦ AI Draft · Generated in 30s'; position: absolute; top: -12px; left: 16px; background: var(--terracotta); color: white; font-size: 0.66rem; font-family: sans-serif; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+    .draft-body { font-size: 0.9rem; line-height: 1.8; color: #1a1a1a; }
+    .draft-body p { margin-bottom: 12px; }
+    .example-nav { display: flex; gap: 8px; margin-bottom: 20px; }
+    .ex-btn { padding: 7px 13px; border-radius: 6px; font-size: 0.76rem; font-family: sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); }
+    .ex-btn.active { border-color: var(--terracotta); background: #FBF0E8; color: var(--primary); font-weight: 600; }
+    .draft-actions { display: flex; gap: 10px; }
+    .btn { padding: 9px 18px; border-radius: 4px; font-family: sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-terra { background: var(--terracotta); color: white; }
+    .roi-section { background: var(--primary); color: white; padding: 34px 40px; }
+    .roi-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 6px; }
+    .roi-subtitle { color: #c4a882; font-family: sans-serif; font-size: 0.8rem; margin-bottom: 24px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .roi-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 6px; padding: 16px; }
+    .roi-number { font-size: 1.85rem; font-weight: bold; color: var(--sand); }
+    .roi-desc { font-size: 0.74rem; color: #ccc; font-family: sans-serif; margin-top: 5px; line-height: 1.5; }
+    .pricing-row { display: flex; gap: 12px; }
+    .price-card { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 16px; }
+    .price-card.highlight { background: var(--terracotta); border-color: var(--terracotta); color: white; }
+    .price-name { font-family: sans-serif; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+    .price-amount { font-size: 1.2rem; font-weight: bold; }
+    .price-monthly { font-size: 0.72rem; margin-top: 2px; opacity: 0.85; font-family: sans-serif; }
+    .price-features { margin-top: 10px; font-size: 0.74rem; font-family: sans-serif; line-height: 1.8; opacity: 0.9; }
+    .footer-note { background: white; padding: 16px 40px; text-align: center; font-family: sans-serif; font-size: 0.77rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .footer-note strong { color: var(--primary); }
+    .example { display: none; }
+    .example.visible { display: block; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="hotel-icon">🏰</div>
+    <div>
+      <div class="hotel-name">Boutique Hotel Stari Grad</div>
+      <div class="hotel-sub">Dubrovnik Old Town · Croatia · Heritage Hotels of Europe</div>
+    </div>
+  </div>
+  <div class="demo-badge">✦ AI CONCIERGE DEMO</div>
+</div>
+<div class="award-bar">
+  🏛 <span>16th-century nobleman's house · UNESCO Old Town</span>
+  &nbsp;|&nbsp; 🌍 <span>Heritage Hotels of Europe member</span>
+  &nbsp;|&nbsp; 14 rooms · International premium clientele · City walls access
+</div>
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🏨 Reservations</div>
+  <div class="tab">📊 Reports</div>
+</div>
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">13</div><div class="stat-label">Emails today</div></div>
+  <div class="stat"><div class="stat-value">30s</div><div class="stat-label">Avg draft time</div></div>
+  <div class="stat"><div class="stat-value">3</div><div class="stat-label">Awaiting review</div></div>
+  <div class="stat"><div class="stat-value">96%</div><div class="stat-label">Drafts approved</div></div>
+</div>
+<div class="main">
+  <div class="inbox">
+    <div class="inbox-header">Inbox <span class="unread-count">3 new</span></div>
+    <div class="email-item active">
+      <div class="email-meta"><span class="email-sender">Jennifer & Paul Carter</span><span class="email-time">10:30</span></div>
+      <div class="email-subject">Private guided walk on the city walls?</div>
+      <div class="tag tag-walls">City Walls</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Alessandro Ricci</span><span class="email-time">09:55</span></div>
+      <div class="email-subject">Best restaurant reservation — local, not touristy</div>
+      <div class="tag tag-restaurant">Dining</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Hannah & Tom Reeves</span><span class="email-time">09:20</span></div>
+      <div class="email-subject">Room with sunset view — is it possible?</div>
+      <div class="tag tag-sunset">Sunset view</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Luisa Fernandez</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Private tour — Game of Thrones filming locations</div>
+      <div class="tag tag-tour">Private tour</div>
+    </div>
+  </div>
+  <div class="draft-panel">
+    <div class="panel-header">
+      <div class="panel-title">Draft reply — Jennifer & Paul Carter</div>
+      <div class="ai-badge">⚡ Generated in 30s</div>
+    </div>
+    <div class="example-nav">
+      <button class="ex-btn active" onclick="showEx(0)">🏰 City walls walk</button>
+      <button class="ex-btn" onclick="showEx(1)">🍽 Local restaurant</button>
+      <button class="ex-btn" onclick="showEx(2)">🌅 Sunset room</button>
+    </div>
+    <div class="example visible" id="ex0">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Jennifer & Paul Carter &lt;jp.carter@gmail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Private guided walk on the city walls?</div>
+        <div class="email-body" style="margin-top:10px;">Dear Stari Grad team,<br><br>We arrive Friday and have always dreamed of walking Dubrovnik's city walls. Could you arrange a private guide — someone who really knows the history, not just the Game of Thrones side? Ideally early morning to avoid the crowds. Party of 2.<br><br>Jennifer & Paul</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Jennifer and Paul,</p>
+          <p>You've made exactly the right choice — the walls at dawn, before the cruise ships arrive, are one of the great experiences of the Adriatic. And yes, there is so much more history here than the TV series.</p>
+          <p>We work with a historian-guide who specialises in the Ragusan Republic and the medieval fortifications — he's one of the best in Dubrovnik and genuinely passionate about the 500 years of real history embedded in these stones. An early morning private walk (7:00 am entry is possible) lasts around 90 minutes and finishes before the heat and the crowds arrive.</p>
+          <p>I'll book this for Saturday morning if that suits you — shall I confirm for 7:00 am? I'll have all details ready at check-in.</p>
+          <p>Looking forward to welcoming you,<br><strong>[Concierge Team]</strong><br>Boutique Hotel Stari Grad | Dubrovnik, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-terra">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex1">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Alessandro Ricci &lt;a.ricci@it.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Best restaurant reservation — local, not touristy</div>
+        <div class="email-body" style="margin-top:10px;">Ciao,<br><br>I'm Italian and I take food seriously. I don't want a restaurant that's built around tourists — I want somewhere the locals actually eat, with good Dalmatian seafood. Can you make a recommendation and ideally a reservation?<br><br>Alessandro</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Alessandro,</p>
+          <p>A fellow Italian asking for the real thing — I take that as a compliment and a responsibility. Here is my honest answer.</p>
+          <p>Forget the Stradun. The restaurant I recommend is a konoba in the upper Old Town that has been run by the same family for three generations, uses only local fishermen, and does not appear on tourist lists. The grilled scampi and the black risotto are the real thing. They know us here and I can secure a table for you.</p>
+          <p>Please let me know which evening and I'll make the reservation directly. You won't be disappointed — and you can hold me to that.</p>
+          <p>Warmly,<br><strong>[Concierge]</strong><br>Boutique Hotel Stari Grad | Dubrovnik, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-terra">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex2">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Hannah & Tom Reeves &lt;h.reeves@uk.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Room with sunset view — is it possible?</div>
+        <div class="email-body" style="margin-top:10px;">Hello,<br><br>We are booking for 3 nights in August and would love a room with the best possible sunset view. Is there a room that faces west or towards the sea? It's a small treat we're giving ourselves and we'd love it to be perfect.<br><br>Hannah & Tom</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Hannah and Tom,</p>
+          <p>What a lovely treat — and absolutely, we can make this work for you.</p>
+          <p>Our rooms vary in aspect within the historic building, and I want to be honest with you: the views here are of Dubrovnik's rooftops and the Old Town skyline rather than open sea, but at sunset the warm terracotta tiles and the light on the old stone are genuinely beautiful and unlike anything else in the Mediterranean.</p>
+          <p>I'll assign you our best-positioned room for western light as a priority note on your booking. If you'd like the full sunset experience over the Adriatic, I'd also recommend an evening on the city walls (about a 5-minute walk) where the view is spectacular.</p>
+          <p>Looking forward to welcoming you in August,<br><strong>[Reception Team]</strong><br>Boutique Hotel Stari Grad | Dubrovnik, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-terra">↺ Regenerate</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="roi-section">
+  <div class="roi-title">Your return on investment — Boutique Hotel Stari Grad</div>
+  <div class="roi-subtitle">Based on 14 rooms and the premium international email volume of a UNESCO Old Town heritage property</div>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="roi-number">~13</div><div class="roi-desc">emails per day — walls tours, restaurant picks, private guides, room requests</div></div>
+    <div class="roi-card"><div class="roi-number">7 min</div><div class="roi-desc">avg time to write a personalised reply — down to 30s with AI</div></div>
+    <div class="roi-card"><div class="roi-number">~1.5 hrs</div><div class="roi-desc">saved every day for your team</div></div>
+    <div class="roi-card"><div class="roi-number">~€1,350</div><div class="roi-desc">in staff hours saved per month (€15/hr equivalent)</div></div>
+  </div>
+  <div class="pricing-row">
+    <div class="price-card"><div class="price-name">Standard</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 80€ / month</div><div class="price-features">✓ AI concierge agent<br>✓ Inbox analysis<br>✓ Draft generation</div></div>
+    <div class="price-card highlight"><div class="price-name">⭐ Premium — Recommended</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 120€ / month</div><div class="price-features">✓ Everything in Standard<br>✓ Auto weekly improvement<br>✓ Monthly performance report</div></div>
+    <div class="price-card"><div class="price-name">Premium+</div><div class="price-amount">1,200€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 150€ / month</div><div class="price-features">✓ Everything in Premium<br>✓ Training on your real emails<br>✓ Matches Stari Grad's voice</div></div>
+  </div>
+</div>
+<div class="footer-note">
+  This personalised demo was created by <strong>Enzo Cosnard</strong>, Intern at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — where this AI Concierge is already live in production.
+  Contact: <strong>enzo26cosnard@gmail.com</strong>
+</div>
+<script>
+function showEx(n) {
+  document.querySelectorAll('.example').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.ex-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('ex' + n).classList.add('visible');
+  document.querySelectorAll('.ex-btn')[n].classList.add('active');
+}
+</script>
+</body>
+</html>

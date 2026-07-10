@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Concierge — Amyth of Nicosia</title>
+  <style>
+    :root {
+      --primary: #1C2B3A;
+      --accent: #8B7355;
+      --gold: #B8977E;
+      --terracotta: #C4724A;
+      --light: #FAF8F5;
+      --warm: #EDE8DF;
+      --text: #1a1a1a;
+      --muted: #7a7a7a;
+      --success: #2E6B52;
+      --border: #E5DDD3;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid var(--terracotta);
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .hotel-icon {
+      width: 48px; height: 48px;
+      background: var(--terracotta);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+    }
+    .hotel-name { font-size: 1.4rem; font-weight: bold; letter-spacing: 0.5px; }
+    .hotel-sub { font-size: 0.78rem; color: #bbb; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+    .demo-badge {
+      background: var(--terracotta);
+      color: white;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: bold;
+      font-family: sans-serif;
+      letter-spacing: 1px;
+    }
+    .award-bar {
+      background: var(--warm);
+      padding: 10px 40px;
+      font-family: sans-serif;
+      font-size: 0.78rem;
+      color: var(--accent);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 24px;
+      align-items: center;
+    }
+    .award-bar span { font-weight: 600; }
+
+    .tabs {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      padding: 0 40px;
+    }
+    .tab { padding: 16px 20px; font-family: sans-serif; font-size: 0.85rem; cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted); }
+    .tab.active { border-bottom-color: var(--terracotta); color: var(--primary); font-weight: 600; }
+
+    .stats-bar { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 16px 40px; gap: 40px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
+    .stat-label { font-size: 0.72rem; color: var(--muted); font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .main { display: grid; grid-template-columns: 330px 1fr; min-height: calc(100vh - 210px); }
+
+    .inbox { border-right: 1px solid var(--border); background: white; }
+    .inbox-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .unread-count { background: var(--terracotta); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.68rem; }
+    .email-item { padding: 15px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .email-item.active { background: #F5F0EB; border-left: 3px solid var(--terracotta); }
+    .email-sender { font-weight: 600; font-size: 0.88rem; font-family: sans-serif; }
+    .email-subject { font-size: 0.8rem; color: var(--muted); font-family: sans-serif; margin-top: 4px; }
+    .email-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .email-time { font-size: 0.7rem; color: #aaa; font-family: sans-serif; }
+    .tag { font-size: 0.65rem; padding: 2px 7px; border-radius: 10px; font-family: sans-serif; font-weight: 600; }
+    .tag-design { background: #F0EBF5; color: #6B3FA0; }
+    .tag-dining { background: #FFF3E0; color: #C05F00; }
+    .tag-culture { background: #E8F4EC; color: #2D6A4F; }
+    .tag-booking { background: #E8F0FE; color: #1A4FAE; }
+
+    .draft-panel { padding: 28px 34px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; }
+    .panel-title { font-size: 1.1rem; font-weight: bold; color: var(--primary); }
+    .ai-badge { background: var(--success); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-family: sans-serif; font-weight: 600; }
+
+    .original-email { background: var(--light); border: 1px solid var(--border); border-radius: 8px; padding: 18px; margin-bottom: 22px; }
+    .section-label { font-family: sans-serif; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+    .email-from { font-family: sans-serif; font-size: 0.83rem; margin-bottom: 5px; }
+    .email-from strong { color: var(--primary); }
+    .email-body { font-size: 0.9rem; line-height: 1.7; color: #333; }
+
+    .draft-box {
+      background: white;
+      border: 2px solid var(--terracotta);
+      border-radius: 8px;
+      padding: 22px;
+      margin-bottom: 18px;
+      position: relative;
+    }
+    .draft-box::before {
+      content: '✦ AI Draft · Generated in 26s';
+      position: absolute; top: -12px; left: 16px;
+      background: var(--terracotta); color: white;
+      font-size: 0.67rem; font-family: sans-serif; font-weight: 700;
+      padding: 3px 10px; border-radius: 10px;
+    }
+    .draft-body { font-size: 0.91rem; line-height: 1.8; color: #222; }
+    .draft-body p { margin-bottom: 12px; }
+
+    .example-nav { display: flex; gap: 8px; margin-bottom: 22px; }
+    .ex-btn { padding: 7px 14px; border-radius: 6px; font-size: 0.77rem; font-family: sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); }
+    .ex-btn.active { border-color: var(--terracotta); background: #FDF5F1; color: var(--primary); font-weight: 600; }
+
+    .draft-actions { display: flex; gap: 10px; }
+    .btn { padding: 9px 18px; border-radius: 6px; font-family: sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-terra { background: var(--terracotta); color: white; }
+
+    .roi-section { background: var(--primary); color: white; padding: 34px 40px; }
+    .roi-title { font-size: 1.25rem; font-weight: bold; margin-bottom: 6px; }
+    .roi-subtitle { color: #bbb; font-family: sans-serif; font-size: 0.82rem; margin-bottom: 26px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 26px; }
+    .roi-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 18px; }
+    .roi-number { font-size: 1.9rem; font-weight: bold; color: var(--terracotta); }
+    .roi-desc { font-size: 0.76rem; color: #ccc; font-family: sans-serif; margin-top: 5px; line-height: 1.5; }
+
+    .pricing-row { display: flex; gap: 14px; }
+    .price-card { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 18px; }
+    .price-card.highlight { background: var(--terracotta); border-color: var(--terracotta); }
+    .price-name { font-family: sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+    .price-amount { font-size: 1.25rem; font-weight: bold; }
+    .price-monthly { font-size: 0.73rem; margin-top: 2px; opacity: 0.85; font-family: sans-serif; }
+    .price-features { margin-top: 10px; font-size: 0.76rem; font-family: sans-serif; line-height: 1.8; opacity: 0.9; }
+
+    .footer-note { background: white; padding: 18px 40px; text-align: center; font-family: sans-serif; font-size: 0.78rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .footer-note strong { color: var(--primary); }
+
+    .example { display: none; }
+    .example.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="hotel-icon">🏛</div>
+    <div>
+      <div class="hotel-name">Amyth of Nicosia</div>
+      <div class="hotel-sub">Venetian Walls · Old Nicosia · Cyprus · Design Hotels™</div>
+    </div>
+  </div>
+  <div class="demo-badge">✦ AI CONCIERGE DEMO</div>
+</div>
+
+<div class="award-bar">
+  🏆 <span>Travel + Leisure · 100 Best New Hotels 2026</span>
+  &nbsp;|&nbsp; 🎨 <span>Design Hotels™ Member</span>
+  &nbsp;|&nbsp; 🏛 <span>Marriott Bonvoy Affiliated</span>
+  &nbsp;|&nbsp; 10 rooms · boutique · curated experiences
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🏨 Reservations</div>
+  <div class="tab">📊 Reports</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">11</div><div class="stat-label">Emails today</div></div>
+  <div class="stat"><div class="stat-value">26s</div><div class="stat-label">Avg draft time</div></div>
+  <div class="stat"><div class="stat-value">2</div><div class="stat-label">Awaiting review</div></div>
+  <div class="stat"><div class="stat-value">97%</div><div class="stat-label">Drafts approved</div></div>
+</div>
+
+<div class="main">
+  <div class="inbox">
+    <div class="inbox-header">Inbox <span class="unread-count">2 new</span></div>
+
+    <div class="email-item active">
+      <div class="email-meta"><span class="email-sender">Olivia & Thomas Laurent</span><span class="email-time">10:22</span></div>
+      <div class="email-subject">Curated art experience — what's in-house?</div>
+      <div class="tag tag-design">Art & Design</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Ravi Mehta</span><span class="email-time">09:45</span></div>
+      <div class="email-subject">Dinner reservation at the restaurant?</div>
+      <div class="tag tag-dining">Dining</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Charlotte Brennan</span><span class="email-time">09:12</span></div>
+      <div class="email-subject">Old Nicosia guided cultural walk request</div>
+      <div class="tag tag-culture">Culture</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Yuki Tanaka</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Direct booking — suite availability July</div>
+      <div class="tag tag-booking">Reservation</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Elena Vasquez</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Press enquiry — media visit request</div>
+      <div class="tag tag-design">Press</div>
+    </div>
+  </div>
+
+  <div class="draft-panel">
+    <div class="panel-header">
+      <div class="panel-title">Draft reply — Olivia & Thomas Laurent</div>
+      <div class="ai-badge">⚡ Generated in 26s</div>
+    </div>
+
+    <div class="example-nav">
+      <button class="ex-btn active" onclick="showEx(0)">🎨 Art experience</button>
+      <button class="ex-btn" onclick="showEx(1)">🍽 Dining enquiry</button>
+      <button class="ex-btn" onclick="showEx(2)">🏛 Cultural walk</button>
+    </div>
+
+    <div class="example visible" id="ex0">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Olivia & Thomas Laurent &lt;o.laurent@mail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Curated art experience — what's in-house?</div>
+        <div class="email-body" style="margin-top:10px;">
+          Dear Amyth team,<br><br>
+          We are staying with you in August and are very drawn to your art and design ethos. Could you tell us more about the art store, any in-house exhibitions, or curated experiences related to Cypriot art and design that we could enjoy during our stay?<br><br>
+          Warmly, Olivia & Thomas
+        </div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Olivia and Thomas,</p>
+          <p>How wonderful — you are going to love August in Nicosia. Art and design are truly at the heart of what we do here at Amyth, and we have a great deal to share with you.</p>
+          <p>Our in-house art store carries an ever-changing selection of works by Cypriot artists — pieces you won't find in any gallery outside Nicosia. During your stay, we can arrange a private guided tour of the Old City's art quarter, a meet-the-artist session with one of our featured local creators, and a curated visit to the Leventis Museum, just a short walk within the Venetian walls.</p>
+          <p>We'll have a personalised programme ready for you before arrival. Do let us know if there are any particular art forms — photography, ceramics, contemporary painting — that especially interest you.</p>
+          <p>Looking forward to welcoming you,<br>
+          <strong>[Guest Experience Team]</strong><br>
+          Amyth of Nicosia | Cyprus</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-terra">↺ Regenerate</button>
+      </div>
+    </div>
+
+    <div class="example" id="ex1">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Ravi Mehta &lt;r.mehta@gmail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Dinner reservation at the restaurant?</div>
+        <div class="email-body" style="margin-top:10px;">
+          Hello,<br><br>
+          I'm not yet a guest but I'd love to dine at your restaurant next Friday evening (11 July), party of 4. Do you accept external reservations? And could you give me a sense of the menu and atmosphere?<br><br>
+          Best, Ravi
+        </div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Ravi,</p>
+          <p>Thank you for your interest — we do welcome outside reservations at our restaurant, and Friday evenings are especially atmospheric within the Venetian walls.</p>
+          <p>Our kitchen celebrates contemporary Cypriot cuisine: seasonal produce, herbs from local producers, and the bold flavours of the Eastern Mediterranean. The setting is intimate, with design details that reflect the villa's layered history — think candlelight, exposed stone, and unhurried service.</p>
+          <p>I'm happy to reserve a table for four on Friday 11 July. What time would suit your party — would 8:00 pm work well? Please also let me know of any dietary requirements.</p>
+          <p>Warm regards,<br>
+          <strong>[Restaurant Team]</strong><br>
+          Amyth of Nicosia | Cyprus</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-terra">↺ Regenerate</button>
+      </div>
+    </div>
+
+    <div class="example" id="ex2">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Charlotte Brennan &lt;c.brennan@hotmail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Old Nicosia guided cultural walk request</div>
+        <div class="email-body" style="margin-top:10px;">
+          Hi,<br><br>
+          We are checking in on 18 July. My partner and I are really interested in the history and architecture of the Old City. Could you arrange a private guided walk? We'd prefer morning and ideally someone who knows the Byzantine and Venetian layers well. Thank you!<br><br>
+          Charlotte
+        </div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Charlotte,</p>
+          <p>This is exactly the kind of morning we love to arrange — Nicosia's Old Town rewards those who look closely, and the Byzantine-to-Venetian story woven into these streets is extraordinary.</p>
+          <p>We work with a small number of specialist local guides, including one who focuses specifically on the medieval and Venetian architectural layers of the city. I'll arrange a private 2-hour walk for the morning of 19 July (the day after arrival, so you can settle in) — starting at 9:00 am before the heat and the day-visitors arrive.</p>
+          <p>Please confirm this works for you, and I'll take care of the booking. We'll also prepare a neighbourhood map with our personal recommendations for the rest of your day.</p>
+          <p>Looking forward to welcoming you,<br>
+          <strong>[Guest Experience Team]</strong><br>
+          Amyth of Nicosia | Cyprus</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-terra">↺ Regenerate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-section">
+  <div class="roi-title">Your return on investment — Amyth of Nicosia</div>
+  <div class="roi-subtitle">Based on 10 rooms and the curated-experience email volume typical of Design Hotels™ properties</div>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="roi-number">~12</div><div class="roi-desc">emails per day — art enquiries, dining, cultural requests, bookings</div></div>
+    <div class="roi-card"><div class="roi-number">7 min</div><div class="roi-desc">average time to write a quality, personalised reply — down to 26s</div></div>
+    <div class="roi-card"><div class="roi-number">~1.5 hrs</div><div class="roi-desc">saved every day for your guest experience team</div></div>
+    <div class="roi-card"><div class="roi-number">~€1,350</div><div class="roi-desc">in staff hours saved per month — reinvested in guest time</div></div>
+  </div>
+  <div class="pricing-row">
+    <div class="price-card">
+      <div class="price-name">Standard</div>
+      <div class="price-amount">800€ <span style="font-size:0.78rem;font-weight:normal;">setup</span></div>
+      <div class="price-monthly">then 80€ / month</div>
+      <div class="price-features">✓ AI concierge agent<br>✓ Inbox analysis<br>✓ Draft generation</div>
+    </div>
+    <div class="price-card highlight">
+      <div class="price-name">⭐ Premium — Recommended</div>
+      <div class="price-amount">800€ <span style="font-size:0.78rem;font-weight:normal;">setup</span></div>
+      <div class="price-monthly">then 120€ / month</div>
+      <div class="price-features">✓ Everything in Standard<br>✓ Auto weekly improvement<br>✓ Monthly performance report</div>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Premium+</div>
+      <div class="price-amount">1,200€ <span style="font-size:0.78rem;font-weight:normal;">setup</span></div>
+      <div class="price-monthly">then 150€ / month</div>
+      <div class="price-features">✓ Everything in Premium<br>✓ Training on your real emails<br>✓ Matches Amyth's exact voice</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
+  This personalised demo was created by <strong>Enzo Cosnard</strong>, Intern at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — where this AI Concierge is already live in production.
+  Contact: <strong>enzo26cosnard@gmail.com</strong>
+</div>
+
+<script>
+function showEx(n) {
+  document.querySelectorAll('.example').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.ex-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('ex' + n).classList.add('visible');
+  document.querySelectorAll('.ex-btn')[n].classList.add('active');
+}
+</script>
+</body>
+</html>

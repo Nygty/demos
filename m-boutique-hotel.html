@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Concierge — M-Boutique Hotel Paphos</title>
+  <style>
+    :root {
+      --primary: #1A1A1A;
+      --accent: #8C6D4F;
+      --sand: #C8A882;
+      --warm-white: #F9F7F4;
+      --taupe: #E8E0D5;
+      --text: #111;
+      --muted: #777;
+      --success: #2D6B52;
+      --border: #DDD5C9;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: var(--warm-white); color: var(--text); }
+
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid var(--sand);
+    }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .hotel-logo {
+      width: 48px; height: 48px;
+      background: var(--sand);
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; font-weight: bold; color: var(--primary);
+      font-family: sans-serif;
+    }
+    .hotel-name { font-size: 1.4rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
+    .hotel-sub { font-size: 0.75rem; color: #bbb; letter-spacing: 3px; text-transform: uppercase; margin-top: 4px; }
+    .demo-badge { background: var(--sand); color: var(--primary); padding: 6px 14px; border-radius: 3px; font-size: 0.72rem; font-weight: bold; font-family: sans-serif; letter-spacing: 1px; }
+
+    .award-bar {
+      background: var(--primary);
+      border-bottom: 1px solid #333;
+      padding: 8px 40px;
+      font-family: sans-serif;
+      font-size: 0.75rem;
+      color: var(--sand);
+      display: flex;
+      gap: 24px;
+    }
+    .award-bar span { font-weight: 700; }
+
+    .tabs { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 40px; }
+    .tab { padding: 16px 20px; font-family: sans-serif; font-size: 0.83rem; cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted); letter-spacing: 0.5px; }
+    .tab.active { border-bottom-color: var(--sand); color: var(--primary); font-weight: 600; }
+
+    .stats-bar { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 14px 40px; gap: 40px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.6rem; font-weight: bold; color: var(--primary); font-family: sans-serif; }
+    .stat-label { font-size: 0.7rem; color: var(--muted); font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .main { display: grid; grid-template-columns: 330px 1fr; min-height: calc(100vh - 200px); }
+    .inbox { border-right: 1px solid var(--border); background: white; }
+    .inbox-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; align-items: center; }
+    .unread-count { background: var(--sand); color: var(--primary); border-radius: 12px; padding: 2px 8px; font-size: 0.67rem; font-weight: 700; }
+    .email-item { padding: 15px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .email-item.active { background: #F5F2EE; border-left: 3px solid var(--sand); }
+    .email-sender { font-weight: 600; font-size: 0.87rem; font-family: sans-serif; }
+    .email-subject { font-size: 0.79rem; color: var(--muted); font-family: sans-serif; margin-top: 4px; }
+    .email-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .email-time { font-size: 0.7rem; color: #bbb; font-family: sans-serif; }
+    .tag { font-size: 0.63rem; padding: 2px 7px; border-radius: 3px; font-family: sans-serif; font-weight: 700; letter-spacing: 0.5px; }
+    .tag-spa { background: #F0EEF8; color: #5B4A9E; }
+    .tag-suite { background: #FFF4EC; color: #C06010; }
+    .tag-dining { background: #ECFAF5; color: #1D7A52; }
+    .tag-booking { background: #EFF4FF; color: #1D4FAA; }
+
+    .draft-panel { padding: 28px 34px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .panel-title { font-size: 1.08rem; font-weight: bold; color: var(--primary); }
+    .ai-badge { background: var(--success); color: white; padding: 5px 12px; border-radius: 3px; font-size: 0.69rem; font-family: sans-serif; font-weight: 700; letter-spacing: 0.5px; }
+
+    .original-email { background: var(--warm-white); border: 1px solid var(--border); border-radius: 4px; padding: 18px; margin-bottom: 20px; }
+    .section-label { font-family: sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); margin-bottom: 8px; }
+    .email-from { font-family: sans-serif; font-size: 0.82rem; margin-bottom: 5px; }
+    .email-from strong { color: var(--primary); }
+    .email-body { font-size: 0.9rem; line-height: 1.7; color: #333; }
+
+    .draft-box {
+      background: white;
+      border: 2px solid var(--sand);
+      border-radius: 4px;
+      padding: 22px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .draft-box::before {
+      content: '✦ AI Draft · Generated in 24s';
+      position: absolute; top: -11px; left: 16px;
+      background: var(--sand); color: var(--primary);
+      font-size: 0.66rem; font-family: sans-serif; font-weight: 700;
+      padding: 3px 10px; border-radius: 3px; letter-spacing: 0.5px;
+    }
+    .draft-body { font-size: 0.9rem; line-height: 1.8; color: #1a1a1a; }
+    .draft-body p { margin-bottom: 12px; }
+
+    .example-nav { display: flex; gap: 8px; margin-bottom: 20px; }
+    .ex-btn { padding: 7px 13px; border-radius: 3px; font-size: 0.76rem; font-family: sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); }
+    .ex-btn.active { border-color: var(--sand); background: #FAF6F1; color: var(--primary); font-weight: 700; }
+
+    .draft-actions { display: flex; gap: 10px; }
+    .btn { padding: 9px 18px; border-radius: 3px; font-family: sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; letter-spacing: 0.5px; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-sand { background: var(--sand); color: var(--primary); }
+
+    .roi-section { background: var(--primary); color: white; padding: 34px 40px; }
+    .roi-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 6px; letter-spacing: 0.5px; }
+    .roi-subtitle { color: #aaa; font-family: sans-serif; font-size: 0.8rem; margin-bottom: 24px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .roi-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; padding: 16px; }
+    .roi-number { font-size: 1.85rem; font-weight: bold; color: var(--sand); font-family: sans-serif; }
+    .roi-desc { font-size: 0.74rem; color: #ccc; font-family: sans-serif; margin-top: 5px; line-height: 1.5; }
+
+    .pricing-row { display: flex; gap: 12px; }
+    .price-card { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; padding: 16px; }
+    .price-card.highlight { background: var(--sand); border-color: var(--sand); color: var(--primary); }
+    .price-name { font-family: sans-serif; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 7px; }
+    .price-amount { font-size: 1.2rem; font-weight: bold; font-family: sans-serif; }
+    .price-monthly { font-size: 0.72rem; margin-top: 2px; opacity: 0.85; font-family: sans-serif; }
+    .price-features { margin-top: 10px; font-size: 0.74rem; font-family: sans-serif; line-height: 1.8; opacity: 0.9; }
+
+    .footer-note { background: white; padding: 16px 40px; text-align: center; font-family: sans-serif; font-size: 0.77rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .footer-note strong { color: var(--primary); }
+
+    .example { display: none; }
+    .example.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="hotel-logo">M</div>
+    <div>
+      <div class="hotel-name">M-Boutique Hotel</div>
+      <div class="hotel-sub">Paphos · Cyprus · Adults Only · Michelin Key 2025</div>
+    </div>
+  </div>
+  <div class="demo-badge">✦ AI CONCIERGE DEMO</div>
+</div>
+
+<div class="award-bar">
+  🔑 <span>Michelin Key 2025</span>
+  &nbsp;|&nbsp; 🏨 <span>One of 2 Michelin Key hotels in Cyprus</span>
+  &nbsp;|&nbsp; 🏊 <span>Private plunge-pool suites</span>
+  &nbsp;|&nbsp; 13 rooms · Adults only · Rooftop bar · Spa
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🏨 Reservations</div>
+  <div class="tab">📊 Reports</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">13</div><div class="stat-label">Emails today</div></div>
+  <div class="stat"><div class="stat-value">24s</div><div class="stat-label">Avg draft time</div></div>
+  <div class="stat"><div class="stat-value">3</div><div class="stat-label">Awaiting review</div></div>
+  <div class="stat"><div class="stat-value">98%</div><div class="stat-label">Drafts approved</div></div>
+</div>
+
+<div class="main">
+  <div class="inbox">
+    <div class="inbox-header">Inbox <span class="unread-count">3 new</span></div>
+
+    <div class="email-item active">
+      <div class="email-meta"><span class="email-sender">Sarah & Daniel Okonkwo</span><span class="email-time">11:05</span></div>
+      <div class="email-subject">Couples spa package — what's included?</div>
+      <div class="tag tag-spa">Spa & Wellness</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Adrian Kovács</span><span class="email-time">10:34</span></div>
+      <div class="email-subject">Pool suite upgrade — honeymoon request</div>
+      <div class="tag tag-suite">Suite / Special</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Ingrid Sörensen</span><span class="email-time">09:58</span></div>
+      <div class="email-subject">Geppetto restaurant — tasting menu availability</div>
+      <div class="tag tag-dining">Dining</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Marcus Bell</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Direct booking — August availability & rates</div>
+      <div class="tag tag-booking">Reservation</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Yara Hassan</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Rooftop bar access for non-guests?</div>
+      <div class="tag tag-dining">Rooftop Bar</div>
+    </div>
+  </div>
+
+  <div class="draft-panel">
+    <div class="panel-header">
+      <div class="panel-title">Draft reply — Sarah & Daniel Okonkwo</div>
+      <div class="ai-badge">⚡ Generated in 24s</div>
+    </div>
+
+    <div class="example-nav">
+      <button class="ex-btn active" onclick="showEx(0)">💆 Spa package</button>
+      <button class="ex-btn" onclick="showEx(1)">🌸 Honeymoon suite</button>
+      <button class="ex-btn" onclick="showEx(2)">🍷 Tasting menu</button>
+    </div>
+
+    <div class="example visible" id="ex0">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Sarah & Daniel Okonkwo &lt;s.okonkwo@gmail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Couples spa package — what's included?</div>
+        <div class="email-body" style="margin-top:10px;">
+          Hi,<br><br>
+          We are staying with you for 4 nights in August and would love to book a couples spa experience. Could you outline what treatments are available, whether there is a couples' room, and how far in advance we should book? We want to make this trip as relaxing as possible.<br><br>
+          Thanks, Sarah & Daniel
+        </div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Sarah and Daniel,</p>
+          <p>Four nights at M-Boutique is the perfect foundation for exactly the retreat you're imagining — and our spa team will take wonderful care of you both.</p>
+          <p>We offer a dedicated couples' treatment room where you can enjoy simultaneous massages, body scrubs, and our signature ritual using local Cypriot herbs and olive oils. We can also arrange private use of the relaxation pool at a time reserved just for you. Treatments range from 60 to 120 minutes and can be combined into a full half-day experience.</p>
+          <p>Given August availability, I'd recommend securing your booking now. Could you let me know your preferred day(s) and whether morning or afternoon suits you better? I'll reserve it immediately.</p>
+          <p>Looking forward to your stay,<br>
+          <strong>[Spa & Wellness Team]</strong><br>
+          M-Boutique Hotel | Paphos, Cyprus</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-sand">↺ Regenerate</button>
+      </div>
+    </div>
+
+    <div class="example" id="ex1">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Adrian Kovács &lt;a.kovacs@outlook.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Pool suite upgrade — honeymoon request</div>
+        <div class="email-body" style="margin-top:10px;">
+          Good morning,<br><br>
+          I made a standard room booking for 22–26 July. My fiancée and I will actually be on our honeymoon — I didn't mention it at the time. Is it possible to upgrade to a pool suite, and are there any special honeymoon touches you can arrange? I want it to be a surprise. Budget is flexible.<br><br>
+          Adrian
+        </div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Adrian,</p>
+          <p>Congratulations — what an exciting way to begin married life! I'm delighted to help make this as special as it deserves to be, and your secret is entirely safe with us.</p>
+          <p>I can upgrade your booking to one of our private plunge-pool suites, which offer complete privacy on your own terrace overlooking the Paphos landscape. For your arrival, we'll arrange chilled Champagne, a curated selection of seasonal fruits, and a floral arrangement — all ready before you check in so the surprise lands perfectly.</p>
+          <p>If you'd like to add a couples' spa ritual during your stay, I can reserve a slot for you as well. Please reply with any specific preferences — favourite flowers, dietary details — and I'll handle everything discreetly.</p>
+          <p>With warmest congratulations,<br>
+          <strong>[Guest Relations]</strong><br>
+          M-Boutique Hotel | Paphos, Cyprus</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-sand">↺ Regenerate</button>
+      </div>
+    </div>
+
+    <div class="example" id="ex2">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Ingrid Sörensen &lt;i.sorensen@se.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Geppetto restaurant — tasting menu availability</div>
+        <div class="email-body" style="margin-top:10px;">
+          Hello,<br><br>
+          We will be staying 3 nights from 1 August and we are very keen to try your Geppetto restaurant. Do you offer a chef's tasting menu? We'd also love to know if there are wine pairings. Party of 2, one of us is vegetarian.<br><br>
+          Ingrid
+        </div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Ingrid,</p>
+          <p>What a pleasure to have you staying with us — and Geppetto will be a highlight of your visit, I'm sure of it.</p>
+          <p>Yes, Chef offers a seasonal tasting menu (currently 7 courses) that showcases the finest Cypriot and Mediterranean produce. We have a beautifully curated wine pairing to accompany it, featuring both local Cypriot and classic European labels. For your vegetarian guest, Chef prepares a fully parallel vegetarian tasting menu of equal creativity — please do mention it again when I confirm your reservation so it's noted for the kitchen.</p>
+          <p>I'll reserve your table for the evening of 1 August. Would 8:00 pm suit you? I'll also flag the vegetarian requirement. Looking forward to welcoming you.</p>
+          <p>Warm regards,<br>
+          <strong>[Geppetto Restaurant Team]</strong><br>
+          M-Boutique Hotel | Paphos, Cyprus</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-sand">↺ Regenerate</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-section">
+  <div class="roi-title">Your return on investment — M-Boutique Hotel</div>
+  <div class="roi-subtitle">Based on 13 rooms and the high-touch email volume of a Michelin Key adults-only property</div>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="roi-number">~14</div><div class="roi-desc">emails per day — spa, dining, suite upgrades, honeymoon requests</div></div>
+    <div class="roi-card"><div class="roi-number">7 min</div><div class="roi-desc">avg time to craft a Michelin-quality reply — down to 24s with AI</div></div>
+    <div class="roi-card"><div class="roi-number">~1.6 hrs</div><div class="roi-desc">saved daily — your team focused on in-person guest excellence</div></div>
+    <div class="roi-card"><div class="roi-number">~€1,440</div><div class="roi-desc">in staff hours saved per month (€15/hr equivalent)</div></div>
+  </div>
+  <div class="pricing-row">
+    <div class="price-card">
+      <div class="price-name">Standard</div>
+      <div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div>
+      <div class="price-monthly">then 80€ / month</div>
+      <div class="price-features">✓ AI concierge agent<br>✓ Inbox analysis<br>✓ Draft generation</div>
+    </div>
+    <div class="price-card highlight">
+      <div class="price-name">⭐ Premium — Recommended</div>
+      <div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div>
+      <div class="price-monthly">then 120€ / month</div>
+      <div class="price-features">✓ Everything in Standard<br>✓ Auto weekly improvement<br>✓ Monthly performance report</div>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Premium+</div>
+      <div class="price-amount">1,200€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div>
+      <div class="price-monthly">then 150€ / month</div>
+      <div class="price-features">✓ Everything in Premium<br>✓ Training on your real emails<br>✓ Matches M-Boutique's voice</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer-note">
+  This personalised demo was created by <strong>Enzo Cosnard</strong>, Intern at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — where this AI Concierge is already live in production.
+  Contact: <strong>enzo26cosnard@gmail.com</strong>
+</div>
+
+<script>
+function showEx(n) {
+  document.querySelectorAll('.example').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.ex-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('ex' + n).classList.add('visible');
+  document.querySelectorAll('.ex-btn')[n].classList.add('active');
+}
+</script>
+</body>
+</html>

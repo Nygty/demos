@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Concierge — Spirito Santo Palazzo Storico Rovinj</title>
+  <style>
+    :root {
+      --primary: #1E2A38;
+      --accent: #7B9E87;
+      --sage: #5C8A6E;
+      --stone: #A89880;
+      --light: #F7F8F6;
+      --warm: #EEF0EA;
+      --text: #111;
+      --muted: #6a7a6a;
+      --success: #2E6B4A;
+      --border: #D8DDD4;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+    .header { background: var(--primary); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--accent); }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .hotel-icon { width: 48px; height: 48px; background: var(--accent); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .hotel-name { font-size: 1.4rem; font-weight: bold; letter-spacing: 0.5px; }
+    .hotel-sub { font-size: 0.75rem; color: #a8bfb0; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+    .demo-badge { background: var(--accent); color: white; padding: 6px 14px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; font-family: sans-serif; letter-spacing: 1px; }
+    .award-bar { background: #2A3A48; padding: 9px 40px; font-family: sans-serif; font-size: 0.75rem; color: #a8c0b4; display: flex; gap: 20px; }
+    .award-bar span { font-weight: 700; color: var(--accent); }
+    .tabs { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 40px; }
+    .tab { padding: 16px 20px; font-family: sans-serif; font-size: 0.84rem; cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted); }
+    .tab.active { border-bottom-color: var(--accent); color: var(--primary); font-weight: 600; }
+    .stats-bar { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 14px 40px; gap: 40px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
+    .stat-label { font-size: 0.7rem; color: var(--muted); font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+    .main { display: grid; grid-template-columns: 330px 1fr; min-height: calc(100vh - 205px); }
+    .inbox { border-right: 1px solid var(--border); background: white; }
+    .inbox-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .unread-count { background: var(--accent); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.67rem; }
+    .email-item { padding: 15px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .email-item.active { background: #EEF2EE; border-left: 3px solid var(--accent); }
+    .email-sender { font-weight: 600; font-size: 0.87rem; font-family: sans-serif; }
+    .email-subject { font-size: 0.79rem; color: var(--muted); font-family: sans-serif; margin-top: 4px; }
+    .email-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .email-time { font-size: 0.7rem; color: #bbb; font-family: sans-serif; }
+    .tag { font-size: 0.63rem; padding: 2px 7px; border-radius: 10px; font-family: sans-serif; font-weight: 600; }
+    .tag-romance { background: #FFF0F5; color: #B03060; }
+    .tag-food { background: #FFF5E8; color: #A05000; }
+    .tag-booking { background: #EEF3FF; color: #2040A0; }
+    .tag-wellness { background: #EDFAF4; color: #1A7A4A; }
+    .draft-panel { padding: 28px 34px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .panel-title { font-size: 1.08rem; font-weight: bold; color: var(--primary); }
+    .ai-badge { background: var(--success); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.69rem; font-family: sans-serif; font-weight: 600; }
+    .original-email { background: var(--warm); border: 1px solid var(--border); border-radius: 6px; padding: 18px; margin-bottom: 20px; }
+    .section-label { font-family: sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+    .email-from { font-family: sans-serif; font-size: 0.82rem; margin-bottom: 5px; }
+    .email-from strong { color: var(--primary); }
+    .email-body { font-size: 0.9rem; line-height: 1.7; color: #333; }
+    .draft-box { background: white; border: 2px solid var(--accent); border-radius: 6px; padding: 22px; margin-bottom: 16px; position: relative; }
+    .draft-box::before { content: '✦ AI Draft · Generated in 27s'; position: absolute; top: -12px; left: 16px; background: var(--accent); color: white; font-size: 0.66rem; font-family: sans-serif; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+    .draft-body { font-size: 0.9rem; line-height: 1.8; color: #1a1a1a; }
+    .draft-body p { margin-bottom: 12px; }
+    .example-nav { display: flex; gap: 8px; margin-bottom: 20px; }
+    .ex-btn { padding: 7px 13px; border-radius: 6px; font-size: 0.76rem; font-family: sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); }
+    .ex-btn.active { border-color: var(--accent); background: #EEF3EE; color: var(--primary); font-weight: 600; }
+    .draft-actions { display: flex; gap: 10px; }
+    .btn { padding: 9px 18px; border-radius: 4px; font-family: sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-sage { background: var(--sage); color: white; }
+    .roi-section { background: var(--primary); color: white; padding: 34px 40px; }
+    .roi-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 6px; }
+    .roi-subtitle { color: #a0b8b0; font-family: sans-serif; font-size: 0.8rem; margin-bottom: 24px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .roi-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 6px; padding: 16px; }
+    .roi-number { font-size: 1.85rem; font-weight: bold; color: var(--accent); }
+    .roi-desc { font-size: 0.74rem; color: #ccc; font-family: sans-serif; margin-top: 5px; line-height: 1.5; }
+    .pricing-row { display: flex; gap: 12px; }
+    .price-card { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 16px; }
+    .price-card.highlight { background: var(--accent); border-color: var(--accent); color: white; }
+    .price-name { font-family: sans-serif; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+    .price-amount { font-size: 1.2rem; font-weight: bold; }
+    .price-monthly { font-size: 0.72rem; margin-top: 2px; opacity: 0.85; font-family: sans-serif; }
+    .price-features { margin-top: 10px; font-size: 0.74rem; font-family: sans-serif; line-height: 1.8; opacity: 0.9; }
+    .footer-note { background: white; padding: 16px 40px; text-align: center; font-family: sans-serif; font-size: 0.77rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .footer-note strong { color: var(--primary); }
+    .example { display: none; }
+    .example.visible { display: block; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="hotel-icon">🕊</div>
+    <div>
+      <div class="hotel-name">Spirito Santo Palazzo Storico</div>
+      <div class="hotel-sub">Rovinj Historic Centre · Croatia · Adults Only · 1920s Palazzo</div>
+    </div>
+  </div>
+  <div class="demo-badge">✦ AI CONCIERGE DEMO</div>
+</div>
+<div class="award-bar">
+  ⭐ <span>9.4/10 rating · #1 on multiple platforms</span>
+  &nbsp;|&nbsp; 🏛 <span>Restored 1920s palazzo, Rovinj Old Town</span>
+  &nbsp;|&nbsp; 16 rooms · Adults only · Small team · High-end clientele
+</div>
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🏨 Reservations</div>
+  <div class="tab">📊 Reports</div>
+</div>
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">15</div><div class="stat-label">Emails today</div></div>
+  <div class="stat"><div class="stat-value">27s</div><div class="stat-label">Avg draft time</div></div>
+  <div class="stat"><div class="stat-value">2</div><div class="stat-label">Awaiting review</div></div>
+  <div class="stat"><div class="stat-value">97%</div><div class="stat-label">Drafts approved</div></div>
+</div>
+<div class="main">
+  <div class="inbox">
+    <div class="inbox-header">Inbox <span class="unread-count">2 new</span></div>
+    <div class="email-item active">
+      <div class="email-meta"><span class="email-sender">Sophie & Marc Lefevre</span><span class="email-time">11:10</span></div>
+      <div class="email-subject">Romantic dinner by the sea — recommendations?</div>
+      <div class="tag tag-romance">Romance</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">David Kimura</span><span class="email-time">10:40</span></div>
+      <div class="email-subject">Rovinj wine bar scene — your top picks?</div>
+      <div class="tag tag-food">Food & Wine</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Natasha Green</span><span class="email-time">09:50</span></div>
+      <div class="email-subject">Availability — 3 nights first week of August</div>
+      <div class="tag tag-booking">Reservation</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Franz & Helene Schulz</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Morning yoga or wellness options near palazzo?</div>
+      <div class="tag tag-wellness">Wellness</div>
+    </div>
+  </div>
+  <div class="draft-panel">
+    <div class="panel-header">
+      <div class="panel-title">Draft reply — Sophie & Marc Lefevre</div>
+      <div class="ai-badge">⚡ Generated in 27s</div>
+    </div>
+    <div class="example-nav">
+      <button class="ex-btn active" onclick="showEx(0)">🌊 Romantic dinner</button>
+      <button class="ex-btn" onclick="showEx(1)">🍷 Wine bar scene</button>
+      <button class="ex-btn" onclick="showEx(2)">🧘 Wellness options</button>
+    </div>
+    <div class="example visible" id="ex0">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Sophie & Marc Lefevre &lt;sm.lefevre@gmail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Romantic dinner by the sea — recommendations?</div>
+        <div class="email-body" style="margin-top:10px;">Dear Spirito Santo,<br><br>We're celebrating our first wedding anniversary during our stay and would love a truly romantic dinner by the water. Could you recommend something special — ideally somewhere intimate, with good seafood, not too touristy? And is it possible for you to make the reservation?<br><br>Sophie & Marc</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Sophie and Marc,</p>
+          <p>Congratulations on your first anniversary — what a beautiful place to mark it, and we'll make sure this dinner is everything it should be.</p>
+          <p>Our personal recommendation is a small restaurant at the edge of the Old Town harbour that most visitors never find: intimate, stone-walled, with a terrace literally over the water. The chef works exclusively with the morning's catch. It is exactly the kind of place that feels like a discovery rather than a tourist restaurant.</p>
+          <p>I'll make the reservation for you — could you let me know which evening works best and what time you prefer? I'll also mention it's your anniversary, so the team can prepare something small to mark the occasion.</p>
+          <p>With warmest wishes,<br><strong>[Concierge]</strong><br>Spirito Santo Palazzo Storico | Rovinj, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-sage">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex1">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> David Kimura &lt;d.kimura@jp.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Rovinj wine bar scene — your top picks?</div>
+        <div class="email-body" style="margin-top:10px;">Hi,<br><br>I'm a wine enthusiast arriving on Saturday. I'd love to explore Istrian wines — Malvazija especially. Can you recommend the best wine bars in the Old Town, and perhaps a local producer to visit?<br><br>David</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear David,</p>
+          <p>You've come to exactly the right corner of Croatia — Istrian Malvazija is one of the great undiscovered white wines of the Mediterranean, and Rovinj's Old Town has a small but excellent wine scene to explore.</p>
+          <p>Within walking distance of the palazzo, I recommend <em>Vauvau Wine Bar</em> on Ulica Sv. Križa for a focused Istrian selection and knowledgeable hosts. For a producer visit, the Matošević estate (about 30 minutes inland) makes some of the finest Malvazija in Istria and welcomes wine-focused guests — I can arrange a tasting for Saturday afternoon if you'd like.</p>
+          <p>Shall I book the producer visit? And I'll leave you a personal wine map at reception for the evenings.</p>
+          <p>Cheers,<br><strong>[Concierge]</strong><br>Spirito Santo Palazzo Storico | Rovinj, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-sage">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex2">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Franz & Helene Schulz &lt;fhschulz@de.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Morning yoga or wellness options near palazzo?</div>
+        <div class="email-body" style="margin-top:10px;">Guten Tag,<br><br>We are health-conscious travellers and always enjoy a yoga class or morning wellness activity when travelling. Are there any yoga classes, guided morning walks, or similar wellness options available near the hotel?<br><br>Franz & Helene</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Franz and Helene,</p>
+          <p>Great news — Rovinj in the early morning is magical, and there are excellent options for exactly what you're looking for.</p>
+          <p>We can arrange a private sunrise yoga session on a quiet terrace overlooking the sea with a local instructor who works with several guests. For guided walks, the coastal path to Zlatni Rt nature park starts just minutes from the palazzo and makes for a beautiful 60–90 minute morning circuit through pine forest along the Adriatic shore.</p>
+          <p>If you'd like the yoga session, could you let me know which morning(s) and preferred time (7:00 or 7:30 am works best)? I'll confirm the instructor directly. The walk we can set up with a map and notes at check-in.</p>
+          <p>Looking forward to welcoming you,<br><strong>[Concierge]</strong><br>Spirito Santo Palazzo Storico | Rovinj, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-sage">↺ Regenerate</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="roi-section">
+  <div class="roi-title">Your return on investment — Spirito Santo Palazzo Storico</div>
+  <div class="roi-subtitle">Based on 16 rooms and the high-touch email volume of a #1-rated adults-only palazzo</div>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="roi-number">~15</div><div class="roi-desc">emails per day — romantic requests, local tips, wellness, bookings</div></div>
+    <div class="roi-card"><div class="roi-number">7 min</div><div class="roi-desc">avg time to write a warm, personal reply — down to 27s with AI</div></div>
+    <div class="roi-card"><div class="roi-number">~1.75 hrs</div><div class="roi-desc">saved each day for your small, dedicated team</div></div>
+    <div class="roi-card"><div class="roi-number">~€1,575</div><div class="roi-desc">in staff hours saved per month (€15/hr equivalent)</div></div>
+  </div>
+  <div class="pricing-row">
+    <div class="price-card"><div class="price-name">Standard</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 80€ / month</div><div class="price-features">✓ AI concierge agent<br>✓ Inbox analysis<br>✓ Draft generation</div></div>
+    <div class="price-card highlight"><div class="price-name">⭐ Premium — Recommended</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 120€ / month</div><div class="price-features">✓ Everything in Standard<br>✓ Auto weekly improvement<br>✓ Monthly performance report</div></div>
+    <div class="price-card"><div class="price-name">Premium+</div><div class="price-amount">1,200€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 150€ / month</div><div class="price-features">✓ Everything in Premium<br>✓ Training on your real emails<br>✓ Matches Spirito Santo's voice</div></div>
+  </div>
+</div>
+<div class="footer-note">
+  This personalised demo was created by <strong>Enzo Cosnard</strong>, Intern at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — where this AI Concierge is already live in production.
+  Contact: <strong>enzo26cosnard@gmail.com</strong>
+</div>
+<script>
+function showEx(n) {
+  document.querySelectorAll('.example').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.ex-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('ex' + n).classList.add('visible');
+  document.querySelectorAll('.ex-btn')[n].classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Concierge — Villa Nora Hvar</title>
+  <style>
+    :root {
+      --primary: #0D2B45;
+      --adriatic: #1A6B9A;
+      --turquoise: #2E9BB5;
+      --sand: #D4B890;
+      --cream: #F8F6F2;
+      --light-blue: #EAF4F8;
+      --text: #111;
+      --muted: #5a7a8a;
+      --success: #2E6B3A;
+      --border: #D4E4EC;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); }
+    .header { background: var(--primary); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--turquoise); }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .hotel-icon { width: 48px; height: 48px; background: var(--turquoise); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .hotel-name { font-size: 1.4rem; font-weight: bold; }
+    .hotel-sub { font-size: 0.75rem; color: #a8d0e0; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+    .demo-badge { background: var(--turquoise); color: white; padding: 6px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: bold; font-family: sans-serif; letter-spacing: 1px; }
+    .award-bar { background: #183A52; padding: 9px 40px; font-family: sans-serif; font-size: 0.75rem; color: #a8d0e0; display: flex; gap: 20px; }
+    .award-bar span { font-weight: 700; color: #7FD0E8; }
+    .tabs { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 40px; }
+    .tab { padding: 16px 20px; font-family: sans-serif; font-size: 0.84rem; cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted); }
+    .tab.active { border-bottom-color: var(--turquoise); color: var(--primary); font-weight: 600; }
+    .stats-bar { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 14px 40px; gap: 40px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
+    .stat-label { font-size: 0.7rem; color: var(--muted); font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+    .main { display: grid; grid-template-columns: 330px 1fr; min-height: calc(100vh - 205px); }
+    .inbox { border-right: 1px solid var(--border); background: white; }
+    .inbox-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .unread-count { background: var(--turquoise); color: white; border-radius: 12px; padding: 2px 8px; font-size: 0.67rem; }
+    .email-item { padding: 15px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .email-item.active { background: #EAF4F8; border-left: 3px solid var(--turquoise); }
+    .email-sender { font-weight: 600; font-size: 0.87rem; font-family: sans-serif; }
+    .email-subject { font-size: 0.79rem; color: var(--muted); font-family: sans-serif; margin-top: 4px; }
+    .email-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .email-time { font-size: 0.7rem; color: #bbb; font-family: sans-serif; }
+    .tag { font-size: 0.63rem; padding: 2px 7px; border-radius: 10px; font-family: sans-serif; font-weight: 600; }
+    .tag-sea { background: #EAF4F8; color: #1A6B9A; }
+    .tag-dining { background: #EDFAF0; color: #1A7A4A; }
+    .tag-booking { background: #FFF5E8; color: #A06000; }
+    .tag-peak { background: #FFF0F5; color: #B03060; }
+    .draft-panel { padding: 28px 34px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .panel-title { font-size: 1.08rem; font-weight: bold; color: var(--primary); }
+    .ai-badge { background: var(--success); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.69rem; font-family: sans-serif; font-weight: 600; }
+    .original-email { background: var(--light-blue); border: 1px solid var(--border); border-radius: 6px; padding: 18px; margin-bottom: 20px; }
+    .section-label { font-family: sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+    .email-from { font-family: sans-serif; font-size: 0.82rem; margin-bottom: 5px; }
+    .email-from strong { color: var(--primary); }
+    .email-body { font-size: 0.9rem; line-height: 1.7; color: #333; }
+    .draft-box { background: white; border: 2px solid var(--turquoise); border-radius: 6px; padding: 22px; margin-bottom: 16px; position: relative; }
+    .draft-box::before { content: '✦ AI Draft · Generated in 25s'; position: absolute; top: -12px; left: 16px; background: var(--turquoise); color: white; font-size: 0.66rem; font-family: sans-serif; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+    .draft-body { font-size: 0.9rem; line-height: 1.8; color: #1a1a1a; }
+    .draft-body p { margin-bottom: 12px; }
+    .example-nav { display: flex; gap: 8px; margin-bottom: 20px; }
+    .ex-btn { padding: 7px 13px; border-radius: 6px; font-size: 0.76rem; font-family: sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); }
+    .ex-btn.active { border-color: var(--turquoise); background: #EAF4F8; color: var(--primary); font-weight: 600; }
+    .draft-actions { display: flex; gap: 10px; }
+    .btn { padding: 9px 18px; border-radius: 4px; font-family: sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-turq { background: var(--turquoise); color: white; }
+    .roi-section { background: var(--primary); color: white; padding: 34px 40px; }
+    .roi-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 6px; }
+    .roi-subtitle { color: #a0c0d0; font-family: sans-serif; font-size: 0.8rem; margin-bottom: 24px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .roi-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 6px; padding: 16px; }
+    .roi-number { font-size: 1.85rem; font-weight: bold; color: var(--turquoise); }
+    .roi-desc { font-size: 0.74rem; color: #ccc; font-family: sans-serif; margin-top: 5px; line-height: 1.5; }
+    .pricing-row { display: flex; gap: 12px; }
+    .price-card { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 16px; }
+    .price-card.highlight { background: var(--turquoise); border-color: var(--turquoise); color: white; }
+    .price-name { font-family: sans-serif; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+    .price-amount { font-size: 1.2rem; font-weight: bold; }
+    .price-monthly { font-size: 0.72rem; margin-top: 2px; opacity: 0.85; font-family: sans-serif; }
+    .price-features { margin-top: 10px; font-size: 0.74rem; font-family: sans-serif; line-height: 1.8; opacity: 0.9; }
+    .footer-note { background: white; padding: 16px 40px; text-align: center; font-family: sans-serif; font-size: 0.77rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .footer-note strong { color: var(--primary); }
+    .natalija-note { background: #EAF4F8; border: 1px solid var(--border); border-radius: 6px; padding: 12px 40px; font-family: sans-serif; font-size: 0.8rem; color: var(--adriatic); display: flex; align-items: center; gap: 8px; }
+    .example { display: none; }
+    .example.visible { display: block; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="hotel-icon">🌊</div>
+    <div>
+      <div class="hotel-name">Villa Nora Hvar</div>
+      <div class="hotel-sub">Hvar Old Town · Croatia · 14th-Century Palace</div>
+    </div>
+  </div>
+  <div class="demo-badge">✦ AI CONCIERGE DEMO</div>
+</div>
+<div class="award-bar">
+  ⭐ <span>9.8/10 on Booking.com (399 reviews)</span>
+  &nbsp;|&nbsp; 🏆 <span>9.7/10 on Trivago (1,152 reviews)</span>
+  &nbsp;|&nbsp; 15 rooms · Restaurant Lucullus · Direct owner management · Peak Adriatic season
+</div>
+<div class="natalija-note">
+  👤 <strong>Natalija</strong> — during peak Adriatic season, your inbox fills faster than you can respond. This demo shows exactly how an AI concierge gives you time back, while keeping every reply personal.
+</div>
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🏨 Reservations</div>
+  <div class="tab">📊 Reports</div>
+</div>
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">16</div><div class="stat-label">Emails today</div></div>
+  <div class="stat"><div class="stat-value">25s</div><div class="stat-label">Avg draft time</div></div>
+  <div class="stat"><div class="stat-value">3</div><div class="stat-label">Awaiting review</div></div>
+  <div class="stat"><div class="stat-value">98%</div><div class="stat-label">Drafts approved</div></div>
+</div>
+<div class="main">
+  <div class="inbox">
+    <div class="inbox-header">Inbox <span class="unread-count">3 new</span></div>
+    <div class="email-item active">
+      <div class="email-meta"><span class="email-sender">Benjamin & Claire Hartley</span><span class="email-time">10:45</span></div>
+      <div class="email-subject">Sunset boat trip — can you arrange one?</div>
+      <div class="tag tag-sea">Sea Activity</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Fumiko Tanaka</span><span class="email-time">10:05</span></div>
+      <div class="email-subject">Table at Lucullus — dinner for 4 tonight?</div>
+      <div class="tag tag-dining">Restaurant Lucullus</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Petra & Ondřej Novotný</span><span class="email-time">09:30</span></div>
+      <div class="email-subject">Last minute room — August 15-17?</div>
+      <div class="tag tag-peak">Peak season</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Robert Collins</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Lavender fields — are they visible in July?</div>
+      <div class="tag tag-sea">Hvar island</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Marina Kovač</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Early check-in possible? Ferry lands at 8am</div>
+      <div class="tag tag-booking">Logistics</div>
+    </div>
+  </div>
+  <div class="draft-panel">
+    <div class="panel-header">
+      <div class="panel-title">Draft reply — Benjamin & Claire Hartley</div>
+      <div class="ai-badge">⚡ Generated in 25s</div>
+    </div>
+    <div class="example-nav">
+      <button class="ex-btn active" onclick="showEx(0)">⛵ Sunset boat trip</button>
+      <button class="ex-btn" onclick="showEx(1)">🍽 Lucullus dinner</button>
+      <button class="ex-btn" onclick="showEx(2)">🌸 Lavender fields</button>
+    </div>
+    <div class="example visible" id="ex0">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Benjamin & Claire Hartley &lt;b.hartley@gmail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Sunset boat trip — can you arrange one?</div>
+        <div class="email-body" style="margin-top:10px;">Hi Villa Nora,<br><br>We arrive Thursday and would love to do a sunset boat trip — ideally something small and private rather than a group tour. We've heard the islands around Hvar are beautiful. Can you arrange something for Friday evening? Party of 2.<br><br>Benjamin & Claire</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Benjamin and Claire,</p>
+          <p>Hvar at sunset from the water is one of those experiences that stays with you forever — and you're absolutely right to want something private rather than a group cruise.</p>
+          <p>We work with a local captain who runs a small, beautifully maintained wooden boat with just the two of you aboard. The route takes in the Pakleni Islands archipelago — crystal water, a swim stop in a hidden cove, local wine and olive oil on board — and returns as the sun sets behind the Dalmatian mountains. It's about 3 hours in total.</p>
+          <p>Friday evening is possible — shall I confirm this for you? I'll need to reach him today given the short notice, so let me know as soon as you can and I'll secure it.</p>
+          <p>Looking forward to welcoming you on Thursday,<br><strong>[Villa Nora Team]</strong><br>Villa Nora Hvar | Hvar, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-turq">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex1">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Fumiko Tanaka &lt;f.tanaka@jp.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Table at Lucullus — dinner for 4 tonight?</div>
+        <div class="email-body" style="margin-top:10px;">Hello,<br><br>We are staying at Villa Nora and would love to have dinner at Lucullus tonight — party of 4. Is there availability? We would prefer a table outside if possible. What time do you recommend?<br><br>Fumiko</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Fumiko,</p>
+          <p>Wonderful — we'd love to have you at Lucullus this evening! We do have a table available for four, and I can reserve one on the terrace for you.</p>
+          <p>For the best Hvar evening, I recommend 8:00 pm — the light is still lovely, the pace is relaxed, and our kitchen is at its best. Tonight's menu features freshly caught Adriatic fish and seasonal Dalmatian ingredients; if you have any dietary preferences, please let me know and I'll mention it to the kitchen.</p>
+          <p>Your table is reserved. See you this evening!</p>
+          <p>Warmly,<br><strong>[Restaurant Lucullus]</strong><br>Villa Nora Hvar | Hvar, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-turq">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex2">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Robert Collins &lt;r.collins@uk.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Lavender fields — are they visible in July?</div>
+        <div class="email-body" style="margin-top:10px;">Hello,<br><br>We've heard Hvar is known for lavender. We arrive in mid-July — will the lavender still be flowering? And where is the best spot to see it? Any local tips welcome.<br><br>Robert</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Robert,</p>
+          <p>Hvar's lavender is one of its great treasures, and mid-July is right at the edge of the flowering season — the fields are usually at their peak in late June and the first weeks of July, so you may catch the very end of the bloom or find the harvest just beginning, which is beautiful in its own way.</p>
+          <p>The best spot is the interior of the island, particularly around the village of Velo Grablje and the Stari Grad Plain — both of which are worth visiting for their landscape and history regardless of the lavender. The ride across the island by scooter (rentable in the Old Town) is half the pleasure.</p>
+          <p>I'll have a printed local map with our recommendations waiting at check-in. Let us know if you'd like us to arrange a scooter for you — it books up quickly in July.</p>
+          <p>See you soon,<br><strong>[Villa Nora Team]</strong><br>Villa Nora Hvar | Hvar, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-turq">↺ Regenerate</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="roi-section">
+  <div class="roi-title">Your return on investment — Villa Nora Hvar</div>
+  <div class="roi-subtitle">Based on 15 rooms and the intense Adriatic peak-season email volume of a 9.8/10-rated owner-run property</div>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="roi-number">~16</div><div class="roi-desc">emails per day in peak season — boat trips, restaurant, activities, bookings</div></div>
+    <div class="roi-card"><div class="roi-number">7 min</div><div class="roi-desc">avg time to write a personal owner-quality reply — down to 25s with AI</div></div>
+    <div class="roi-card"><div class="roi-number">~1.9 hrs</div><div class="roi-desc">freed up every day — you focus on the guest in front of you</div></div>
+    <div class="roi-card"><div class="roi-number">~€1,700</div><div class="roi-desc">in staff hours saved per month — exactly when peak season demands most</div></div>
+  </div>
+  <div class="pricing-row">
+    <div class="price-card"><div class="price-name">Standard</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 80€ / month</div><div class="price-features">✓ AI concierge agent<br>✓ Inbox analysis<br>✓ Draft generation</div></div>
+    <div class="price-card highlight"><div class="price-name">⭐ Premium — Recommended</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 120€ / month</div><div class="price-features">✓ Everything in Standard<br>✓ Auto weekly improvement<br>✓ Monthly performance report</div></div>
+    <div class="price-card"><div class="price-name">Premium+</div><div class="price-amount">1,200€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 150€ / month</div><div class="price-features">✓ Everything in Premium<br>✓ Training on your real emails<br>✓ Learns Natalija's personal voice</div></div>
+  </div>
+</div>
+<div class="footer-note">
+  This personalised demo was created by <strong>Enzo Cosnard</strong>, Intern at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — where this AI Concierge is already live in production.
+  Contact: <strong>enzo26cosnard@gmail.com</strong>
+</div>
+<script>
+function showEx(n) {
+  document.querySelectorAll('.example').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.ex-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('ex' + n).classList.add('visible');
+  document.querySelectorAll('.ex-btn')[n].classList.add('active');
+}
+</script>
+</body>
+</html>

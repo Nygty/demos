@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Concierge — Angelo d'Oro Heritage Hotel Rovinj</title>
+  <style>
+    :root {
+      --primary: #2A1F14;
+      --gold: #B8860B;
+      --amber: #D4A055;
+      --cream: #FAF6EF;
+      --parchment: #EDE6D8;
+      --text: #111;
+      --muted: #7a6a50;
+      --success: #2E6B3A;
+      --border: #DDD0BC;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); }
+    .header { background: var(--primary); color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--amber); }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .hotel-icon { width: 48px; height: 48px; background: var(--amber); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .hotel-name { font-size: 1.4rem; font-weight: bold; }
+    .hotel-sub { font-size: 0.75rem; color: #d4b896; letter-spacing: 2px; text-transform: uppercase; margin-top: 3px; }
+    .demo-badge { background: var(--amber); color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.72rem; font-weight: bold; font-family: sans-serif; letter-spacing: 1px; }
+    .award-bar { background: #4A3828; padding: 9px 40px; font-family: sans-serif; font-size: 0.75rem; color: #d4b896; display: flex; gap: 20px; }
+    .award-bar span { font-weight: 700; color: var(--amber); }
+    .tabs { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 0 40px; }
+    .tab { padding: 16px 20px; font-family: sans-serif; font-size: 0.84rem; cursor: pointer; border-bottom: 3px solid transparent; color: var(--muted); }
+    .tab.active { border-bottom-color: var(--amber); color: var(--primary); font-weight: 600; }
+    .stats-bar { background: white; border-bottom: 1px solid var(--border); display: flex; padding: 14px 40px; gap: 40px; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.6rem; font-weight: bold; color: var(--primary); }
+    .stat-label { font-size: 0.7rem; color: var(--muted); font-family: sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+    .main { display: grid; grid-template-columns: 330px 1fr; min-height: calc(100vh - 210px); }
+    .inbox { border-right: 1px solid var(--border); background: white; }
+    .inbox-header { padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: sans-serif; font-size: 0.76rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center; }
+    .unread-count { background: var(--amber); color: var(--primary); border-radius: 12px; padding: 2px 8px; font-size: 0.67rem; font-weight: 700; }
+    .email-item { padding: 15px 18px; border-bottom: 1px solid var(--border); cursor: pointer; }
+    .email-item.active { background: #FBF5EB; border-left: 3px solid var(--amber); }
+    .email-sender { font-weight: 600; font-size: 0.87rem; font-family: sans-serif; }
+    .email-subject { font-size: 0.79rem; color: var(--muted); font-family: sans-serif; margin-top: 4px; }
+    .email-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .email-time { font-size: 0.7rem; color: #bbb; font-family: sans-serif; }
+    .tag { font-size: 0.63rem; padding: 2px 7px; border-radius: 10px; font-family: sans-serif; font-weight: 600; }
+    .tag-excursion { background: #EEF6FF; color: #1D5FA0; }
+    .tag-special { background: #FFF0F5; color: #B03060; }
+    .tag-istria { background: #EDFAF0; color: #1E7A4A; }
+    .draft-panel { padding: 28px 34px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .panel-title { font-size: 1.08rem; font-weight: bold; color: var(--primary); }
+    .ai-badge { background: var(--success); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.69rem; font-family: sans-serif; font-weight: 600; }
+    .original-email { background: var(--cream); border: 1px solid var(--border); border-radius: 6px; padding: 18px; margin-bottom: 20px; }
+    .section-label { font-family: sans-serif; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 8px; }
+    .email-from { font-family: sans-serif; font-size: 0.82rem; margin-bottom: 5px; }
+    .email-from strong { color: var(--primary); }
+    .email-body { font-size: 0.9rem; line-height: 1.7; color: #333; }
+    .draft-box { background: white; border: 2px solid var(--amber); border-radius: 6px; padding: 22px; margin-bottom: 16px; position: relative; }
+    .draft-box::before { content: '✦ AI Draft · Generated in 31s'; position: absolute; top: -12px; left: 16px; background: var(--amber); color: var(--primary); font-size: 0.66rem; font-family: sans-serif; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+    .draft-body { font-size: 0.9rem; line-height: 1.8; color: #1a1a1a; }
+    .draft-body p { margin-bottom: 12px; }
+    .example-nav { display: flex; gap: 8px; margin-bottom: 20px; }
+    .ex-btn { padding: 7px 13px; border-radius: 6px; font-size: 0.76rem; font-family: sans-serif; cursor: pointer; border: 1.5px solid var(--border); background: white; color: var(--muted); }
+    .ex-btn.active { border-color: var(--amber); background: #FBF5EB; color: var(--primary); font-weight: 600; }
+    .draft-actions { display: flex; gap: 10px; }
+    .btn { padding: 9px 18px; border-radius: 4px; font-family: sans-serif; font-size: 0.8rem; font-weight: 600; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: white; color: var(--primary); border: 1.5px solid var(--primary); }
+    .btn-amber { background: var(--amber); color: var(--primary); }
+    .roi-section { background: var(--primary); color: white; padding: 34px 40px; }
+    .roi-title { font-size: 1.2rem; font-weight: bold; margin-bottom: 6px; }
+    .roi-subtitle { color: #c4a882; font-family: sans-serif; font-size: 0.8rem; margin-bottom: 24px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .roi-card { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 6px; padding: 16px; }
+    .roi-number { font-size: 1.85rem; font-weight: bold; color: var(--amber); }
+    .roi-desc { font-size: 0.74rem; color: #ccc; font-family: sans-serif; margin-top: 5px; line-height: 1.5; }
+    .pricing-row { display: flex; gap: 12px; }
+    .price-card { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 6px; padding: 16px; }
+    .price-card.highlight { background: var(--amber); border-color: var(--amber); color: var(--primary); }
+    .price-name { font-family: sans-serif; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 7px; }
+    .price-amount { font-size: 1.2rem; font-weight: bold; }
+    .price-monthly { font-size: 0.72rem; margin-top: 2px; opacity: 0.85; font-family: sans-serif; }
+    .price-features { margin-top: 10px; font-size: 0.74rem; font-family: sans-serif; line-height: 1.8; opacity: 0.9; }
+    .footer-note { background: white; padding: 16px 40px; text-align: center; font-family: sans-serif; font-size: 0.77rem; color: var(--muted); border-top: 1px solid var(--border); }
+    .footer-note strong { color: var(--primary); }
+    .example { display: none; }
+    .example.visible { display: block; }
+  </style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <div class="hotel-icon">⚜️</div>
+    <div>
+      <div class="hotel-name">Angelo d'Oro Heritage Hotel</div>
+      <div class="hotel-sub">Rovinj Old Town · Istria · Croatia · 17th-Century Bishop's Palace</div>
+    </div>
+  </div>
+  <div class="demo-badge">✦ AI CONCIERGE DEMO</div>
+</div>
+<div class="award-bar">
+  🏰 <span>Former Bishop's Palace, 17th century</span>
+  &nbsp;|&nbsp; ⭐ <span>9.2/10 on Booking.com (933 reviews)</span>
+  &nbsp;|&nbsp; 27 rooms & suites · Pedestrian Old Town · Premium Adriatic clientele
+</div>
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🏨 Reservations</div>
+  <div class="tab">📊 Reports</div>
+</div>
+<div class="stats-bar">
+  <div class="stat"><div class="stat-value">25</div><div class="stat-label">Emails today</div></div>
+  <div class="stat"><div class="stat-value">31s</div><div class="stat-label">Avg draft time</div></div>
+  <div class="stat"><div class="stat-value">4</div><div class="stat-label">Awaiting review</div></div>
+  <div class="stat"><div class="stat-value">96%</div><div class="stat-label">Drafts approved</div></div>
+</div>
+<div class="main">
+  <div class="inbox">
+    <div class="inbox-header">Inbox <span class="unread-count">4 new</span></div>
+    <div class="email-item active">
+      <div class="email-meta"><span class="email-sender">Emma & Patrick Walsh</span><span class="email-time">10:55</span></div>
+      <div class="email-subject">Island hopping excursion — Rovinj archipelago</div>
+      <div class="tag tag-excursion">Excursion</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Lars Andersen</span><span class="email-time">10:14</span></div>
+      <div class="email-subject">50th birthday celebration — suite & dinner</div>
+      <div class="tag tag-special">Special occasion</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Monika & Piotr Kowalski</span><span class="email-time">09:30</span></div>
+      <div class="email-subject">Best Istrian truffle experience near Rovinj?</div>
+      <div class="tag tag-istria">Local Experience</div>
+    </div>
+    <div class="email-item">
+      <div class="email-meta"><span class="email-sender">Claire Dubois</span><span class="email-time">Yesterday</span></div>
+      <div class="email-subject">Sunset painting workshop — do you know one?</div>
+      <div class="tag tag-excursion">Activity</div>
+    </div>
+  </div>
+  <div class="draft-panel">
+    <div class="panel-header">
+      <div class="panel-title">Draft reply — Emma & Patrick Walsh</div>
+      <div class="ai-badge">⚡ Generated in 31s</div>
+    </div>
+    <div class="example-nav">
+      <button class="ex-btn active" onclick="showEx(0)">⛵ Island excursion</button>
+      <button class="ex-btn" onclick="showEx(1)">🎂 Birthday suite</button>
+      <button class="ex-btn" onclick="showEx(2)">🍄 Truffle hunting</button>
+    </div>
+    <div class="example visible" id="ex0">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Emma & Patrick Walsh &lt;epatrickw@gmail.com&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Island hopping excursion — Rovinj archipelago</div>
+        <div class="email-body" style="margin-top:10px;">Hi Angelo d'Oro,<br><br>We're arriving next Tuesday for 4 nights. We'd love to do a boat trip around the Rovinj islands — ideally a private boat with a captain who knows the area well. Snorkelling spots, hidden coves, that kind of thing. Can you arrange something? Party of 2.<br><br>Emma & Patrick</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Emma and Patrick,</p>
+          <p>You've chosen exactly the right base for this — Rovinj's archipelago of 13 islands is one of the most beautiful stretches of the Adriatic, and a private boat is the only way to truly discover it.</p>
+          <p>We work with a trusted local captain who knows every hidden cove, the best snorkelling reefs in the Red Island and St Catherine's channels, and the tiny pebble beaches that don't appear on any map. A full-day private excursion for two, including fuel, a cooler with local wine and snacks, and swimming stops, can be arranged for any day of your stay.</p>
+          <p>Could you let me know which day would suit you best? I'll coordinate directly with our captain and have everything confirmed for your arrival.</p>
+          <p>Looking forward to welcoming you,<br><strong>[Concierge Team]</strong><br>Angelo d'Oro Heritage Hotel | Rovinj, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-amber">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex1">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Lars Andersen &lt;l.andersen@dk.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> 50th birthday celebration — suite & dinner</div>
+        <div class="email-body" style="margin-top:10px;">Dear team,<br><br>My wife's 50th birthday falls during our stay (17 July). I would like to make it special — a suite if available, and a memorable dinner. She loves seafood and doesn't know I'm planning this. Any ideas?<br><br>Lars</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Lars,</p>
+          <p>What a wonderful surprise to be planning — and a 50th birthday in Rovinj is truly something to remember. Your secret is entirely safe with us.</p>
+          <p>I'm delighted to upgrade you to one of our heritage suites for 17 July. Upon arrival, we'll arrange a floral welcome and a bottle of Malvazija — the finest Istrian white — chilled and waiting. For the birthday dinner, I'd like to propose a private table on the terrace of one of Rovinj's finest seafood restaurants, where the catch comes off the boat that morning. I'll brief them personally.</p>
+          <p>Could you share any other details — favourite flowers, any wines she particularly loves? We'll make sure every detail is right.</p>
+          <p>Warmly,<br><strong>[Guest Relations]</strong><br>Angelo d'Oro Heritage Hotel | Rovinj, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-amber">↺ Regenerate</button>
+      </div>
+    </div>
+    <div class="example" id="ex2">
+      <div class="original-email">
+        <div class="section-label">Incoming email</div>
+        <div class="email-from"><strong>From:</strong> Monika & Piotr Kowalski &lt;mkowalski@pl.net&gt;</div>
+        <div class="email-from"><strong>Subject:</strong> Best Istrian truffle experience near Rovinj?</div>
+        <div class="email-body" style="margin-top:10px;">Hello,<br><br>We've heard Istria is famous for truffles and we would love to have a real experience — maybe a hunt in the forest? And a proper truffle dinner afterwards. Is this something you can organise? We arrive Friday.<br><br>Monika & Piotr</div>
+      </div>
+      <div class="draft-box">
+        <div class="draft-body">
+          <p>Dear Monika and Piotr,</p>
+          <p>You've heard correctly — Istrian truffles are among the finest in the world, and the forests around Motovun and Buzet are extraordinary. This is one of our most-requested experiences and we'd love to put it together for you.</p>
+          <p>We can arrange a half-day truffle hunt with a local truffle hunter and his dogs in the oak forests of inland Istria — a genuinely authentic experience. Afterwards, dinner at a family-run konoba (country restaurant) where truffles appear in every course: shaved over pasta, stirred into eggs, with local prosciutto and Istrian olive oil.</p>
+          <p>The drive from Rovinj takes about 45 minutes and the setting is stunning. We recommend Saturday morning — shall I book this for you? I'll confirm all details by tomorrow.</p>
+          <p>Warmly,<br><strong>[Concierge Team]</strong><br>Angelo d'Oro Heritage Hotel | Rovinj, Croatia</p>
+        </div>
+      </div>
+      <div class="draft-actions">
+        <button class="btn btn-primary">✓ Approve & Send</button>
+        <button class="btn btn-secondary">✏️ Edit</button>
+        <button class="btn btn-amber">↺ Regenerate</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="roi-section">
+  <div class="roi-title">Your return on investment — Angelo d'Oro Heritage Hotel</div>
+  <div class="roi-subtitle">Based on 27 rooms and the premium concierge-intensive email volume of an Istrian heritage hotel</div>
+  <div class="roi-grid">
+    <div class="roi-card"><div class="roi-number">~25</div><div class="roi-desc">emails per day — excursions, birthday setups, local tips, bookings</div></div>
+    <div class="roi-card"><div class="roi-number">7 min</div><div class="roi-desc">avg time to write a personalised Istrian reply — down to 31s</div></div>
+    <div class="roi-card"><div class="roi-number">~2.9 hrs</div><div class="roi-desc">saved every day for your reception team</div></div>
+    <div class="roi-card"><div class="roi-number">~€2,600</div><div class="roi-desc">in staff hours saved per month (€15/hr equivalent)</div></div>
+  </div>
+  <div class="pricing-row">
+    <div class="price-card"><div class="price-name">Standard</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 80€ / month</div><div class="price-features">✓ AI concierge agent<br>✓ Inbox analysis<br>✓ Draft generation</div></div>
+    <div class="price-card highlight"><div class="price-name">⭐ Premium — Recommended</div><div class="price-amount">800€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 120€ / month</div><div class="price-features">✓ Everything in Standard<br>✓ Auto weekly improvement<br>✓ Monthly performance report</div></div>
+    <div class="price-card"><div class="price-name">Premium+</div><div class="price-amount">1,200€ <span style="font-size:0.77rem;font-weight:normal;">setup</span></div><div class="price-monthly">then 150€ / month</div><div class="price-features">✓ Everything in Premium<br>✓ Training on your real emails<br>✓ Matches Angelo d'Oro's voice</div></div>
+  </div>
+</div>
+<div class="footer-note">
+  This personalised demo was created by <strong>Enzo Cosnard</strong>, Intern at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — where this AI Concierge is already live in production.
+  Contact: <strong>enzo26cosnard@gmail.com</strong>
+</div>
+<script>
+function showEx(n) {
+  document.querySelectorAll('.example').forEach(e => e.classList.remove('visible'));
+  document.querySelectorAll('.ex-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('ex' + n).classList.add('visible');
+  document.querySelectorAll('.ex-btn')[n].classList.add('active');
+}
+</script>
+</body>
+</html>
