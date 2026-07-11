@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Palazzo Previtera</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f5f0; min-height: 100vh; display: flex; flex-direction: column; }
+        .header {
+            background: #2a1810;
+            padding: 30px 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        .header-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #c84b00, #e07030, #c84b00); }
+        .stars { color: #e07030; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: #fff; letter-spacing: 4px; margin-bottom: 4px; }
+        .hotel-sub { font-size: 11px; color: #e07030; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 6px; }
+        .subtitle { font-size: 11px; color: rgba(255,255,255,0.5); letter-spacing: 3px; text-transform: uppercase; }
+        .award-row { margin-top: 14px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .award-badge { background: rgba(224,112,48,0.15); border: 1px solid rgba(224,112,48,0.4); color: #e07030; font-size: 10px; padding: 4px 12px; letter-spacing: 1px; }
+        .tabs { display: flex; background-color: #fff; padding: 0 40px; border-bottom: 1px solid #e8ddd5; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
+        .tab:hover { color: #2a1810; }
+        .tab.active { color: #2a1810; border-bottom-color: #c84b00; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #c84b00; color: white; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+        .refresh-btn:hover { background: #a03800; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #ddd; background: white; cursor: pointer; transition: all 0.2s; }
+        .filter:hover, .filter.active { background: #2a1810; color: white; border-color: #2a1810; }
+        .filter .count { background: #f0e8df; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #e8ddd5; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #f5ede5; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f8f5f0; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #2a1810; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; }
+        .tag.urgent { background: #fee2e2; color: #dc2626; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .tag.processed { background: #e0e7ff; color: #4f46e5; }
+        .tag.escalated { background: #fce7f3; color: #db2777; }
+        .ai-response { background: #fdf5ef; border-left: 3px solid #c84b00; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #c84b00; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .roi-box { background: white; border: 1px solid #e8ddd5; padding: 30px; margin-top: 24px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #2a1810; margin-bottom: 20px; }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+        .roi-card { background: #fdf5ef; padding: 20px; text-align: center; border-top: 3px solid #c84b00; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #c84b00; font-weight: 600; }
+        .roi-label { font-size: 10px; color: #888; letter-spacing: 1px; margin-top: 4px; }
+        .roi-note { font-size: 12px; color: #666; line-height: 1.7; background: #f8f5f0; padding: 16px; border-left: 3px solid #2a1810; }
+        .footer { background: #2a1810; color: rgba(255,255,255,0.4); padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .analyze-content, .history-content, .reservations-content, .invoices-content { background: white; border: 1px solid #e8ddd5; padding: 40px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid #e8ddd5; padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; }
+        .analyze-btn { background: #c84b00; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #888; padding: 12px 15px; border-bottom: 1px solid #e8ddd5; font-weight: 500; }
+        .history-table td { padding: 15px; font-size: 13px; border-bottom: 1px solid #f5ede5; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">PALAZZO PREVITERA</div>
+        <div class="hotel-sub">LIVING MUSEUM OF ETNA · LUXURY GUESTHOUSE</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · LINGUAGLOSSA, ETNA</div>
+        <div class="award-row">
+            <span class="award-badge">MICHELIN GUIDE 2025</span>
+            <span class="award-badge">CONDÉ NAST — BEST HOTEL SICILY 2026</span>
+            <span class="award-badge">EST. 1649</span>
+        </div>
+        <div class="header-accent"></div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS CREATED</div>
+        <div class="tab" data-tab="invoices">🔥 INVOICES</div>
+    </div>
+
+    <div class="main-content">
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">2</span></div>
+                    <div class="filter">ESCALATED <span class="count">0</span></div>
+                    <div class="filter">URGENT <span class="count">0</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">1</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <!-- Email 1: Etna hike + wine -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Simon &amp; Kate Ashford</div>
+                        <div class="email-date">Today, 09:05</div>
+                    </div>
+                    <div class="email-subject">Guided Etna hike + wine tasting — 3-night stay</div>
+                    <div class="email-preview">Hi Alfio, we're staying July 21–24 and would love to combine a guided sunrise hike on Etna with a wine tasting from local Nerello Mascalese producers. Can you help us organise this for the full 3 days?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 29s</div>
+                        Dear Simon and Kate,<br><br>
+                        Wonderful choice — Etna at sunrise is an experience that stays with you forever. Here's a suggested programme for your 3 nights at Palazzo Previtera:<br><br>
+                        <b>Day 1 (Jul 21):</b> Arrival + private Nerello Mascalese tasting in the palazzo's cellars — 3 producers, 6 wines, charcuterie pairing<br>
+                        <b>Day 2 (Jul 22):</b> Sunrise crater hike with Alfio's trusted guide (depart 5am, return 11am) — altitude 2,900m, lava fields<br>
+                        <b>Day 3 (Jul 23):</b> Guided visit to a working winery + lunch in a contrada vineyard<br><br>
+                        All can be arranged directly through us. Shall I send a detailed itinerary with pricing?<br><br>
+                        Warmly,<br>Palazzo Previtera Concierge
+                    </div>
+                </div>
+                <!-- Email 2: Art residency inquiry -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Isabella Costa — Studio IC</div>
+                        <div class="email-date">Today, 11:30</div>
+                    </div>
+                    <div class="email-subject">Art residency inquiry — September / October 2026</div>
+                    <div class="email-preview">Dear Alfio, I am a ceramicist based in Milan. I came across your living museum concept and I am deeply interested in applying for an artist residency at Palazzo Previtera. Do you have availability for a 2-week stay?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 33s</div>
+                        Dear Isabella,<br><br>
+                        Thank you for reaching out — your work in ceramics sounds wonderfully aligned with the spirit of Palazzo Previtera as a living museum and creative space.<br><br>
+                        Alfio Puglisi personally reviews all residency applications, as each artist becomes part of the palazzo's ongoing narrative. We currently have availability in October 2026 (confirmed) and late September (pending).<br><br>
+                        To move forward, could you share:<br>
+                        • A brief portfolio or links to recent work<br>
+                        • Your project concept for the residency<br>
+                        • Preferred dates and duration<br><br>
+                        Alfio will review and respond personally within 48 hours.<br><br>
+                        With curiosity and warmth,<br>Palazzo Previtera
+                    </div>
+                </div>
+                <!-- Email 3: Tasting menu -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Marco &amp; Valeria Esposito</div>
+                        <div class="email-date">Yesterday, 21:15</div>
+                    </div>
+                    <div class="email-subject">Menù degustazione — sera del 19 luglio</div>
+                    <div class="email-preview">Buonasera, arriviamo il 19 luglio e vorremmo prenotare il menù degustazione della sera. Siamo in due, una di noi è vegetariana. C'è una versione vegetariana del menù?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">AUTO-REPLIED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT (Italiano)</div>
+                        Buonasera Marco e Valeria,<br><br>
+                        Benvenuti a Palazzo Previtera! Siamo lieti di confermare che il nostro menù degustazione è disponibile in versione vegetariana, con prodotti dell'Etna e dell'entroterra siciliano.<br><br>
+                        <b>Cena del 19 luglio:</b> Riservata per 2 persone — 1 menù classico + 1 menù vegetariano<br>
+                        <b>Orario:</b> 20:00 (consigliato per la luce serale sul giardino)<br>
+                        <b>Abbinamento vini:</b> Disponibile su richiesta (Nerello Mascalese, Etna Bianco)<br><br>
+                        Ho preso nota delle vostre preferenze. A presto!<br>
+                        Palazzo Previtera
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROI Box -->
+            <div class="roi-box">
+                <div class="roi-title">Your ROI with AI Concierge</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">~7</div>
+                        <div class="roi-label">EMAILS / DAY<br>(7 ROOMS + EVENTS)</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">3.5h</div>
+                        <div class="roi-label">SAVED / DAY<br>FOR ALFIO'S TEAM</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~24h</div>
+                        <div class="roi-label">SAVED / WEEK<br>IT / EN / DE / FR</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    <b>Alfio Puglisi runs Palazzo Previtera as a living museum — every guest is unique, every email deserves a craft response.</b> The AI handles the standard requests (transfers, menus, bookings) so Alfio can focus on what only he can do: curating residencies, guiding tastings, and building the story of the palazzo. From <b>€80/month</b>.
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3 style="margin-bottom: 20px; color: #2a1810; font-family: 'Cormorant Garamond', serif; font-size: 24px;">Paste an incoming email to analyze</h3>
+                <textarea placeholder="Paste email content here — Italian, English, French or German — AI responds in under 30 seconds..."></textarea>
+                <button class="analyze-btn">ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>DATE</th><th>GUEST</th><th>SUBJECT</th><th>STATUS</th><th>RESPONSE TIME</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>Elena Voss (DE)</td><td>Etna observatory visit request</td><td><span class="status-badge sent">SENT</span></td><td>31s</td></tr>
+                        <tr><td>Jul 09, 2026</td><td>Patrick Morel (FR)</td><td>Séjour photographique — Etna</td><td><span class="status-badge sent">SENT</span></td><td>28s</td></tr>
+                        <tr><td>Jul 08, 2026</td><td>Condé Nast Traveller</td><td>Press visit coordination</td><td><span class="status-badge sent">SENT</span></td><td>35s</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESERVATIONS TAB -->
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>CREATED</th><th>GUEST</th><th>DATES</th><th>ROOM TYPE</th><th>VALUE</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>Simon &amp; Kate Ashford</td><td>Jul 21–24, 2026</td><td>Suite Etna View</td><td>€2,040</td></tr>
+                        <tr><td>Jul 08, 2026</td><td>Henry &amp; Judith Clarke</td><td>Aug 5–9, 2026</td><td>Junior Suite</td><td>€2,400</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- INVOICES TAB -->
+        <div class="tab-content" id="invoices">
+            <div class="invoices-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>DATE</th><th>INVOICE #</th><th>GUEST</th><th>AMOUNT</th><th>STATUS</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>PP-2026-0089</td><td>Anna &amp; Robert Steiner</td><td>€1,960</td><td><span class="status-badge sent">PAID</span></td></tr>
+                        <tr><td>Jul 09, 2026</td><td>PP-2026-0088</td><td>Marco &amp; Valeria Esposito</td><td>€1,480</td><td><span class="status-badge pending">PENDING</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">AI CONCIERGE V3.0 — PALAZZO PREVITERA · ETNA, SICILIA · POWERED BY IBB PALAZZO BETTINA TECHNOLOGY</div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

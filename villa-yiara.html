@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Villa Yiara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8f8f3; min-height: 100vh; display: flex; flex-direction: column; }
+        .header {
+            background: linear-gradient(160deg, #1a4a5e 0%, #2a7a9e 60%, #3a9abf 100%);
+            padding: 30px 40px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 4px; background: #f5d06a; }
+        .stars { color: #f5d06a; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 400; color: #fff; letter-spacing: 6px; margin-bottom: 4px; }
+        .hotel-tagline { font-family: 'Cormorant Garamond', serif; font-size: 14px; font-style: italic; color: rgba(255,255,255,0.8); letter-spacing: 1px; margin-bottom: 6px; }
+        .subtitle { font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing: 3px; text-transform: uppercase; }
+        .award-row { margin-top: 14px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .award-pill { background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25); color: #f5d06a; font-size: 10px; padding: 4px 12px; letter-spacing: 1px; }
+        .tabs { display: flex; background-color: #fff; padding: 0 40px; border-bottom: 1px solid #e4e8d8; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s; }
+        .tab:hover { color: #1a4a5e; }
+        .tab.active { color: #1a4a5e; border-bottom-color: #f5d06a; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #1a4a5e; color: white; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+        .refresh-btn:hover { background: #0d3040; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #ddd; background: white; cursor: pointer; transition: all 0.2s; }
+        .filter:hover, .filter.active { background: #1a4a5e; color: white; border-color: #1a4a5e; }
+        .filter .count { background: #e4e8d8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #e4e8d8; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #f0f2e8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f8f8f3; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #1a4a5e; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; }
+        .tag.urgent { background: #fee2e2; color: #dc2626; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .tag.processed { background: #e0e7ff; color: #4f46e5; }
+        .tag.escalated { background: #fce7f3; color: #db2777; }
+        .ai-response { background: #eef4f8; border-left: 3px solid #2a7a9e; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #1a4a5e; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .roi-box { background: white; border: 1px solid #e4e8d8; padding: 30px; margin-top: 24px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #1a4a5e; margin-bottom: 20px; }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+        .roi-card { background: #eef4f8; padding: 20px; text-align: center; border-top: 3px solid #f5d06a; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #1a4a5e; font-weight: 600; }
+        .roi-label { font-size: 10px; color: #888; letter-spacing: 1px; margin-top: 4px; }
+        .roi-note { font-size: 12px; color: #666; line-height: 1.7; background: #f8f8f3; padding: 16px; border-left: 3px solid #f5d06a; }
+        .footer { background: #1a4a5e; color: rgba(255,255,255,0.4); padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .analyze-content, .history-content, .reservations-content, .invoices-content { background: white; border: 1px solid #e4e8d8; padding: 40px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid #e4e8d8; padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; }
+        .analyze-btn { background: #1a4a5e; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #888; padding: 12px 15px; border-bottom: 1px solid #e4e8d8; font-weight: 500; }
+        .history-table td { padding: 15px; font-size: 13px; border-bottom: 1px solid #f0f2e8; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">VILLA YIARA</div>
+        <div class="hotel-tagline">Your Home in Positano — Adults Only</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · POSITANO, AMALFI COAST</div>
+        <div class="award-row">
+            <span class="award-pill">#1 TRIPADVISOR POSITANO</span>
+            <span class="award-pill">4.9/5 — 773 REVIEWS</span>
+            <span class="award-pill">8 SEA-VIEW ROOMS</span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS CREATED</div>
+        <div class="tab" data-tab="invoices">🔥 INVOICES</div>
+    </div>
+
+    <div class="main-content">
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">2</span></div>
+                    <div class="filter">ESCALATED <span class="count">0</span></div>
+                    <div class="filter">URGENT <span class="count">0</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">1</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+                <!-- Email 1: Jacuzzi + anniversary -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">David &amp; Rebecca Stern</div>
+                        <div class="email-date">Today, 08:12</div>
+                    </div>
+                    <div class="email-subject">Jacuzzi room + surprise rose petals — honeymoon arrival</div>
+                    <div class="email-preview">Dear Villa Yiara, we are arriving on our honeymoon on July 22. Could we request one of the jacuzzi rooms, and could you possibly arrange rose petals and a bottle of Prosecco in the room on arrival? We want it to be magical.</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 26s</div>
+                        Dear David and Rebecca,<br><br>
+                        Congratulations on your upcoming honeymoon — we would be honoured to make your arrival at Villa Yiara truly special!<br><br>
+                        <b>Jacuzzi Room:</b> Confirmed available for July 22 — private sea-view terrace included<br>
+                        <b>Room preparation:</b> Rose petal turndown, Prosecco from the Amalfi Coast, local sweets from Positano's historic pasticceria — all arranged with love by Yiara and Silvio's team<br>
+                        <b>Bonus:</b> Breakfast on your private terrace at your chosen time the next morning<br><br>
+                        Welcome to your home in Positano, newlyweds.<br><br>
+                        With warmth,<br>Villa Yiara — Imara, Yiara &amp; Silvio
+                    </div>
+                </div>
+                <!-- Email 2: boat hire -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Chiara Moretti</div>
+                        <div class="email-date">Today, 11:35</div>
+                    </div>
+                    <div class="email-subject">Noleggio barchino privato — Capri e Li Galli</div>
+                    <div class="email-preview">Buongiorno! Sarò a Villa Yiara dal 18 al 22 luglio. Vorrei noleggiare un piccolo gozzo privato per una giornata con skipper per visitare Capri e le Isole Li Galli. Potete aiutarmi?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE (Italiano) — generated in 29s</div>
+                        Buongiorno Chiara,<br><br>
+                        Che itinerario fantastico — Capri e Le Li Galli sono due dei posti più belli della costiera!<br><br>
+                        <b>Gozzo privato con skipper:</b> disponibile per la giornata, partenza dal porto di Positano (5 min a piedi da Villa Yiara)<br>
+                        <b>Itinerario consigliato:</b> Villa Yiara → Li Galli (ex residenza di Nureyev) → Capri / Marina Piccola → sosta snorkeling → rientro al tramonto<br>
+                        <b>Tariffa indicativa:</b> €380–450 per la giornata intera (skipper + carburante inclusi)<br><br>
+                        Ho verificato la disponibilità per il periodo 18–22 luglio. Quale giorno preferirebbe?<br><br>
+                        A presto,<br>Villa Yiara
+                    </div>
+                </div>
+                <!-- Email 3: TripAdvisor review inquiry -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Amanda &amp; John Fletcher</div>
+                        <div class="email-date">Yesterday, 22:00</div>
+                    </div>
+                    <div class="email-subject">Review: just the most incredible stay — and a question</div>
+                    <div class="email-preview">We've just posted our TripAdvisor review (5 stars of course). The room, the views, the welcome — truly unforgettable. Quick question: is it possible to book the same room for next July already?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">AUTO-REPLIED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT</div>
+                        Dear Amanda and John,<br><br>
+                        Your kind words mean the world to us — thank you for taking the time to share your experience on TripAdvisor. It is our greatest reward.<br><br>
+                        We would be delighted to reserve your room for next July. Guests who return with such love always get our best availability!<br><br>
+                        <b>Early reservation for July 2027:</b> I've noted your room preference. We recommend booking by September 2026 for peak summer dates.<br><br>
+                        We look forward to welcoming you back home.<br><br>
+                        With gratitude,<br>Villa Yiara — Yiara, Silvio &amp; Imara
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROI Box -->
+            <div class="roi-box">
+                <div class="roi-title">Your ROI with AI Concierge</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">~6</div>
+                        <div class="roi-label">EMAILS / DAY<br>(8 ROOMS, ADULTS ONLY)</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">3h</div>
+                        <div class="roi-label">SAVED / DAY<br>FOR YIARA'S FAMILY</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~21h</div>
+                        <div class="roi-label">SAVED / WEEK<br>EN / IT / FR</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    <b>Villa Yiara's 4.9/5 rating is earned reply by reply.</b> With only 8 rooms and a family-run team, every minute spent drafting emails is a minute not spent welcoming guests or curating experiences. The AI keeps the warmth and personal touch — in English, Italian and French — in under 30 seconds. From <b>€80/month</b>.
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3 style="margin-bottom: 20px; color: #1a4a5e; font-family: 'Cormorant Garamond', serif; font-size: 24px;">Paste an incoming email to analyze</h3>
+                <textarea placeholder="Paste email content here — English or Italian — the AI maintains Villa Yiara's warm, personal tone in 30 seconds..."></textarea>
+                <button class="analyze-btn">ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>DATE</th><th>GUEST</th><th>SUBJECT</th><th>STATUS</th><th>RESPONSE TIME</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>Emma &amp; Tom Collins (UK)</td><td>Jacuzzi availability August</td><td><span class="status-badge sent">SENT</span></td><td>27s</td></tr>
+                        <tr><td>Jul 09, 2026</td><td>Lucía Fernández (ES)</td><td>Taxi from Naples airport</td><td><span class="status-badge sent">SENT</span></td><td>31s</td></tr>
+                        <tr><td>Jul 08, 2026</td><td>Margot Delacroix (FR)</td><td>Terrasse privée — question horaires</td><td><span class="status-badge sent">SENT</span></td><td>28s</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESERVATIONS TAB -->
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>CREATED</th><th>GUEST</th><th>DATES</th><th>ROOM TYPE</th><th>VALUE</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>David &amp; Rebecca Stern</td><td>Jul 22–26, 2026</td><td>Sea View Jacuzzi Room</td><td>€2,160</td></tr>
+                        <tr><td>Jul 08, 2026</td><td>Chiara Moretti</td><td>Jul 18–22, 2026</td><td>Double Sea View</td><td>€1,840</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- INVOICES TAB -->
+        <div class="tab-content" id="invoices">
+            <div class="invoices-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>DATE</th><th>INVOICE #</th><th>GUEST</th><th>AMOUNT</th><th>STATUS</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>VY-2026-0203</td><td>Peter &amp; Carolyn Matthews</td><td>€1,960</td><td><span class="status-badge sent">PAID</span></td></tr>
+                        <tr><td>Jul 09, 2026</td><td>VY-2026-0202</td><td>Marco Bernardini</td><td>€1,440</td><td><span class="status-badge pending">PENDING</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">AI CONCIERGE V3.0 — VILLA YIARA · POSITANO, AMALFI COAST · POWERED BY IBB PALAZZO BETTINA TECHNOLOGY</div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

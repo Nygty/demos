@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Santa Lucia Boutique Hotel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8faf6; min-height: 100vh; display: flex; flex-direction: column; }
+        .header {
+            background: linear-gradient(160deg, #2e5e3a 0%, #4a8c5c 100%);
+            padding: 30px 40px;
+            color: white;
+        }
+        .stars { color: #e8d87a; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: #fff; letter-spacing: 3px; margin-bottom: 4px; }
+        .subtitle { font-size: 11px; color: rgba(255,255,255,0.65); letter-spacing: 3px; text-transform: uppercase; }
+        .header-meta { margin-top: 16px; display: flex; gap: 16px; flex-wrap: wrap; }
+        .meta-pill { background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); padding: 5px 14px; font-size: 11px; letter-spacing: 1px; color: rgba(255,255,255,0.9); }
+        .tabs { display: flex; background-color: #fff; padding: 0 40px; border-bottom: 2px solid #d8e8d2; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #888; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+        .tab:hover { color: #2e5e3a; }
+        .tab.active { color: #2e5e3a; border-bottom-color: #2e5e3a; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #2e5e3a; color: white; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+        .refresh-btn:hover { background: #1f4028; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #ddd; background: white; cursor: pointer; transition: all 0.2s; }
+        .filter:hover, .filter.active { background: #2e5e3a; color: white; border-color: #2e5e3a; }
+        .filter .count { background: #d8e8d2; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.25); }
+        .email-list { background: white; border: 1px solid #d8e8d2; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #ecf4e8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f8faf6; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #2e5e3a; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; }
+        .tag.urgent { background: #fee2e2; color: #dc2626; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .tag.processed { background: #e0e7ff; color: #4f46e5; }
+        .tag.escalated { background: #fce7f3; color: #db2777; }
+        .ai-response { background: #f2f8ef; border-left: 3px solid #4a8c5c; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #2e5e3a; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+        .local-badge { background: #d1fae5; color: #065f46; padding: 10px 16px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 24px; display: inline-block; }
+        .roi-box { background: white; border: 1px solid #d8e8d2; padding: 30px; margin-top: 24px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: #2e5e3a; margin-bottom: 20px; }
+        .roi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
+        .roi-card { background: #f2f8ef; padding: 20px; text-align: center; border-top: 3px solid #4a8c5c; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; color: #2e5e3a; font-weight: 600; }
+        .roi-label { font-size: 10px; color: #888; letter-spacing: 1px; margin-top: 4px; }
+        .roi-note { font-size: 12px; color: #555; line-height: 1.7; background: #f8faf6; padding: 16px; border-left: 3px solid #e8d87a; }
+        .footer { background: #1f4028; color: rgba(255,255,255,0.5); padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .analyze-content, .history-content, .reservations-content, .invoices-content { background: white; border: 1px solid #d8e8d2; padding: 40px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid #d8e8d2; padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; }
+        .analyze-btn { background: #2e5e3a; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #888; padding: 12px 15px; border-bottom: 1px solid #d8e8d2; font-weight: 500; }
+        .history-table td { padding: 15px; font-size: 13px; border-bottom: 1px solid #ecf4e8; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">SANTA LUCIA BOUTIQUE HOTEL</div>
+        <div class="subtitle">AI CONCIERGE · FRONT DESK · GOZO, MALTA</div>
+        <div class="header-meta">
+            <span class="meta-pill">18 ROOMS</span>
+            <span class="meta-pill">IRENE &amp; MARIO — FAMILY RUN</span>
+            <span class="meta-pill">9.3/10 — 1,249 REVIEWS</span>
+            <span class="meta-pill">OUTDOOR POOL · HOT TUB</span>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+        <div class="tab" data-tab="reservations">RESERVATIONS CREATED</div>
+        <div class="tab" data-tab="invoices">🔥 INVOICES</div>
+    </div>
+
+    <div class="main-content">
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">2</span></div>
+                    <div class="filter">ESCALATED <span class="count">0</span></div>
+                    <div class="filter">URGENT <span class="count">0</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">1</span></div>
+                </div>
+            </div>
+
+            <div class="local-badge">🇲🇹 AI Concierge already live at IBB Palazzo Bettina, Birgu — 20 km from Gozo</div>
+
+            <div class="email-list">
+                <!-- Email 1: Long-stay discount inquiry -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Rachel &amp; Daniel Morrison</div>
+                        <div class="email-date">Today, 10:22</div>
+                    </div>
+                    <div class="email-subject">Long stay inquiry — 10 nights in August, best rate?</div>
+                    <div class="email-preview">Hi, we are planning to stay in Gozo for 10 nights in August (Aug 3–13). We noticed you have long-stay discounts. What would be the best deal for us? We are two adults, no children.</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 29s</div>
+                        Dear Rachel and Daniel,<br><br>
+                        Thank you for considering Santa Lucia for your Gozo escape — 10 nights in August is a wonderful choice!<br><br>
+                        For stays of 5+ nights, we offer our <b>Long Stay Rate: 35% OFF</b> across all room categories. For August 3–13, our Superior Suite is the perfect choice with a sunrise terrace overlooking the countryside.<br><br>
+                        <b>Superior Suite (10 nights):</b> Best available rate with long-stay discount applied<br>
+                        <b>Inclusions:</b> Daily breakfast, complimentary minibar, welcome drink on arrival<br><br>
+                        Shall I check exact availability for those dates and send you a formal quote?<br><br>
+                        Warm regards,<br>Santa Lucia Boutique Hotel
+                    </div>
+                </div>
+                <!-- Email 2: Wedding venue -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Joanna &amp; Mark Elliot</div>
+                        <div class="email-date">Today, 14:38</div>
+                    </div>
+                    <div class="email-subject">Exclusive hire for wedding weekend — September 2026</div>
+                    <div class="email-preview">We are looking for an intimate venue in Gozo for our wedding weekend (Sept 12–14, 2026). We'd like to enquire about hiring the full property for approximately 30 guests, including outdoor ceremony by the pool.</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — generated in 32s</div>
+                        Dear Joanna and Mark,<br><br>
+                        Congratulations on your upcoming wedding! Santa Lucia's countryside setting with pool and hot tub terrace is truly a magical backdrop for an intimate celebration.<br><br>
+                        We can accommodate exclusive hire for your weekend (Sept 12–14) across all 18 rooms for your 30 guests, including:<br>
+                        • Outdoor ceremony space by the pool<br>
+                        • Private dinner &amp; reception catering<br>
+                        • Accommodation for the full weekend<br>
+                        • Dedicated coordinator from our team<br><br>
+                        September 12–14 is still available on our calendar. Shall I send a full events pack and pricing for your review?<br><br>
+                        Best wishes,<br>Santa Lucia Events Team
+                    </div>
+                </div>
+                <!-- Email 3: Activities -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Nicole Ferris</div>
+                        <div class="email-date">Yesterday, 18:12</div>
+                    </div>
+                    <div class="email-subject">What activities can you recommend for 5 days in Gozo?</div>
+                    <div class="email-preview">Hi there! I'll be staying with you from July 28 for 5 nights, solo traveller. Could you recommend activities to fill my days? I love diving, cycling, and local food experiences.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">AUTO-REPLIED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT</div>
+                        Dear Nicole,<br><br>
+                        Welcome to Gozo soon! As a solo traveller who loves diving, cycling and food — you've picked the right island.<br><br>
+                        <b>Diving:</b> The Blue Hole at Dwejra is world-class — we can book your dives via the Triggle app<br>
+                        <b>Cycling:</b> Half-day e-bike tour of the Citadel and salt pans (we provide the bikes)<br>
+                        <b>Food:</b> Cooking class with a local family in Xagħra + Ftira bread &amp; gbejniet tasting<br>
+                        <b>Bonus:</b> Sunset at Ta' Ċenċ cliffs — 15 min from us, spectacular views<br><br>
+                        I'll prepare a personalised day-by-day itinerary for your arrival on July 28.<br><br>
+                        See you soon,<br>Santa Lucia Concierge
+                    </div>
+                </div>
+            </div>
+
+            <!-- ROI Box -->
+            <div class="roi-box">
+                <div class="roi-title">Your ROI with AI Concierge</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">~13</div>
+                        <div class="roi-label">EMAILS / DAY<br>(18 ROOMS, PEAK SEASON)</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">6h</div>
+                        <div class="roi-label">SAVED / DAY<br>FOR IRENE &amp; MARIO</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~43h</div>
+                        <div class="roi-label">SAVED / WEEK<br>EVERY WEEK</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    <b>Gozo neighbour advantage:</b> The same AI Concierge is already live at IBB Palazzo Bettina in Birgu — a family boutique just 20 km away. Irene and Mario could have the same system running within days, not months. Starting from <b>€80/month</b>.
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3 style="margin-bottom: 20px; color: #2e5e3a; font-family: 'Cormorant Garamond', serif; font-size: 24px;">Paste an incoming email to analyze</h3>
+                <textarea placeholder="Paste email content here — the AI drafts a response in the guest's language in under 30 seconds..."></textarea>
+                <button class="analyze-btn">ANALYZE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>DATE</th><th>GUEST</th><th>SUBJECT</th><th>STATUS</th><th>RESPONSE TIME</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>Amanda Fox (US)</td><td>Airport transfer from Malta</td><td><span class="status-badge sent">SENT</span></td><td>27s</td></tr>
+                        <tr><td>Jul 09, 2026</td><td>Ben &amp; Lucy Hall (UK)</td><td>Hot tub booking request</td><td><span class="status-badge sent">SENT</span></td><td>31s</td></tr>
+                        <tr><td>Jul 08, 2026</td><td>Erika Müller (DE)</td><td>Allergy — gluten-free breakfast</td><td><span class="status-badge sent">SENT</span></td><td>29s</td></tr>
+                        <tr><td>Jul 07, 2026</td><td>Ray &amp; Sandra Vella (MT)</td><td>Gozo ferry booking assistance</td><td><span class="status-badge sent">SENT</span></td><td>26s</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RESERVATIONS TAB -->
+        <div class="tab-content" id="reservations">
+            <div class="reservations-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>CREATED</th><th>GUEST</th><th>DATES</th><th>ROOM TYPE</th><th>VALUE</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>Rachel &amp; Daniel Morrison</td><td>Aug 3–13, 2026</td><td>Superior Suite</td><td>€2,340</td></tr>
+                        <tr><td>Jul 08, 2026</td><td>Philip &amp; Clare Norton</td><td>Jul 22–26, 2026</td><td>Signature Suite</td><td>€1,440</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- INVOICES TAB -->
+        <div class="tab-content" id="invoices">
+            <div class="invoices-content">
+                <table class="history-table">
+                    <thead>
+                        <tr><th>DATE</th><th>INVOICE #</th><th>GUEST</th><th>AMOUNT</th><th>STATUS</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 10, 2026</td><td>SL-2026-0512</td><td>Nonaleyone (US)</td><td>€2,860</td><td><span class="status-badge sent">PAID</span></td></tr>
+                        <tr><td>Jul 09, 2026</td><td>SL-2026-0511</td><td>Tom &amp; Jane Ashby (UK)</td><td>€1,680</td><td><span class="status-badge pending">PENDING</span></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">AI CONCIERGE V3.0 — SANTA LUCIA BOUTIQUE HOTEL · GOZO, MALTA · POWERED BY IBB PALAZZO BETTINA TECHNOLOGY</div>
+
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', () => {
+                document.querySelectorAll('.filter').forEach(f => f.classList.remove('active'));
+                filter.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
