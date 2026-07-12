@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Concierge IA — Le Château des Alpilles</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f2ec; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Château des Alpilles: stone grey + lavender + warm gold — Provençal elegance */
+        .header { background-color: #2a2520; padding: 30px 40px; border-bottom: 3px solid #9b8b5a; }
+        .stars { color: #9b8b5a; font-size: 14px; letter-spacing: 4px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: #f0ebe0; letter-spacing: 3px; margin-bottom: 6px; }
+        .subtitle { font-size: 11px; color: #8a7d6a; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #1e1a16; padding: 0 40px; border-bottom: 1px solid #3a3028; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #8a7d6a; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: #f0ebe0; }
+        .tab.active { color: #f0ebe0; border-bottom-color: #9b8b5a; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #2a2520; color: #f0ebe0; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .refresh-btn:hover { background: #9b8b5a; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #ccc4b0; background: white; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+        .filter:hover, .filter.active { background: #2a2520; color: white; border-color: #2a2520; }
+        .filter .count { background: #e8dfc8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #ccc4b0; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #f0ebe0; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf7f2; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #2a2520; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.urgent { background: #fee2e2; color: #dc2626; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #faf7f0; border-left: 3px solid #9b8b5a; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #9b8b5a; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: #2a2520; color: #8a7d6a; padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-section { background: white; border: 1px solid #ccc4b0; padding: 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #2a2520; margin-bottom: 25px; text-align: center; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .roi-card { text-align: center; padding: 20px; background: #f5f2ec; border-radius: 8px; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 600; color: #9b8b5a; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: #888; margin-top: 5px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: #888; line-height: 1.9; }
+        .roi-note b { color: #2a2520; }
+        .analyze-content { background: white; border: 1px solid #ccc4b0; padding: 40px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid #ccc4b0; padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; }
+        .analyze-btn { background: #9b8b5a; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: white; border: 1px solid #ccc4b0; padding: 30px; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #888; padding: 12px 15px; border-bottom: 1px solid #ccc4b0; font-weight: 500; text-transform: uppercase; }
+        .history-table td { padding: 15px; font-size: 13px; border-bottom: 1px solid #f0ebe0; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) { .roi-grid { grid-template-columns: repeat(2, 1fr); } .tabs { overflow-x: auto; } .header { padding: 20px; } .main-content { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★ ★</div>
+        <div class="hotel-name">LE CHÂTEAU DES ALPILLES</div>
+        <div class="subtitle">Agent Concierge IA · Guide Michelin · Saint-Rémy-de-Provence · 21 Chambres & Suites</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">BOÎTE DE RÉCEPTION</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">ANALYSER UN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORIQUE</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ ACTUALISER</button>
+                <div class="filters">
+                    <div class="filter active">TOUS <span class="count">3</span></div>
+                    <div class="filter">À VALIDER <span class="count">1</span></div>
+                    <div class="filter">ENVOYÉS AUTO <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 FR: Excursion Alpilles -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">M. &amp; Mme Lefebvre</div>
+                        <div class="email-date">Aujourd'hui, 10:05</div>
+                    </div>
+                    <div class="email-subject">Excursion dans les Alpilles — que recommandez-vous ?</div>
+                    <div class="email-preview">Bonjour, nous arrivons vendredi pour 3 nuits. Nous aimerions découvrir les Alpilles à pied ou à vélo — idéalement en passant par les Baux-de-Provence. Pouvez-vous nous conseiller ?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">À VALIDER</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ BROUILLON IA — rédigé en 27 sec</div>
+                        Cher Monsieur, chère Madame Lefebvre,<br><br>
+                        Bienvenue au Château des Alpilles — vous avez choisi une semaine parfaite pour explorer nos paysages. Voici nos suggestions :<br><br>
+                        🚴 <strong>À vélo (demi-journée) :</strong> Depuis le château → Les Baux-de-Provence (8 km, panorama exceptionnel) → retour par le Val d'Enfer. Vélos disponibles au château (gratuit).<br>
+                        🥾 <strong>À pied (journée) :</strong> Sentier du massif des Alpilles depuis Saint-Rémy — 12 km, vues sur la Camargue et le Luberon, dénivelé modéré.<br><br>
+                        Je peux vous préparer une carte détaillée avec les meilleurs arrêts (moulin à huile artisanal, point de vue du Castelet) et réserver votre déjeuner aux Baux.<br><br>
+                        Très cordialement,<br>
+                        Le Château des Alpilles
+                    </div>
+                </div>
+
+                <!-- Email 2 EN: Michelin table recommendation -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Mr. David &amp; Mrs. Sarah Collins</div>
+                        <div class="email-date">Aujourd'hui, 08:30</div>
+                    </div>
+                    <div class="email-subject">Michelin restaurant recommendation for our anniversary dinner</div>
+                    <div class="email-preview">Hello, we're visiting for our 25th anniversary and would love to dine at a nearby Michelin-starred restaurant. We'd prefer something with a Provençal influence and a beautiful terrace if possible.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">ENVOYÉ AUTO</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ RÉPONSE AUTO IA ENVOYÉE — 31 sec</div>
+                        Dear David &amp; Sarah,<br><br>
+                        Congratulations on your 25th anniversary — we are delighted to help make this evening unforgettable! Here are our top recommendations within 30 minutes:<br><br>
+                        ⭐ <strong>L'Oustau de Baumanière (Les Baux)</strong> — 2 Michelin stars, legendary Provençal haute cuisine, beautiful terrace overlooking the Alpilles. This is THE table for a milestone evening (€150–200pp).<br>
+                        ⭐ <strong>La Cabro d'Or (Les Baux)</strong> — 1 Michelin star, refined garden setting, lighter Provençal menu (€90–130pp).<br><br>
+                        I've checked availability — Oustau de Baumanière has a terrace table at 20:00 on Saturday. Shall I confirm the reservation in your name?<br><br>
+                        With warmest wishes,<br>
+                        Le Château des Alpilles
+                    </div>
+                </div>
+
+                <!-- Email 3 DE: Transfer question -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Familie Schneider</div>
+                        <div class="email-date">Hier, 16:20</div>
+                    </div>
+                    <div class="email-subject">Transfer vom Flughafen Marseille — Möglichkeiten?</div>
+                    <div class="email-preview">Guten Tag, wir fliegen am Donnerstag in Marseille an (14:30 Uhr). Wie kommen wir am besten zum Château? Gibt es einen Transferservice oder empfehlen Sie ein Taxi?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">ENVOYÉ AUTO</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ RÉPONSE AUTO IA ENVOYÉE — 28 sec</div>
+                        Guten Tag, Familie Schneider,<br><br>
+                        Herzlich willkommen — wir freuen uns auf Ihren Besuch! Hier sind Ihre Optionen für den Transfer von Marseille:<br><br>
+                        🚗 <strong>Privater Transfer (empfohlen):</strong> Unser Partner-Fahrer holt Sie direkt am Terminal ab — bequem, klimatisiert, ca. 1h15 Fahrt (Festpreis €120 für bis zu 4 Personen).<br>
+                        🚌 <strong>Zug + Taxi:</strong> Marseille → Avignon TGV (45 min) → Taxi nach Saint-Rémy (20 min, ca. €40). Zug ab 15:08, Ankunft ca. 17:00.<br><br>
+                        Ich empfehle den privaten Transfer — besonders mit Gepäck. Soll ich den Fahrer für Donnerstag 14:30 buchen? Ich informiere ihn über Ihre Flugnummer.<br><br>
+                        Mit freundlichen Grüßen,<br>
+                        Le Château des Alpilles
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">ROI Estimé — Le Château des Alpilles</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">21</div>
+                        <div class="roi-label">Chambres & Suites</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~252</div>
+                        <div class="roi-label">Emails / mois</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">50.4h</div>
+                        <div class="roi-label">Temps économisé / mois</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,260</div>
+                        <div class="roi-label">Économie mensuelle</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Basé sur <b>21 chambres</b> × ~12 emails/chambre/mois × <b>12 min économisées</b> par email.<br>
+                    Coût staff estimé : 25€/h · <b>ROI positif dès le 1er mois</b> avec le forfait Standard (80€/mois).<br><br>
+                    💡 <b>Forfait recommandé :</b> Premium — 800€ setup + 120€/mois (amélioration hebdo + rapport mensuel)<br>
+                    Retour sur investissement : <b>10,5× le coût mensuel</b><br><br>
+                    <em>Avec une clientèle internationale (FR, EN, DE, IT), l'IA répond dans la langue de chaque client — comme dans les exemples ci-dessus.</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3 style="margin-bottom: 20px; color: #2a2520; font-family: 'Cormorant Garamond', serif; font-size: 24px;">Coller un email client à analyser</h3>
+                <textarea placeholder="Coller ici n'importe quel email reçu — en français, anglais, allemand, italien… L'IA détecte la langue et rédige le brouillon parfait en ~30 secondes dans le ton du Château des Alpilles."></textarea>
+                <button class="analyze-btn">✨ ANALYSER AVEC L'IA</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>CLIENT</th>
+                            <th>SUJET</th>
+                            <th>STATUT</th>
+                            <th>DÉLAI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>12 juil. 2026</td><td>M. &amp; Mme Lefebvre</td><td>Excursion Alpilles &amp; Baux-de-Provence</td><td><span class="status-badge pending">EN ATTENTE</span></td><td>—</td></tr>
+                        <tr><td>12 juil. 2026</td><td>David &amp; Sarah Collins</td><td>Dîner Michelin anniversaire</td><td><span class="status-badge sent">ENVOYÉ</span></td><td>31 sec</td></tr>
+                        <tr><td>11 juil. 2026</td><td>Familie Schneider</td><td>Transfer aéroport Marseille</td><td><span class="status-badge sent">ENVOYÉ</span></td><td>28 sec</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AGENT CONCIERGE IA V3.0 — LE CHÂTEAU DES ALPILLES · GUIDE MICHELIN · SAINT-RÉMY-DE-PROVENCE</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

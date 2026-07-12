@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — 10GR Boutique Hotel & Wine Bar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f1eb; min-height: 100vh; display: flex; flex-direction: column; }
+        /* 10GR palette: deep charcoal + aged gold + warm ivory — UNESCO heritage gravitas */
+        .header { background-color: #1a1a1a; padding: 30px 40px; border-bottom: 3px solid #a8924a; }
+        .stars { color: #a8924a; font-size: 14px; letter-spacing: 4px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: #f0ead8; letter-spacing: 4px; margin-bottom: 6px; }
+        .subtitle { font-size: 11px; color: #888; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #111; padding: 0 40px; border-bottom: 1px solid #333; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #777; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: #f0ead8; }
+        .tab.active { color: #f0ead8; border-bottom-color: #a8924a; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #1a1a1a; color: #f0ead8; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .refresh-btn:hover { background: #a8924a; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #ccc; background: white; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+        .filter:hover, .filter.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+        .filter .count { background: #e8e0d0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #ddd; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #f0ebe0; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf8f3; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #1a1a1a; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.urgent { background: #fee2e2; color: #dc2626; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #faf8f0; border-left: 3px solid #a8924a; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #a8924a; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: #1a1a1a; color: #666; padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-section { background: white; border: 1px solid #ddd; padding: 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #1a1a1a; margin-bottom: 25px; text-align: center; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .roi-card { text-align: center; padding: 20px; background: #f4f1eb; border-radius: 8px; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 600; color: #a8924a; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: #888; margin-top: 5px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: #888; line-height: 1.9; }
+        .roi-note b { color: #1a1a1a; }
+        .analyze-content { background: white; border: 1px solid #ddd; padding: 40px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid #ddd; padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; }
+        .analyze-btn { background: #a8924a; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: white; border: 1px solid #ddd; padding: 30px; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #888; padding: 12px 15px; border-bottom: 1px solid #ddd; font-weight: 500; text-transform: uppercase; }
+        .history-table td { padding: 15px; font-size: 13px; border-bottom: 1px solid #f0ebe0; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) { .roi-grid { grid-template-columns: repeat(2, 1fr); } .tabs { overflow-x: auto; } .header { padding: 20px; } .main-content { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★ ★</div>
+        <div class="hotel-name">10GR BOUTIQUE HOTEL & WINE BAR</div>
+        <div class="subtitle">AI Concierge · Adults-Only · UNESCO Medieval City · Rhodes, Greece</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">INBOX</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">ANALYZE AN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORY</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ REFRESH</button>
+                <div class="filters">
+                    <div class="filter active">ALL <span class="count">3</span></div>
+                    <div class="filter">TO VALIDATE <span class="count">1</span></div>
+                    <div class="filter">AUTO-REPLIED <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1: Wine tasting experience -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Helena &amp; Thomas Vandenberg</div>
+                        <div class="email-date">Today, 11:10</div>
+                    </div>
+                    <div class="email-subject">Private wine tasting — can you arrange an evening session?</div>
+                    <div class="email-preview">Good morning, we're staying with you next week and noticed you have a wine bar. We'd love a curated private wine tasting one evening — preferably Greek wines. What options do you have?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">TO VALIDATE</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI SUGGESTED RESPONSE — drafted in 27 sec</div>
+                        Dear Helena &amp; Thomas,<br><br>
+                        What a perfect evening this would be! Our wine bar specialises in precisely this kind of curated experience. Here's what we can offer:<br><br>
+                        🍷 <strong>Aegean Terroir Tasting</strong> — 5 Greek wines across Santorini Assyrtiko, Naoussa Xinomavro &amp; Cretan Vidiano (€55pp, 90 min, hosted by our sommelier)<br>
+                        🍷 <strong>Intimate Pairing Evening</strong> — 3 wines paired with local mezedes &amp; aged cheeses (€75pp, 2 hours)<br><br>
+                        Both sessions can be arranged in the private courtyard or at the wine bar. Which evening suits you best? I'll reserve the slot with our team.<br><br>
+                        Warmest,<br>
+                        10GR Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2: Cultural tour -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Dr. James Thornton</div>
+                        <div class="email-date">Today, 09:15</div>
+                    </div>
+                    <div class="email-subject">Guided tour of the Knights' Quarter — history focus</div>
+                    <div class="email-preview">I'm a history professor and very interested in the Order of St John and the Knights' Quarter of Rhodes. Can you arrange a private guided tour with an expert historian?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">AUTO-REPLIED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT — 30 sec</div>
+                        Dear Dr. Thornton,<br><br>
+                        Given your expertise, this calls for something special. Our preferred historian, Dr. Nikolaos Papadopoulos (archaeologist, University of Rhodes), offers private tours specifically focused on the Hospitallers' legacy:<br><br>
+                        📜 <strong>2-hour deep-dive:</strong> Palace of the Grand Masters → Hospital → Armoury → Street of the Knights (€120, max 4 guests)<br>
+                        📜 <strong>Half-day scholarly tour:</strong> Above + access to the Municipal Archives collections (€200, arranged in advance)<br><br>
+                        Being located inside the Medieval City, your walk begins literally at our front door. Shall I book Dr. Papadopoulos for your preferred morning?<br><br>
+                        10GR Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3: Spa + room upgrade -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Camille &amp; Pierre Rousseau</div>
+                        <div class="email-date">Yesterday, 16:40</div>
+                    </div>
+                    <div class="email-subject">Spa access and room upgrade for our anniversary</div>
+                    <div class="email-preview">Bonjour, we are celebrating our anniversary and would like to know if we can access the spa during our stay, and whether an upgrade to one of your themed suites is possible. We're booked as Pierre Rousseau.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">AUTO-REPLIED</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI AUTO-RESPONSE SENT — 29 sec</div>
+                        Dear Camille &amp; Pierre,<br><br>
+                        Happy anniversary — how wonderful! Here's what we've arranged for you:<br><br>
+                        🛁 <strong>Spa access</strong> is included for all guests (daily 10:00–21:00). We can also book a couples' massage (60 min, €120 for two).<br>
+                        🏛️ <strong>Room upgrade:</strong> I've checked availability — the <em>Alexander the Great Suite</em> is free for your dates. This is one of our most requested rooms: carved stone details, medieval arched windows, and a private jacuzzi. Upgrade rate: +€60/night.<br><br>
+                        Shall I confirm the suite and schedule the massage for your arrival evening?<br><br>
+                        Avec plaisir,<br>
+                        10GR Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — 10GR Boutique Hotel & Wine Bar</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">14</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~168</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">33.6h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€840</div>
+                        <div class="roi-label">Monthly saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>14 rooms</b> × ~12 emails/room/month × <b>12 min saved</b> per email.<br>
+                    Staff cost estimate: 25€/h · <b>Positive ROI from month 1</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> Premium — €800 setup + €120/month (includes weekly auto-improvement + monthly report)<br>
+                    Return on investment: <b>7× the monthly cost</b><br><br>
+                    <em>A 5-star hotel with a wine bar attracts highly engaged guests who write detailed emails — this is exactly the complexity the AI excels at.</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3 style="margin-bottom: 20px; color: #1a1a1a; font-family: 'Cormorant Garamond', serif; font-size: 24px;">Paste a guest email to analyse</h3>
+                <textarea placeholder="Paste any guest email here — wine queries, cultural tour requests, room upgrades… The AI drafts a reply in 10GR's distinctive tone in ~30 seconds."></textarea>
+                <button class="analyze-btn">✨ ANALYSE WITH AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>GUEST</th>
+                            <th>SUBJECT</th>
+                            <th>STATUS</th>
+                            <th>RESPONSE TIME</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Jul 12, 2026</td><td>Helena &amp; Thomas Vandenberg</td><td>Private wine tasting session</td><td><span class="status-badge pending">PENDING</span></td><td>—</td></tr>
+                        <tr><td>Jul 12, 2026</td><td>Dr. James Thornton</td><td>Knights' Quarter history tour</td><td><span class="status-badge sent">SENT</span></td><td>30 sec</td></tr>
+                        <tr><td>Jul 11, 2026</td><td>Camille &amp; Pierre Rousseau</td><td>Spa + anniversary upgrade</td><td><span class="status-badge sent">SENT</span></td><td>29 sec</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI CONCIERGE V3.0 — 10GR BOUTIQUE HOTEL & WINE BAR · UNESCO MEDIEVAL CITY, RHODES</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

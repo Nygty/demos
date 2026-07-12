@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Concierge IA — Les Petites Maisons · Hameau des Baux</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f0e8; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Les Petites Maisons: warm olive + stone limestone + aged gold — Alpilles provençal hameau */
+        .header { background-color: #3a3420; padding: 30px 40px; border-bottom: 3px solid #a09050; }
+        .stars { color: #a09050; font-size: 14px; letter-spacing: 4px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500; color: #f0ead5; letter-spacing: 3px; margin-bottom: 4px; }
+        .hotel-name-sub { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 400; color: #c0b088; letter-spacing: 2px; margin-bottom: 8px; }
+        .subtitle { font-size: 11px; color: #8a8060; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #2e2a1a; padding: 0 40px; border-bottom: 1px solid #4a4228; }
+        .tab { padding: 18px 28px; font-size: 12px; font-weight: 500; letter-spacing: 1.5px; color: #8a8060; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: #f0ead5; }
+        .tab.active { color: #f0ead5; border-bottom-color: #a09050; }
+        .main-content { flex: 1; padding: 30px 40px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .refresh-btn { background: #3a3420; color: #f0ead5; border: none; padding: 10px 20px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .refresh-btn:hover { background: #a09050; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid #c8c0a0; background: white; cursor: pointer; transition: all 0.2s; text-transform: uppercase; }
+        .filter:hover, .filter.active { background: #3a3420; color: white; border-color: #3a3420; }
+        .filter .count { background: #e8e0c8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: white; border: 1px solid #c8c0a0; }
+        .email-item { padding: 20px 25px; border-bottom: 1px solid #f0ecd8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf8f0; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: #3a3420; font-size: 14px; }
+        .email-date { font-size: 11px; color: #999; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.5; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.urgent { background: #fee2e2; color: #dc2626; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #faf8ec; border-left: 3px solid #a09050; padding: 15px; margin-top: 12px; font-size: 12px; color: #555; line-height: 1.7; }
+        .ai-response-header { font-size: 10px; color: #a09050; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: #3a3420; color: #8a8060; padding: 20px 40px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-section { background: white; border: 1px solid #c8c0a0; padding: 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #3a3420; margin-bottom: 25px; text-align: center; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .roi-card { text-align: center; padding: 20px; background: #f3f0e8; border-radius: 8px; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 600; color: #a09050; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: #888; margin-top: 5px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: #888; line-height: 1.9; }
+        .roi-note b { color: #3a3420; }
+        .analyze-content { background: white; border: 1px solid #c8c0a0; padding: 40px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid #c8c0a0; padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; }
+        .analyze-btn { background: #a09050; color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: white; border: 1px solid #c8c0a0; padding: 30px; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: #888; padding: 12px 15px; border-bottom: 1px solid #c8c0a0; font-weight: 500; text-transform: uppercase; }
+        .history-table td { padding: 15px; font-size: 13px; border-bottom: 1px solid #f0ecd8; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) { .roi-grid { grid-template-columns: repeat(2, 1fr); } .tabs { overflow-x: auto; } .header { padding: 20px; } .main-content { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">LES PETITES MAISONS</div>
+        <div class="hotel-name-sub">Hameau des Baux</div>
+        <div class="subtitle">Agent Concierge IA · 27 Suites · Parc d'Oliviers · Paradou, Alpilles</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">BOÎTE DE RÉCEPTION</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">ANALYSER UN EMAIL</div>
+        <div class="tab" data-tab="history">HISTORIQUE</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ ACTUALISER</button>
+                <div class="filters">
+                    <div class="filter active">TOUS <span class="count">3</span></div>
+                    <div class="filter">À VALIDER <span class="count">1</span></div>
+                    <div class="filter">ENVOYÉS AUTO <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1: Mariage / événement privé -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Mme Sophie Durand</div>
+                        <div class="email-date">Aujourd'hui, 11:18</div>
+                    </div>
+                    <div class="email-subject">Organisation mariage — privatisation du hameau pour 40 invités</div>
+                    <div class="email-preview">Bonjour, nous envisageons d'organiser notre mariage en mai prochain dans un cadre provençal authentique. Seriez-vous en mesure de privatiser le hameau pour 40 personnes sur 2 nuits ? Avec dîner, cocktail et cérémonie laïque dans le parc.</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">À VALIDER</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ BROUILLON IA — rédigé en 29 sec</div>
+                        Chère Madame Durand,<br><br>
+                        Quel beau projet — le Hameau des Baux est fait pour les occasions comme la vôtre. Voici ce que nous pouvons envisager :<br><br>
+                        🌿 <strong>Privatisation complète (2 nuits, 40 invités) :</strong> Les 27 suites du hameau, parc d'oliviers de 5 hectares pour la cérémonie laïque, terrasse couverte pour le dîner<br>
+                        🍽️ <strong>Restauration :</strong> Menu gastronomique de saison (cuisine provençale, producteurs locaux) · Cocktail dînatoire à l'huile d'olive du domaine<br>
+                        🎊 <strong>Services inclus :</strong> Coordination mariage, décoration florale sur mesure, accès tennis et vélos pour le week-end<br><br>
+                        Pour une proposition détaillée et les disponibilités de mai, pouvez-vous m'indiquer votre date exacte ? Alexis, notre directeur, vous répondra personnellement pour affiner les détails.<br><br>
+                        Avec nos vœux les plus sincères,<br>
+                        Les Petites Maisons — Hameau des Baux
+                    </div>
+                </div>
+
+                <!-- Email 2: Table restaurant -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">M. Thomas Renard</div>
+                        <div class="email-date">Aujourd'hui, 09:00</div>
+                    </div>
+                    <div class="email-subject">Réservation dîner pour ce soir — table de 4</div>
+                    <div class="email-preview">Bonjour, nous sommes clients dans votre établissement (suite Olivier, check-in hier). Peut-on réserver une table pour 4 personnes ce soir au restaurant ? Nous aurions une allergie aux noix de l'un de nos convives à signaler.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">ENVOYÉ AUTO</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ RÉPONSE AUTO IA ENVOYÉE — 24 sec</div>
+                        Cher Monsieur Renard,<br><br>
+                        Bien noté — votre table est réservée ce soir pour 4 personnes. Quelques détails :<br><br>
+                        📅 <strong>Ce soir :</strong> Table en terrasse (sous les oliviers), 20h00 · Table en salle disponible à 20h30 si vous préférez<br>
+                        ⚠️ <strong>Allergie noix :</strong> J'ai transmis l'information à notre chef. Il vous proposera une adaptation du menu avec des alternatives pour chaque plat concerné.<br><br>
+                        Souhaitez-vous un apéritif servi directement sur votre terrasse de suite avant le dîner (18h30) ? C'est un moment apprécié dans notre parc au coucher du soleil.<br><br>
+                        À ce soir,<br>
+                        Les Petites Maisons
+                    </div>
+                </div>
+
+                <!-- Email 3: Activités vélos + tennis -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Famille Martin</div>
+                        <div class="email-date">Hier, 18:45</div>
+                    </div>
+                    <div class="email-subject">Activités disponibles — vélos et tennis</div>
+                    <div class="email-preview">Bonsoir, nous arrivons avec nos deux enfants (12 et 15 ans) et cherchons des activités pour la journée : vélos, tennis, et peut-être une promenade dans les Baux. Pouvez-vous nous dire ce qui est disponible sur place ?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">ENVOYÉ AUTO</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ RÉPONSE AUTO IA ENVOYÉE — 27 sec</div>
+                        Chère Famille Martin,<br><br>
+                        Vous arrivez dans le bon endroit pour une journée active ! Voici ce qui vous attend :<br><br>
+                        🚴 <strong>Vélos (inclus) :</strong> 8 vélos disponibles au hameau, tailles adultes et ados. Itinéraire recommandé : hameau → Les Baux-de-Provence (4 km, panorama unique) → retour par les carrières de lumière (entrée ~€15pp)<br>
+                        🎾 <strong>Tennis :</strong> Court disponible sur réservation (créneaux 2h, gratuit pour les clients). Je note votre préférence de créneau — matin ou après-midi ?<br>
+                        🏔️ <strong>Les Baux à pied :</strong> 1h depuis le hameau, village médiéval perché — les ados adorent généralement la tour du château (vue 360°)<br><br>
+                        Je prépare un programme personnalisé pour votre séjour et réserve le court de tennis à votre arrivée.<br><br>
+                        À très bientôt,<br>
+                        Les Petites Maisons
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">ROI Estimé — Les Petites Maisons, Hameau des Baux</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">27</div>
+                        <div class="roi-label">Suites</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~324</div>
+                        <div class="roi-label">Emails / mois</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">64.8h</div>
+                        <div class="roi-label">Temps économisé / mois</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,620</div>
+                        <div class="roi-label">Économie mensuelle</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Basé sur <b>27 suites</b> × ~12 emails/suite/mois × <b>12 min économisées</b> par email.<br>
+                    Coût staff estimé : 25€/h · <b>ROI positif dès le 1er mois</b> avec le forfait Standard (80€/mois).<br><br>
+                    💡 <b>Forfait recommandé :</b> Premium+ — 1 200€ setup + 150€/mois (amélioration hebdo + formation sur vrais échanges réception)<br>
+                    Retour sur investissement : <b>10,8× le coût mensuel</b><br><br>
+                    <em>Chaque email au Hameau est unique — mariages, tables, événements, activités. C'est exactement là que l'IA crée le plus de valeur, en libérant Alexis et l'équipe pour l'humain.</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3 style="margin-bottom: 20px; color: #3a3420; font-family: 'Cormorant Garamond', serif; font-size: 24px;">Coller un email client à analyser</h3>
+                <textarea placeholder="Coller ici n'importe quel email reçu — mariages, tables restaurant, activités, résidences d'artistes, événements privés… L'IA rédige le brouillon parfait en ~30 secondes dans le ton chaleureux du Hameau des Baux."></textarea>
+                <button class="analyze-btn">✨ ANALYSER AVEC L'IA</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>DATE</th>
+                            <th>CLIENT</th>
+                            <th>SUJET</th>
+                            <th>STATUT</th>
+                            <th>DÉLAI</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>12 juil. 2026</td><td>Mme Sophie Durand</td><td>Mariage — privatisation hameau 40 invités</td><td><span class="status-badge pending">EN ATTENTE</span></td><td>—</td></tr>
+                        <tr><td>12 juil. 2026</td><td>M. Thomas Renard</td><td>Dîner ce soir — table de 4 + allergie</td><td><span class="status-badge sent">ENVOYÉ</span></td><td>24 sec</td></tr>
+                        <tr><td>11 juil. 2026</td><td>Famille Martin</td><td>Vélos, tennis &amp; Les Baux avec enfants</td><td><span class="status-badge sent">ENVOYÉ</span></td><td>27 sec</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AGENT CONCIERGE IA V3.0 — LES PETITES MAISONS · HAMEAU DES BAUX · PARADOU, ALPILLES</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
