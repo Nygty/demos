@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Locanda Don Serafino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f1eb; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Locanda Don Serafino : calcaire baroque sicilien, or Michelin, brun lave, ivoire chaud */
+        :root {
+            --primary: #2e2218;      /* brun lave baroque */
+            --accent: #9e7c2a;       /* or Michelin / vins Val di Noto */
+            --bg: #f4f1eb;
+            --bg-card: #fefcf8;
+            --border: #ddd3bc;
+            --text-dark: #1a130a;
+            --text-light: #7a6e58;
+            --michelin: #c0392b;     /* rouge Michelin */
+        }
+        .header { background-color: var(--primary); padding: 35px 45px; }
+        .michelin-badge { display: inline-flex; align-items: center; gap: 6px; background: var(--michelin); color: white; font-size: 9px; letter-spacing: 2px; padding: 4px 10px; margin-bottom: 14px; text-transform: uppercase; }
+        .stars { color: var(--accent); font-size: 14px; letter-spacing: 3px; margin-bottom: 10px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: #f0ece0; letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: #9a8870; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: var(--primary); padding: 0 45px; border-bottom: 1px solid #1e1610; }
+        .tab { padding: 16px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #7a6a58; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: #f0ece0; }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--accent); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--primary); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e8e0d0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #eee5d0; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f9f5ec; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f5f0e5; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #7a6a58; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        /* ROI */
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--accent); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .roi-reference { background: #fef9f0; border: 1px solid var(--border); padding: 15px 20px; margin-top: 20px; font-size: 11px; color: var(--text-light); line-height: 1.8; }
+        .roi-reference b { color: var(--primary); }
+        /* Analyze */
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        /* History */
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #eee5d0; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header, .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="michelin-badge">★ Michelin Star Restaurant</div>
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">LOCANDA DON SERAFINO</div>
+        <div class="subtitle">AI Concierge · Ragusa Ibla · UNESCO Baroque · Sicily</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Val di Noto baroque tour -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">George & Harriet Whitmore</div>
+                        <div class="email-date">Today, 10:55</div>
+                    </div>
+                    <div class="email-subject">Val di Noto baroque tour — 4 nights, private guide</div>
+                    <div class="email-preview">Dear team, we are arriving for 4 nights and would love a private guided tour of the Val di Noto baroque towns — Noto, Modica and Scicli are our priorities. Can you arrange this with a knowledgeable art historian guide?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 27 sec</div>
+                        Dear George & Harriet,<br><br>
+                        The Val di Noto is arguably the finest concentration of baroque architecture in Europe — and Locanda Don Serafino, carved into the caves of Ragusa Ibla, is the ideal starting point.<br><br>
+                        <b>Private 2-day Val di Noto programme:</b><br><br>
+                        <em>Day 2 — Noto & Modica (09:00–17:00):</em><br>
+                        • Noto: Corso Vittorio Emanuele, Duomo di San Nicolò (UNESCO), Palazzo Nicolaci, Infiorata terraces<br>
+                        • Art historian guide: 3h · €130 for the two of you<br>
+                        • Lunch: Caffè Sicilia (Noto) — the legendary pastry house of Corrado Assenza<br>
+                        • Modica: baroque churches, Modica chocolate experience at <em>Bonajuto</em> (Sicily's oldest chocolatier since 1880)<br><br>
+                        <em>Day 3 — Scicli & Ragusa Ibla (10:00–13:00):</em><br>
+                        • Scicli: Palazzo Beneventano, via Mormino Penna<br>
+                        • Extended guided walk of Ragusa Ibla itself, ending at Don Serafino<br>
+                        • Cost: €95 for the Scicli morning (guide + transport)<br><br>
+                        Shall I confirm both days?<br><br>
+                        Warmest regards,<br>
+                        Locanda Don Serafino · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Private wine dinner -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Stéphane & Hélène Dupont</div>
+                        <div class="email-date">Today, 07:30</div>
+                    </div>
+                    <div class="email-subject">Dîner œnologique privé — vins de Sicile</div>
+                    <div class="email-preview">Bonjour, nous sommes des passionnés de gastronomie et souhaiterions réserver une table privée au restaurant Don Serafino avec un accord mets-vins centré sur les grands vins siciliens (Nero d'Avola, Etna Rosso, Marsala). Est-ce possible pour le 18 juillet?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chers Stéphane et Hélène,<br><br>
+                        Bienvenue ! Un dîner œnologique privé au cœur de nos caves baroque du XIXe siècle — quelle belle soirée en perspective.<br><br>
+                        <b>Table privée · Don Serafino · 18 juillet :</b><br>
+                        • Table exclusive dans notre cave (max 4 personnes) — voûtes en pierre calcaire, candélabres<br>
+                        • Menu dégustation 7 services du Chef Vincenzo Candiano (étoile Michelin) : carpaccio de gambero rosso, risotto aux oursins de Marzamemi, maialino noir des Nebrodi...<br>
+                        • Accord Sicile Prestige (notre sommelier Salvatore Cali) :<br>
+                        &nbsp;&nbsp;· Etna Bianco Superiore DOC (Benanti)<br>
+                        &nbsp;&nbsp;· Cerasuolo di Vittoria DOCG (Arianna Occhipinti)<br>
+                        &nbsp;&nbsp;· Nero d'Avola Riserva (Planeta)<br>
+                        &nbsp;&nbsp;· Marsala Vergine Riserva (Marco De Bartoli) — avec le dessert<br>
+                        • Prix : €195pp (menu + accord, café et digestif inclus)<br><br>
+                        Le 18 juillet est disponible. Quelle heure vous conviendrait (20:00 ou 20:30) ?<br><br>
+                        À très bientôt,<br>
+                        Locanda Don Serafino · Restaurant & Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Modica chocolate -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Chiara van den Berg</div>
+                        <div class="email-date">Yesterday, 14:30</div>
+                    </div>
+                    <div class="email-subject">Modica chocolate workshop — is it possible to book?</div>
+                    <div class="email-preview">Hello, I'm a food writer visiting for 3 nights and I'd love to arrange a hands-on Modica chocolate workshop (not just a tasting — I want to learn the cold-process technique). Can you organise something with a local maître chocolatier?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Chiara,<br><br>
+                        A hands-on Modica chocolate workshop is absolutely the right way to experience it — the cold-process technique dating from Aztec preparation via Spanish Sicily is unlike any other chocolate in the world.<br><br>
+                        <b>Private Modica chocolate masterclass:</b><br>
+                        • Location: artisan laboratory in Modica (25 min from Locanda Don Serafino)<br>
+                        • Master chocolatier: 3rd-generation family, featured in international food press<br>
+                        • Duration: 2.5h hands-on · process: raw cacao + cold grinding + spicing (cinnamon, chili, vanilla, carob)<br>
+                        • You leave with 500g of your own-made bars<br>
+                        • Press access: the family is happy to be interviewed / photographed · just let us know in advance<br>
+                        • Cost: €85 (includes all materials + transport from hotel)<br><br>
+                        Available on any morning of your stay. Shall I reserve?<br><br>
+                        Best regards,<br>
+                        Locanda Don Serafino · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Locanda Don Serafino</div>
+                <div class="roi-subtitle">Ragusa Ibla, Sicily · 11 Cave Rooms · 4 Stars · Michelin Star</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">11</div>
+                        <div class="roi-label">Cave Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~132</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">26h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€660</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>11 cave rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Standard — €800 setup + €80/month</span><br>
+                    Return on investment: <b>8.25× the monthly cost</b> — and that's being conservative on email volume.
+                </div>
+                <div class="roi-reference">
+                    <b>🏨 Already live at a near-identical property:</b> IBB Palazzo Bettina (Birgu, Malta) — 13 rooms, historic stone setting, premium international clientele.
+                    Same profile as Don Serafino: small boutique, UNESCO heritage city, guests asking daily about private tours, restaurant reservations and local experiences.
+                    The AI concierge handles every one of those requests in <b>under 30 seconds, in any language</b>.
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will draft a personalised response in the refined tone of Locanda Don Serafino within 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>George & Harriet Whitmore</td>
+                            <td>Val di Noto baroque private tour</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Stéphane & Hélène Dupont</td>
+                            <td>Dîner œnologique — vins Sicile</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>27 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 12, 2026</td>
+                            <td>Chiara van den Berg</td>
+                            <td>Modica chocolate workshop</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>25 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Locanda Don Serafino · Ragusa Ibla, Sicily</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

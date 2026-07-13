@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Le Grotte della Civita</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f0ea; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Sextantio : pierre calcaire, brun sassi, anthracite, ivoire chaud */
+        :root {
+            --primary: #3a3028;      /* brun profond des sassi */
+            --accent: #8b6e52;       /* pierre ocre Matera */
+            --bg: #f4f0ea;
+            --bg-card: #fdfcf9;
+            --border: #ddd5c5;
+            --text-dark: #1c1812;
+            --text-light: #7a6e60;
+        }
+        .header { background-color: var(--primary); padding: 35px 45px; }
+        .stars { color: #d4a96a; font-size: 14px; letter-spacing: 3px; margin-bottom: 10px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500; color: #f0ece5; letter-spacing: 2px; margin-bottom: 4px; }
+        .hotel-brand { font-family: 'Cormorant Garamond', serif; font-size: 14px; color: #d4a96a; letter-spacing: 4px; margin-bottom: 8px; text-transform: uppercase; }
+        .subtitle { font-size: 10px; color: #9a8e80; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: var(--primary); padding: 0 45px; border-bottom: 1px solid #2e2520; }
+        .tab { padding: 16px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #7a6e60; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: #f0ece5; }
+        .tab.active { color: #d4a96a; border-bottom-color: #d4a96a; }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--accent); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--primary); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .filter .count { background: #e8e0d5; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.25); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #eee7d8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f9f5ee; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #aaa; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 2px; text-transform: uppercase; }
+        .tag.urgent { background: #fee2e2; color: #dc2626; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f5f0e8; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #555; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #7a6e60; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        /* ROI */
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--accent); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--accent); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        /* Analyze */
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        /* History */
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #eee7d8; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 2px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header { padding: 20px; }
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★ ★</div>
+        <div class="hotel-brand">Sextantio</div>
+        <div class="hotel-name">LE GROTTE DELLA CIVITA</div>
+        <div class="subtitle">AI Concierge · Matera · Basilicata · UNESCO World Heritage</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Private Sassi tour at sunrise -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Alexander & Lena Vogt</div>
+                        <div class="email-date">Today, 09:15</div>
+                    </div>
+                    <div class="email-subject">Private Sassi tour at sunrise — photography focus</div>
+                    <div class="email-preview">Good morning, we're passionate photographers staying for 4 nights in September. Could you arrange a private, early-morning guide to the Sassi before the crowds arrive? We'd also love a sunset view point recommendation.</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 26 sec</div>
+                        Dear Alexander & Lena,<br><br>
+                        A photography-focused Sassi experience at dawn is truly one of Matera's great privileges — and the caves of Le Grotte della Civita are the perfect base.<br><br>
+                        <b>Private dawn Sassi tour:</b><br>
+                        • Departs 05:30 from the hotel — your cave-room opens directly onto the ancient district<br>
+                        • Private certified guide specialising in rupestrian heritage · 3h duration<br>
+                        • Access to rupestrian churches before public opening (06:30)<br>
+                        • Cost: approx. €120 for the two of you<br><br>
+                        <b>Sunset photography:</b><br>
+                        • Belvedere di Murgia Timone — direct view onto both Sassi and the ravine · 15 min drive<br>
+                        • Or the terrace at the top of Civita — we'll reserve it exclusively for you 30 min before sunset<br><br>
+                        Shall I confirm the guide for your September dates?<br><br>
+                        Warm regards,<br>
+                        Le Grotte della Civita · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Lucanian gastronomy experience -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Dr. James Calloway</div>
+                        <div class="email-date">Today, 06:55</div>
+                    </div>
+                    <div class="email-subject">Lucanian cuisine — private dinner in the cave?</div>
+                    <div class="email-preview">I've seen references to private dinners arranged in the ancient caves. Is this something you can organise? We're a group of 6 interested in authentic Basilicata cuisine with local wine.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Dr. Calloway,<br><br>
+                        A private dinner in the ancient cave setting is one of our most sought-after experiences — and perfectly suited to a group of 6.<br><br>
+                        <b>Private cave dinner at Le Grotte:</b><br>
+                        • Served in our excavated dining cave (11th century rupestrian church)<br>
+                        • 5-course Lucanian tasting menu by our chef — <em>strazzata</em>, <em>baccalà alla lucana</em>, aged Canestrato cheese, <em>peperoni cruschi</em><br>
+                        • Wine pairing from Basilicata: Aglianico del Vulture DOC (we pour Cantine del Notaio)<br>
+                        • Duration: approx. 3 hours · Price: €185pp all-inclusive<br><br>
+                        Advance booking required — shall I check availability for your stay?<br><br>
+                        Best regards,<br>
+                        Le Grotte della Civita · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Transfer + accessibility -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Patricia Fernández</div>
+                        <div class="email-date">Yesterday, 16:40</div>
+                    </div>
+                    <div class="email-subject">Getting to the hotel — mobility question</div>
+                    <div class="email-preview">Hello, we are arriving by train from Rome next Thursday. How do we get from Matera Sud station to the hotel, and one member of our group has limited mobility — are the cave rooms accessible?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Patricia,<br><br>
+                        Welcome, and thank you for letting us know in advance — we'll ensure everything is perfectly arranged.<br><br>
+                        <b>Transfer from Matera Sud station:</b><br>
+                        • Private hotel transfer available · 10 min · €18 · we can pre-book for your Thursday arrival<br>
+                        • Please share your train time and we'll have the driver waiting<br><br>
+                        <b>Regarding mobility:</b><br>
+                        Please note that Le Grotte della Civita is built within the ancient Sassi — all cave rooms involve some steps and uneven stone paths, which are intrinsic to the UNESCO site. We want to ensure complete transparency: there are no lift-accessible rooms, but several cave rooms have <b>shorter paths</b> from the main entrance.<br><br>
+                        I'll personally assign you the most suitable cave room and have a full description ready.<br><br>
+                        Kind regards,<br>
+                        Le Grotte della Civita · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Le Grotte della Civita</div>
+                <div class="roi-subtitle">Matera, Basilicata · 18 Cave Rooms · 5 Stars · UNESCO</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">18</div>
+                        <div class="roi-label">Cave Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~216</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">43h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,080</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>18 cave rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Standard — €800 setup + €80/month</span><br>
+                    For a property of this prestige, the AI handles multi-language enquiries 24/7 — guests arrive from 40+ countries.<br>
+                    Return on investment: <b>13.5× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will draft a response matching the unique atmosphere of Le Grotte della Civita in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Alexander & Lena Vogt</td>
+                            <td>Private Sassi tour at sunrise</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Dr. James Calloway</td>
+                            <td>Lucanian cuisine — private cave dinner</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>26 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 12, 2026</td>
+                            <td>Patricia Fernández</td>
+                            <td>Transfer from station + mobility</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Le Grotte della Civita · Sextantio · Matera</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

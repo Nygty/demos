@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Vasia Resort & Spa</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f2f6f9; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Vasia : bleu égéen, blanc pur, sable doré, turquoise eau */
+        :root {
+            --primary: #1a4a6b;      /* bleu profond Égée */
+            --accent: #2e8bb5;       /* turquoise Crète */
+            --bg: #f2f6f9;
+            --bg-card: #ffffff;
+            --border: #d0dde8;
+            --text-dark: #0d2233;
+            --text-light: #6a86a0;
+        }
+        .header { background: linear-gradient(135deg, #1a4a6b 0%, #1a3d5e 100%); padding: 32px 45px; }
+        .stars { color: #f0c060; font-size: 14px; letter-spacing: 3px; margin-bottom: 10px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: #ffffff; letter-spacing: 3px; margin-bottom: 6px; }
+        .subtitle { font-size: 10px; color: #8ab0cc; letter-spacing: 3px; text-transform: uppercase; }
+        .subtitle .pill { background: rgba(255,255,255,0.12); padding: 3px 10px; border-radius: 20px; margin-left: 8px; font-size: 9px; color: #f0c060; letter-spacing: 1px; }
+        .tabs { display: flex; background-color: var(--primary); padding: 0 45px; border-bottom: 1px solid #15405e; }
+        .tab { padding: 16px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #6a8ea8; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: #ffffff; }
+        .tab.active { color: #f0c060; border-bottom-color: #f0c060; }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; border-radius: 3px; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); border-radius: 3px; }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #dce8f0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #eaf0f6; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f5f9fc; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #aac0d0; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 12px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f0f7fc; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; border-radius: 0 4px 4px 0; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #5a7e9a; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        /* ROI */
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; border-radius: 4px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; border-radius: 3px; }
+        /* Analyze */
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; border-radius: 4px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; border-radius: 3px; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; border-radius: 3px; }
+        /* History */
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #eaf0f6; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 12px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header, .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">VASIA RESORT & SPA</div>
+        <div class="subtitle">
+            AI Concierge · Almyrida Bay, West Crete
+            <span class="pill">ADULTS ONLY</span>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Boat charter Gramvousa lagoon -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Thomas & Ingrid Mueller</div>
+                        <div class="email-date">Today, 11:30</div>
+                    </div>
+                    <div class="email-subject">Private boat to Gramvousa lagoon — full day</div>
+                    <div class="email-preview">Hello, we would like to arrange a private boat charter to Gramvousa Island and Balos Lagoon during our stay July 20–27. Just the two of us — is it possible to have the boat exclusively? What does it include?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 29 sec</div>
+                        Dear Thomas & Ingrid,<br><br>
+                        A private charter to Gramvousa and Balos is one of the most spectacular day trips in all of Crete — and Almyrida's position in western Crete makes it perfectly accessible.<br><br>
+                        <b>Private boat charter (exclusive, 2 guests):</b><br>
+                        • Departure from Almyrida harbour, 08:30<br>
+                        • Route: Almyrida → Gramvousa Island (fortress visit, 1h) → Balos Lagoon (swim & lunch, 2h) → return<br>
+                        • Skipper + snorkelling equipment + cold drinks included<br>
+                        • Duration: approx. 8 hours · Price: €420 for the boat<br>
+                        • Packed lunch from Vasia's kitchen: €28pp (optional)<br><br>
+                        Best days July 21 or 22 — seas calm in the morning. Shall I pre-book?<br><br>
+                        With warm regards,<br>
+                        Vasia Resort & Spa · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Samaria Gorge hike -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Rachel & David Cohen</div>
+                        <div class="email-date">Today, 08:12</div>
+                    </div>
+                    <div class="email-subject">Samaria Gorge hike — organised from the hotel?</div>
+                    <div class="email-preview">We're keen hikers staying 10 nights and definitely want to do the Samaria Gorge. Can the hotel organise transfers and is there a guided option? Also what time do you need to leave?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Rachel & David,<br><br>
+                        The Samaria Gorge is one of Europe's great hikes — 16km through the White Mountains to the Libyan Sea. From Almyrida, it's very manageable.<br><br>
+                        <b>Samaria Gorge day trip from Vasia:</b><br>
+                        • Early morning pickup from hotel: 06:15 (the gorge opens at 07:00, early start avoids crowds)<br>
+                        • Transfer to Xyloskalo (starting point) · 50 min · included in our excursion package<br>
+                        • Option A: Self-guided (maps + briefing from us) · €35pp (transfer + return boat from Agia Roumeli)<br>
+                        • Option B: Guided group · €65pp (certified mountain guide throughout)<br>
+                        • Recovery tip: book a spa treatment at Vasia for the evening after 😊<br><br>
+                        Which date were you considering? I'll reserve your preferred option.<br><br>
+                        Best,<br>
+                        Vasia Resort & Spa · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Olive oil tasting + spa -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Sophie Laurent</div>
+                        <div class="email-date">Yesterday, 14:55</div>
+                    </div>
+                    <div class="email-subject">Olive oil tasting + spa package — available?</div>
+                    <div class="email-preview">Bonjour, ma partenaire et moi envisageons un séjour de 7 nuits en septembre. Nous aimerions combiner votre spa avec une expérience locale — avez-vous des dégustations d'huile d'olive ou des ateliers crétois?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chère Sophie,<br><br>
+                        Bienvenue ! September is perfect — the olive harvest season begins and the light in western Crete is extraordinary.<br><br>
+                        <b>Our Wellness & Cretan Culture package (2 guests, 7 nights):</b><br>
+                        • Daily breakfast at our sea-view terrace<br>
+                        • 2 × 60-min spa sessions per person (Vasia Spa — hammam, massage, hydrotherapy)<br>
+                        • Half-day olive oil tasting at a family-run Almyrida grove (15 min from hotel): pressing demo, 6-oil tasting, light Cretan mezze · €45pp<br>
+                        • Cretan cooking class (traditional dakos, spanakopita, loukoumades) — half-day, €60pp<br><br>
+                        Package price on request — shall I send a full quote for September?<br><br>
+                        À très bientôt,<br>
+                        Vasia Resort & Spa · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Vasia Resort & Spa</div>
+                <div class="roi-subtitle">Almyrida Bay, West Crete · 26 Suites · 4 Stars · Adults Only</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">26</div>
+                        <div class="roi-label">Suites</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~312</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">62h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,560</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>26 suites</b> × ~12 emails per suite per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium — €800 setup + €120/month</span><br>
+                    Includes weekly auto-improvement + monthly performance report.<br>
+                    Return on investment: <b>13× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will draft a personalised response in the Vasia Resort & Spa tone within 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Thomas & Ingrid Mueller</td>
+                            <td>Private boat to Gramvousa lagoon</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Rachel & David Cohen</td>
+                            <td>Samaria Gorge hike</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 12, 2026</td>
+                            <td>Sophie Laurent</td>
+                            <td>Olive oil tasting + spa package</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>27 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Vasia Resort & Spa · Almyrida, West Crete</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

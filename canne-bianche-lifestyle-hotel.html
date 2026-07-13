@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Canne Bianche Lifestyle Hotel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f6f8; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Canne Bianche : blanc pur, bleu Adriatique, sable dune, vert romarin */
+        :root {
+            --primary: #1b5c7a;      /* bleu Adriatique profond */
+            --accent: #3498c0;       /* bleu mer Adriatique */
+            --bg: #f3f6f8;
+            --bg-card: #ffffff;
+            --border: #d4dfe8;
+            --text-dark: #0d1f2b;
+            --text-light: #6a8496;
+            --sand: #d4c4a0;
+        }
+        .header { background: #ffffff; padding: 30px 45px; border-bottom: 3px solid var(--accent); position: relative; overflow: hidden; }
+        .header::after { content: ''; position: absolute; top: 0; right: 0; width: 200px; height: 100%; background: linear-gradient(135deg, transparent 60%, #e8f4f8 100%); }
+        .stars { color: #f0b030; font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #ffffff; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aac0d0; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #dce8f0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e8eff5; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f5f9fc; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #aac0d0; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #eef5fa; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #5a8099; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        /* ROI */
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        /* Analyze */
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        /* History */
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e8eff5; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header, .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">CANNE BIANCHE LIFESTYLE HOTEL</div>
+        <div class="subtitle">AI Concierge · Torre Canne, Adriatic Coast · Fasano, Puglia</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Boat rental + Alberobello -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Sebastian & Mia Brandt</div>
+                        <div class="email-date">Today, 09:55</div>
+                    </div>
+                    <div class="email-subject">Boat rental + Alberobello trulli — 6 nights August</div>
+                    <div class="email-preview">Hi, we're booking 6 nights in August (arrives 10th). We'd love to rent a boat for a day on the Adriatic and also visit Alberobello. Can the hotel arrange both? We'd prefer the boat on day 1 and Alberobello on day 3 or 4.</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 28 sec</div>
+                        Dear Sebastian & Mia,<br><br>
+                        Wonderful — you've picked the perfect combination for a Puglia immersion.<br><br>
+                        <b>Day 1 (Aug 11) — Adriatic boat rental:</b><br>
+                        • Semi-rigid motorboat (no licence required, up to 4 guests) · half day: €180 · full day: €290<br>
+                        • Departing from Torre Canne beach · snorkelling gear included<br>
+                        • Suggested route: marine reserve of Torre Guaceto (15 min by sea) — crystal-clear protected waters<br><br>
+                        <b>Day 4 (Aug 14) — Alberobello private visit:</b><br>
+                        • Private driver + guide · 30 min from Canne Bianche<br>
+                        • 3h guided tour: Rione Monti (UNESCO trulli district) + trullo interior visit + local ceramics<br>
+                        • Return by 13:00 for lunch at our sea-view terrace · €130pp<br><br>
+                        Shall I confirm both bookings for your August stay?<br><br>
+                        Best regards,<br>
+                        Canne Bianche · Concierge Team
+                    </div>
+                </div>
+
+                <!-- Email 2 : Lecce baroque day trip -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Claire & Pierre Moreau</div>
+                        <div class="email-date">Today, 07:10</div>
+                    </div>
+                    <div class="email-subject">Visite de Lecce baroque — excursion organisée?</div>
+                    <div class="email-preview">Bonjour, nous souhaitons visiter Lecce pendant notre séjour. Pouvez-vous organiser un transfert et un guide privé francophone? Nous serions disponibles le mercredi de notre séjour (du 15 au 22 juillet).</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chers Claire et Pierre,<br><br>
+                        Lecce est un incontournable — "la Florence du Baroque" mérite amplement une journée entière depuis Canne Bianche (1h15 de route).<br><br>
+                        <b>Excursion privée Lecce — Mercredi 16 juillet :</b><br>
+                        • Départ 08:45 depuis l'hôtel (voiture avec chauffeur, climatisée)<br>
+                        • Guide privé francophone : Piazza del Duomo, Basilique Santa Croce, amphithéâtre romain, quartier des palais baroques<br>
+                        • Déjeuner libre dans le centre historique — nous vous recommandons <em>Alle Due Corti</em> (cuisine traditionnelle salentine)<br>
+                        • Retour prévu 18:00<br>
+                        • Tarif : €95pp (transport + guide, hors déjeuner)<br><br>
+                        Je confirme la disponibilité pour le mercredi 16 juillet. Souhaitez-vous valider ?<br><br>
+                        Bien à vous,<br>
+                        Canne Bianche · Équipe Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Wellness weekend -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Amanda Richardson</div>
+                        <div class="email-date">Yesterday, 21:00</div>
+                    </div>
+                    <div class="email-subject">Wellness weekend package — what's included in the spa?</div>
+                    <div class="email-preview">Hello, I'm looking at a solo wellness weekend (3 nights) specifically to use your spa. What treatments do you offer and is there a package that combines accommodation with spa access?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Amanda,<br><br>
+                        A wellness weekend at Canne Bianche is exactly what our philosophy is built around — the sea, the silence and the treatments work together.<br><br>
+                        <b>Lifestyle Wellness Weekend (3 nights, solo):</b><br>
+                        • Superior sea-view room + daily wellness breakfast (local fruits, Pugliese yogurt, crudités)<br>
+                        • Unlimited spa access: indoor pool, sauna, steam room, thalasso circuit<br>
+                        • 2 × 60-min treatments included: choose from Adriatic seaweed wrap, hot stone massage, or Pugliese oil ritual<br>
+                        • 1 morning yoga session on our terrace with sea view<br>
+                        • Price: from €720 per person (3 nights, all wellness included)<br><br>
+                        Available on request for the weekend of your choice. Shall I send full availability?<br><br>
+                        Warmly,<br>
+                        Canne Bianche · Spa & Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Canne Bianche Lifestyle Hotel</div>
+                <div class="roi-subtitle">Torre Canne, Puglia · 37 Rooms · 4 Stars · Adriatic Coast</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">37</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~444</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">89h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€2,220</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>37 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium — €800 setup + €120/month</span><br>
+                    Includes weekly auto-improvement + monthly report. Multi-language coverage (EN, FR, DE, IT).<br>
+                    Return on investment: <b>18.5× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will draft a personalised response in the Canne Bianche lifestyle tone within 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Sebastian & Mia Brandt</td>
+                            <td>Boat rental + Alberobello trulli</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Claire & Pierre Moreau</td>
+                            <td>Visite Lecce baroque — guide francophone</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>28 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 12, 2026</td>
+                            <td>Amanda Richardson</td>
+                            <td>Wellness weekend package</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>26 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Canne Bianche Lifestyle Hotel · Torre Canne, Puglia</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Masseria Torre Coccaro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f6f4ef; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Torre Coccaro : blanc masseria, vert olive, pierre ocre pugliese, brun terreux */
+        :root {
+            --primary: #2d4a1e;      /* vert oliveraie Puglia */
+            --accent: #7a9c3a;       /* vert olive clair */
+            --bg: #f6f4ef;
+            --bg-card: #ffffff;
+            --border: #e0d9cc;
+            --text-dark: #1a2412;
+            --text-light: #7a7060;
+            --gold: #b8963a;
+        }
+        .header { background-color: #faf9f5; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 8px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #c8d8a8; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #faf9f5; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e5e0d5; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #ede8de; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f8f6f0; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f3f7ee; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #5a7040; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        /* ROI */
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        /* Analyze */
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        /* History */
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #ede8de; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Relais & Châteaux · 5 Star · Fasano, Puglia</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">MASSERIA TORRE COCCARO</div>
+            <div class="subtitle">AI Concierge · 16th Century Masseria · Fasano, Brindisi</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Private trulli visit + olive oil -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">William & Catherine Hargreaves</div>
+                        <div class="email-date">Today, 10:45</div>
+                    </div>
+                    <div class="email-subject">Private trulli visit + olive oil tasting — 4 nights June</div>
+                    <div class="email-preview">Dear Concierge, we're visiting in June (4 nights) and would love to arrange a private visit to the trulli of Alberobello and an authentic olive oil tasting at a local masseria. Could you coordinate both on day 2 of our stay?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 27 sec</div>
+                        Dear William & Catherine,<br><br>
+                        What a wonderful itinerary — Alberobello and our Pugliese olive groves are among Torre Coccaro's most beloved excursions.<br><br>
+                        <b>Day 2 — Puglia Heritage & Flavours:</b><br><br>
+                        <em>Morning · Trulli of Alberobello (private):</em><br>
+                        • Private car + dedicated guide · 35 min from Torre Coccaro<br>
+                        • Exclusive access to a trullo interior with local artisan family<br>
+                        • Duration: 2.5h · €180 for the two of you<br><br>
+                        <em>Afternoon · Olive Oil Tasting (Torre Coccaro estate):</em><br>
+                        • Walk through our 250-year-old centenary olive grove with our agronomist<br>
+                        • Cold-press demonstration + 5-variety tasting (Ogliarola, Cellina, Coratina)<br>
+                        • Paired with local bruschetta, burrata and Primitivo wine · €55pp<br><br>
+                        Shall I confirm June 2nd for this full itinerary?<br><br>
+                        Warmest regards,<br>
+                        Masseria Torre Coccaro · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Private cooking class -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Audrey Fontaine</div>
+                        <div class="email-date">Today, 07:20</div>
+                    </div>
+                    <div class="email-subject">Private cooking class — Pugliese cuisine</div>
+                    <div class="email-preview">Bonjour, nous sommes 4 personnes et souhaiterions organiser un cours de cuisine privé avec votre chef. Idéalement avec les produits de votre potager. Est-ce possible pour notre séjour du 8 au 12 juillet?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chère Audrey,<br><br>
+                        Bienvenue ! Un cours de cuisine privé dans les cuisines de Torre Coccaro est l'une de nos expériences les plus appréciées — et votre séjour du 8 au 12 juillet tombe à une période magnifique.<br><br>
+                        <b>Cours de cuisine privé "Puglia Autentica" (4 personnes) :</b><br>
+                        • Cueillette de légumes au potager de la masseria avec notre jardinier (08:30)<br>
+                        • Cours avec notre Chef : orecchiette alle cime di rapa, tiella di patate riso e cozze, cartellate au vin cuit<br>
+                        • Déjeuner sous les oliviers avec les plats préparés<br>
+                        • Durée : 3h30 · Prix : €125pp tout compris (vins inclus)<br><br>
+                        Je vous propose le 9 juillet (mardi) — disponibilité confirmée. Souhaitez-vous réserver ?<br><br>
+                        Bien cordialement,<br>
+                        Masseria Torre Coccaro · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Cave spa + archaeological -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Robert & Patricia Stein</div>
+                        <div class="email-date">Yesterday, 18:30</div>
+                    </div>
+                    <div class="email-subject">The cave spa — what treatments are available?</div>
+                    <div class="email-preview">We've read about your underground cave spa carved out of the ancient rock. We'd love to book a half-day spa experience during our stay. What's available and do you recommend any specific treatments?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Robert & Patricia,<br><br>
+                        Our spa is indeed something unique — carved from the 16th-century archaeological caves beneath the masseria. The atmosphere is unlike any other.<br><br>
+                        <b>Half-day cave spa experience (our recommendation for couples):</b><br>
+                        • Arrival in the rock cave grotto: complimentary Apulian herbal infusion<br>
+                        • 80-min Signature Puglia Ritual: warm olive oil massage + scrub with Salento sea salt · €210pp<br>
+                        • Access to hydro-pool, cave hammam, and solarium terrace<br>
+                        • Duration: 3h · Price: €290pp total<br><br>
+                        Alternative: Individual treatments from €95 (60 min).<br><br>
+                        Which date shall I reserve? Mornings (09:00–12:00) are quietest.<br><br>
+                        Kind regards,<br>
+                        Masseria Torre Coccaro · Spa & Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Masseria Torre Coccaro</div>
+                <div class="roi-subtitle">Fasano, Puglia · 38 Rooms · 5 Stars · Relais & Châteaux</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">38</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~456</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">91h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€2,280</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>38 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium+ — €1,200 setup + €150/month</span><br>
+                    Includes weekly auto-improvement, monthly report + training on real Torre Coccaro guest exchanges.<br>
+                    Return on investment: <b>15.2× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Torre Coccaro tone in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>William & Catherine Hargreaves</td>
+                            <td>Private trulli visit + olive oil tasting</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Audrey Fontaine</td>
+                            <td>Private cooking class — Pugliese cuisine</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>27 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 12, 2026</td>
+                            <td>Robert & Patricia Stein</td>
+                            <td>Cave spa treatments</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>30 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Masseria Torre Coccaro · Fasano, Puglia</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Tivoli Palácio de Seteais</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f3f0; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Palácio de Seteais : bleu royal porcelaine, ivoire pâle, or néoclassique, vert jardin anglais */
+        :root {
+            --primary: #2a3f6a;      /* bleu royal néoclassique */
+            --accent: #9c7c2e;       /* or palais 18e siècle */
+            --bg: #f5f3f0;
+            --bg-card: #fefefe;
+            --border: #ddd7cc;
+            --text-dark: #16243a;
+            --text-light: #7a7264;
+            --green: #3a6040;
+        }
+        .header { background: var(--bg-card); padding: 30px 45px; border-bottom: 1px solid var(--border); }
+        .header-brand { font-size: 9px; color: #aaa; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 12px; }
+        .stars { color: var(--accent); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name-line1 { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 400; color: var(--text-light); letter-spacing: 4px; text-transform: uppercase; }
+        .hotel-name-line2 { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 6px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: var(--bg-card); padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #bbb; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e5e0d8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #ece7de; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf8f5; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f2f4f8; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #5a709a; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        /* ROI */
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        /* Analyze */
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        /* History */
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #ece7de; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header, .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-brand">Tivoli Hotels & Resorts · Minor Hotels Collection</div>
+        <div class="stars">★ ★ ★ ★ ★</div>
+        <div class="hotel-name-line1">Tivoli</div>
+        <div class="hotel-name-line2">PALÁCIO DE SETEAIS</div>
+        <div class="subtitle">AI Concierge · Sintra · UNESCO World Heritage · Portugal</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Sintra palaces private tour -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Lord & Lady Ashbourne</div>
+                        <div class="email-date">Today, 10:10</div>
+                    </div>
+                    <div class="email-subject">Private guided tour of Sintra palaces — 3 nights in September</div>
+                    <div class="email-preview">Dear Concierge, we shall be staying for 3 nights in September and would appreciate a fully private guided tour of the Sintra palaces, including Pena, Monserrate and Quinta da Regaleira. We prefer mornings before the public crowds. Could you arrange accordingly?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 25 sec</div>
+                        Dear Lord and Lady Ashbourne,<br><br>
+                        We are delighted to curate a private Sintra palace itinerary for your September stay — the Palácio de Seteais is ideally placed, surrounded by Sintra's UNESCO parks.<br><br>
+                        <b>Private 2-day palace programme (morning schedule):</b><br><br>
+                        <em>Day 1 — Palácio da Pena & Monserrate (07:45–12:30):</em><br>
+                        • Early-entry private tour of Pena Palace before public opening (08:00)<br>
+                        • Monserrate Palace gardens (private guide, botanical focus) · 10:30<br>
+                        • Return to Seteais for lunch in the formal gardens<br><br>
+                        <em>Day 2 — Quinta da Regaleira (07:45–11:30):</em><br>
+                        • Exclusive early-access programme · Initiation Well, chapel, grottos<br>
+                        • Optional: private visit to Palácio Nacional de Sintra (town centre)<br><br>
+                        • Full 2-day programme: €420 per person (private guides, transport, early access)<br><br>
+                        Shall I confirm September dates and reserve the private guides?<br><br>
+                        Yours sincerely,<br>
+                        Tivoli Palácio de Seteais · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Cabo da Roca sunset + Lisbon transfer -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Emma & Tomas Lindqvist</div>
+                        <div class="email-date">Today, 07:35</div>
+                    </div>
+                    <div class="email-subject">Cabo da Roca sunset + Lisbon day trip</div>
+                    <div class="email-preview">Hello, we'd like to see the sunset at Cabo da Roca (westernmost point of Europe!) and also do a day in Lisbon including the Alfama and Belém districts. Can you organise both? We have 4 nights.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Emma & Tomas,<br><br>
+                        Both are highlights we arrange regularly — here is our suggested programme:<br><br>
+                        <b>Cabo da Roca (Day 2, late afternoon):</b><br>
+                        • Private car from Seteais · 25 min along the Sintra coast road<br>
+                        • Arrive 18:30 for golden hour · sunset typically 20:10–20:30 in summer<br>
+                        • The dramatic cliff views are extraordinary at this hour<br>
+                        • Round trip with wait time: €65 (hotel car + driver)<br><br>
+                        <b>Lisbon full day (Day 3):</b><br>
+                        • Private car departs 09:00 (45 min to Lisbon)<br>
+                        • Morning: Belém — Jerónimos Monastery, Torre de Belém, Pastéis de Belém<br>
+                        • Afternoon: Alfama — São Jorge Castle, cathedral, Fado neighbourhood<br>
+                        • Return from Lisbon approx. 18:00 · €140 for the day (transport only)<br><br>
+                        Shall I arrange both?<br><br>
+                        Best regards,<br>
+                        Tivoli Palácio de Seteais · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Michelin restaurant dinner -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Dr. Heinrich Zimmermann</div>
+                        <div class="email-date">Yesterday, 20:05</div>
+                    </div>
+                    <div class="email-subject">Dinner at the palace restaurant — wine pairing?</div>
+                    <div class="email-preview">Guten Abend, we will dine at your restaurant tomorrow evening. We are two wine enthusiasts — is there a sommelier-led pairing available to accompany the tasting menu? And is there a dress code for dinner?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Dr. Zimmermann,<br><br>
+                        Good evening — we look forward to welcoming you tomorrow.<br><br>
+                        <b>Wine Pairing at Seteais:</b><br>
+                        • Our sommelier offers a curated Portuguese wine pairing alongside the 7-course tasting menu: Douro Valley, Dão, Alentejo and — uniquely — Colares (one of Portugal's rarest appellations, grown 5km from Seteais)<br>
+                        • Full pairing: €68pp (6 wines)<br>
+                        • Should you prefer a specific focus (e.g. white Burgundy-style wines from Alvarinho, or aged reds), please let us know in advance<br><br>
+                        <b>Dress code:</b> Smart elegant — jacket recommended for gentlemen in the formal dining room.<br><br>
+                        Your table is confirmed for tomorrow. At what time would you prefer to dine?<br><br>
+                        Mit freundlichen Grüßen,<br>
+                        Tivoli Palácio de Seteais · Restaurant & Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Tivoli Palácio de Seteais</div>
+                <div class="roi-subtitle">Sintra, Portugal · 30 Rooms · 5 Stars · UNESCO · 18th-Century Palace</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">30</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~360</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">72h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,800</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>30 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium+ — €1,200 setup + €150/month</span><br>
+                    Includes weekly auto-improvement, monthly report + training on real Seteais guest exchanges.<br>
+                    Multilingual coverage: EN, DE, FR, ES, PT. Return on investment: <b>12× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will draft a personalised response matching the refinement of Palácio de Seteais in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Lord & Lady Ashbourne</td>
+                            <td>Private Sintra palace tour</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Emma & Tomas Lindqvist</td>
+                            <td>Cabo da Roca sunset + Lisbon day trip</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>25 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 12, 2026</td>
+                            <td>Dr. Heinrich Zimmermann</td>
+                            <td>Dinner wine pairing + dress code</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Tivoli Palácio de Seteais · Sintra, Portugal</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

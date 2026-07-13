@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Palazzo del Duca</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f6f3ef; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Palazzo del Duca : rouge brique Renaissance, ivoire chaud, or ducal, brun parquet */
+        :root {
+            --primary: #5c1f1f;      /* rouge brique Renaissance */
+            --accent: #9a6030;       /* or terracotta Marche */
+            --bg: #f6f3ef;
+            --bg-card: #ffffff;
+            --border: #ddd5c5;
+            --text-dark: #1c1210;
+            --text-light: #7a6860;
+            --gold: #b0882a;
+        }
+        .header { background: #ffffff; padding: 30px 45px; border-bottom: 1px solid var(--border); border-top: 4px solid var(--primary); }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 4px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #ffffff; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #bbb; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e8e0d5; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #eee6d8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf7f2; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #faf5f0; border-left: 3px solid var(--primary); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--primary); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #8a6060; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        /* ROI */
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        /* Analyze */
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        /* History */
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #eee6d8; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header, .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">PALAZZO DEL DUCA</div>
+        <div class="subtitle">AI Concierge · Senigallia · Le Marche · Adriatic Coast · Italy</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Verdicchio wine tour -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Gregory & Élise Fontaine</div>
+                        <div class="email-date">Today, 10:30</div>
+                    </div>
+                    <div class="email-subject">Verdicchio wine tour in the Marche hills — 5 nights August</div>
+                    <div class="email-preview">Bonjour, nous sommes sommeliers amateurs et aimerions visiter les domaines viticoles produisant le Verdicchio di Matelica ou dei Castelli di Jesi pendant notre séjour de 5 nuits. Pouvez-vous organiser une journée de dégustation privée?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 26 sec</div>
+                        Chers Gregory et Élise,<br><br>
+                        Quel programme parfait — le Verdicchio est l'un des grands blancs d'Italie, injustement méconnu, et les Marches en sont le berceau exclusif.<br><br>
+                        <b>Journée dégustation privée Verdicchio (jour 2 de votre séjour) :</b><br><br>
+                        <em>Matin · Castelli di Jesi (45 min depuis Senigallia) :</em><br>
+                        • Visite privée de <em>Umani Ronchi</em> — producteur de référence (Casal di Serra)<br>
+                        • Dégustation guidée : 4 cuvées dont la réserve Plenio · 10:00–12:00<br><br>
+                        <em>Après-midi · Matelica (optionnel, 1h30) :</em><br>
+                        • <em>Belisario</em> — coopérative historique · style minéral et plus tendu que le Jesi<br>
+                        • Dégustation + visite de chai<br><br>
+                        • Forfait journée (transport + guides + dégustations) : €95pp<br>
+                        • Déjeuner à Jesi (osteria locale) : en option<br><br>
+                        Souhaitez-vous que je vous propose le programme complet ?<br><br>
+                        Bien cordialement,<br>
+                        Palazzo del Duca · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Urbino day trip -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Charlotte & Oliver Baines</div>
+                        <div class="email-date">Today, 08:00</div>
+                    </div>
+                    <div class="email-subject">Day trip to Urbino — Raphael and the Ducal Palace</div>
+                    <div class="email-preview">Hello, we're very keen to visit Urbino during our stay, especially the Ducal Palace and the Raphael birthplace. Is this something you can organise from Senigallia, and could we have a private guide?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Charlotte & Oliver,<br><br>
+                        Urbino is one of the great Renaissance cities of Italy — less visited than Florence, more authentic, and only 65km from Palazzo del Duca.<br><br>
+                        <b>Private Urbino day trip:</b><br>
+                        • Departure from Palazzo del Duca: 09:00 (private car)<br>
+                        • Arrive Urbino: 10:15<br>
+                        • Private art historian guide: Palazzo Ducale (Studiolo, Galleria Nazionale delle Marche with Raphael, Piero della Francesca, Paolo Uccello), Casa Natale di Raffaello<br>
+                        • Lunch at an Urbino osteria (we suggest Ridolfo for truffle pasta)<br>
+                        • Afternoon: free exploration of the medieval streets<br>
+                        • Return to Senigallia: 18:00<br>
+                        • Cost: €185 for two (transport + private guide · lunch excluded)<br><br>
+                        Shall I reserve for a specific day of your stay?<br><br>
+                        Kind regards,<br>
+                        Palazzo del Duca · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Black truffle hunt -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Jan & Maria Novotný</div>
+                        <div class="email-date">Yesterday, 17:45</div>
+                    </div>
+                    <div class="email-subject">Truffle hunting in the Marche — is it available in September?</div>
+                    <div class="email-preview">Dear team, we have heard that the Marche region is excellent for truffles. We're visiting in September — is it possible to join a truffle hunt with a trifolau (truffle hunter) and his dog? Would love the full experience.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Jan & Maria,<br><br>
+                        September is excellent timing — the black summer truffle season closes (ends August) but the highly prized <em>tartufo nero pregiato</em> begins in September in the Apennine hills above Senigallia.<br><br>
+                        <b>Private truffle hunt experience:</b><br>
+                        • Half-day with local trifolau and his Lagotto Romagnolo · departs 07:00<br>
+                        • Location: Monte Catria / Acqualagna area (45 min from Palazzo del Duca) — one of Italy's truffle capitals<br>
+                        • Hunt in the oak forest · typically 2h search<br>
+                        • Return to a farmhouse kitchen: the trifolau's wife cooks a truffle lunch with what you found (tagliolini al tartufo, uova e tartufo) + local Verdicchio<br>
+                        • Duration: 5h total · Cost: €145pp (truffle hunt + farmhouse lunch)<br><br>
+                        Shall I confirm for a date in your September stay?<br><br>
+                        Best regards,<br>
+                        Palazzo del Duca · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Palazzo del Duca</div>
+                <div class="roi-subtitle">Senigallia, Le Marche · 20 Rooms · 4 Stars · Renaissance Palazzo</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">20</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~240</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">48h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,200</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>20 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Standard — €800 setup + €80/month</span><br>
+                    Multi-language: EN, FR, DE, IT, CS. Replies drafted in the refined tone of a Renaissance palazzo.<br>
+                    Return on investment: <b>15× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will draft a personalised response matching the refinement of Palazzo del Duca in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Gregory & Élise Fontaine</td>
+                            <td>Verdicchio wine tour — Marche hills</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Charlotte & Oliver Baines</td>
+                            <td>Day trip to Urbino — private guide</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>26 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 12, 2026</td>
+                            <td>Jan & Maria Novotný</td>
+                            <td>Truffle hunting experience — September</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>28 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Palazzo del Duca · Senigallia, Le Marche</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

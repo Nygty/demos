@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Capo dei Greci Taormina Coast</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f3ef; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Capo dei Greci : bleu ionien, blanc sicilien, terracotta chaude, or soleil */
+        :root {
+            --primary: #1a3d5e;      /* bleu mer Ionienne */
+            --accent: #c8622a;       /* terracotta sicilienne */
+            --bg: #f5f3ef;
+            --bg-card: #ffffff;
+            --border: #ddd6c8;
+            --text-dark: #0d1e2e;
+            --text-light: #7a7060;
+            --gold: #d4a030;
+        }
+        .header { background: linear-gradient(180deg, #1a3d5e 0%, #1a3050 100%); padding: 35px 45px; position: relative; }
+        .header-deco { position: absolute; top: 0; right: 40px; font-size: 80px; opacity: 0.06; color: white; line-height: 1; padding-top: 10px; font-family: serif; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 10px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500; color: #ffffff; letter-spacing: 2px; margin-bottom: 4px; }
+        .hotel-sub { font-family: 'Cormorant Garamond', serif; font-size: 16px; font-weight: 400; color: #a0c0d8; margin-bottom: 8px; letter-spacing: 1px; }
+        .subtitle { font-size: 10px; color: #6a90aa; letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: var(--primary); padding: 0 45px; border-bottom: 1px solid #152e46; }
+        .tab { padding: 16px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #5a7a94; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: #ffffff; }
+        .tab.active { color: #ffffff; border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e5ddd0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #eee8de; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #faf8f4; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f2f6fa; border-left: 3px solid var(--primary); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--primary); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #4a7090; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        /* ROI */
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--accent); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--accent); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        /* Analyze */
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--primary); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        /* History */
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #eee8de; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header, .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-deco">🏛</div>
+        <div class="stars">★ ★ ★ ★</div>
+        <div class="hotel-name">CAPO DEI GRECI</div>
+        <div class="hotel-sub">Taormina Coast</div>
+        <div class="subtitle">AI Concierge · Sant'Alessio Siculo · Ionian Sea · Sicily</div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Etna excursion -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Michael & Sarah O'Brien</div>
+                        <div class="email-date">Today, 11:05</div>
+                    </div>
+                    <div class="email-subject">Mount Etna excursion — private or group?</div>
+                    <div class="email-preview">Good morning, we're arriving next Saturday for 5 nights and really want to do Etna — the summit if possible. What do you recommend: private guide or group tour? And what's the approximate cost and duration from the hotel?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 27 sec</div>
+                        Dear Michael & Sarah,<br><br>
+                        Etna from the Ionian coast is extraordinary — you can see the summit from your sea-view room at Capo dei Greci.<br><br>
+                        <b>Our recommendation: Private Etna full day</b> (best experience, worth the difference)<br><br>
+                        • Hotel pickup at 08:00 · private 4×4 vehicle<br>
+                        • Licensed volcanologist guide throughout<br>
+                        • Ascent to 2,900m (cable car + crater walk) — approx. 2.5h at altitude<br>
+                        • Picnic lunch on the volcano with local Etna wine<br>
+                        • Return to hotel approx. 17:30<br>
+                        • Cost: €280 for the two of you (all inclusive)<br><br>
+                        <em>Note: summit access depends on volcanic activity on the day — our guide confirms conditions at 07:00.</em><br><br>
+                        Shall I book for Tuesday (July 16), allowing you time to settle in first?<br><br>
+                        Warm regards,<br>
+                        Capo dei Greci · Concierge Team
+                    </div>
+                </div>
+
+                <!-- Email 2 : Private boat trip -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Nathalie Rousseau</div>
+                        <div class="email-date">Today, 08:30</div>
+                    </div>
+                    <div class="email-subject">Excursion en bateau privé — côte ionienne</div>
+                    <div class="email-preview">Bonjour, nous aimerions passer une journée en bateau le long de la côte entre Sant'Alessio et Taormina. Est-ce que vous organisez des excursions en bateau? Nous sommes 3 couples.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Bonjour Nathalie,<br><br>
+                        Quelle belle idée ! La côte ionienne entre notre hôtel et Taormina est spectaculaire depuis la mer — vous longerez des falaises de lave noire, des grottes marines et la baie de Mazzeo.<br><br>
+                        <b>Bateau privé (6 personnes) :</b><br>
+                        • Gozzo sicilien en bois · départ de la plage privée de Capo dei Greci · 09:00<br>
+                        • Route : Sant'Alessio → Forza d'Agrò (vue panoramique) → Isola Bella → Baie de Taormina<br>
+                        • Baignade dans les criques · snorkeling · apéritif vin de l'Etna inclus<br>
+                        • Déjeuner à Taormina (retour bateau ou voiture) · retour 17:00<br>
+                        • Tarif : €480 pour le bateau (6 pers.) · déjeuner hors forfait<br><br>
+                        Disponible dès mercredi prochain. Souhaitez-vous réserver ?<br><br>
+                        À bientôt,<br>
+                        Capo dei Greci · Équipe Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Taormina Greek Theatre tickets -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">James Whitfield</div>
+                        <div class="email-date">Yesterday, 15:20</div>
+                    </div>
+                    <div class="email-subject">Taormina Greek Theatre — evening show tickets</div>
+                    <div class="email-preview">Hi, I've seen there are evening concerts and film screenings at the ancient Greek Theatre in Taormina. Can you help us get tickets for something during our stay (July 18–24)? We're flexible on the event type.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear James,<br><br>
+                        The Teatro Antico di Taormina at dusk is one of the world's most magical concert settings — with Etna lit in the background. We're delighted to help.<br><br>
+                        <b>Events during your stay (Jul 18–24):</b><br>
+                        • Jul 19 — Taormina Arte summer concert series (TBC programme)<br>
+                        • Jul 21 — Taormina Film Festival closing events (open-air screenings)<br>
+                        • Jul 23 — Classical music night at the Odeon<br><br>
+                        <b>We can pre-book tickets</b> and arrange a private car to Taormina (20 min · €28 return).<br><br>
+                        Shall I secure two tickets for July 19 and provide full programme details when confirmed?<br><br>
+                        Kind regards,<br>
+                        Capo dei Greci · Concierge Team
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Capo dei Greci Taormina Coast</div>
+                <div class="roi-subtitle">Sant'Alessio Siculo, Sicily · 27 Rooms · 4 Stars · Ionian Sea</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">27</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~324</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">65h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,620</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>27 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium — €800 setup + €120/month</span><br>
+                    Multi-language support: EN, FR, DE, IT. Weekly auto-improvement from real guest exchanges.<br>
+                    Return on investment: <b>13.5× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will draft a personalised response in the Capo dei Greci tone within 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Michael & Sarah O'Brien</td>
+                            <td>Mount Etna private excursion</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 13, 2026</td>
+                            <td>Nathalie Rousseau</td>
+                            <td>Excursion bateau privé — côte ionienne</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>27 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 12, 2026</td>
+                            <td>James Whitfield</td>
+                            <td>Taormina Greek Theatre — evening tickets</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>30 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Capo dei Greci Taormina Coast · Sant'Alessio Siculo, Sicily</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
