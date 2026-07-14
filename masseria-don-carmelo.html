@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Masseria Don Carmelo</title>
+<style>
+  :root {
+    --primary: #2C1E0A;       /* deep Puglia earth / terracotta stone */
+    --accent:  #C8502A;       /* Primitivo wine terracotta */
+    --gold:    #C9A250;       /* Puglia harvest gold */
+    --light:   #F5EFE0;       /* limestone white / masseria linen */
+    --olive:   #5A6A30;       /* Puglia olive tree */
+    --dark:    #1A0E02;
+    --text:    #2A2010;
+    --muted:   #8A7A60;
+    --border:  #DDD0B8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+    border-bottom: 2px solid var(--accent);
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.08em; font-weight: normal; font-style: italic; }
+  .header .logo span { color: var(--gold); font-style: normal; }
+  .badge { border: 1px solid var(--gold); color: var(--gold); font-family: sans-serif; font-size: 0.65rem;
+           padding: 4px 14px; border-radius: 2px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 66px 48px 54px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(200,80,42,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.16em; text-transform: uppercase;
+               color: var(--gold); margin-bottom: 14px; }
+  .hero h1 { font-size: 2.2rem; font-weight: normal; line-height: 1.25; margin-bottom: 12px; font-style: italic; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 570px; line-height: 1.65; }
+  .hero .meta { margin-top: 34px; display: flex; gap: 42px; flex-wrap: wrap; }
+  .hero .meta-item .num { font-size: 2.1rem; color: var(--gold); }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.63rem; letter-spacing: 0.08em; opacity: 0.72; text-transform: uppercase; margin-top: 3px; }
+
+  .wine-banner { background: var(--accent); color: #fff; padding: 16px 48px;
+                 font-family: sans-serif; font-size: 0.82rem; display: flex; align-items: center; gap: 12px; }
+  .wine-banner strong { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
+  .roi-strip { background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+               padding: 36px 48px; display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 48px 48px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.15em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 28px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 20px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; }
+  .email-card .card-header .type { color: var(--gold); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FBF8F2; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 16px 20px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #277A4A; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 20px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--gold); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+  .plan .rec { background: var(--gold); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-weight: normal; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 18px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "✓ "; color: var(--gold); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 26px 48px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--gold); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { gap: 20px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .wine-banner, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Masseria <em>Don Carmelo</em> <span>· Manduria</span></div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Masseria Don Carmelo · Manduria, Puglia, Italy</div>
+  <h1>Nel cuore del Primitivo.<br>L'accoglienza di una volta.</h1>
+  <p>20 rooms in a restored Puglian farmhouse. A cantina. Farm-to-table dining under the vines. Guests arrive from across Europe to discover Primitivo wine country, the trulli of Alberobello, Ionian beach clubs and cooking classes in a real masseria kitchen. Every email they send deserves a reply as warm as the Puglia sun. In 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item"><div class="num">20</div><div class="lbl">Rooms</div></div>
+    <div class="meta-item"><div class="num">~14</div><div class="lbl">Emails / day</div></div>
+    <div class="meta-item"><div class="num">~7 h</div><div class="lbl">Saved / week</div></div>
+    <div class="meta-item"><div class="num">30 s</div><div class="lbl">Draft time</div></div>
+  </div>
+</div>
+
+<div class="wine-banner">
+  <span>🍷</span>
+  <div><strong>Primitivo di Manduria DOC</strong> — the great wine of Salento. Your guests come for the wine, the trulli, the sea and the silence. Your AI concierge makes sure every email reply reflects that unique Puglian soul.</div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item"><div class="num">~14</div><div class="lbl">Emails / day<br><small style="font-size:0.62rem;color:#bbb">(20 rooms × 0.7)</small></div></div>
+  <div class="roi-item"><div class="num">~7 h</div><div class="lbl">Hours saved / week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s)</small></div></div>
+  <div class="roi-item"><div class="num">€336</div><div class="lbl">Staff value freed / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h)</small></div></div>
+  <div class="roi-item"><div class="num">4.2×</div><div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;color:#bbb">(€336 / €80)</small></div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — real Masseria Don Carmelo guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Primitivo Wine Tasting</div><div>From: james.porter@gmail.com</div></div>
+        <div>🍷</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, arriving next Thursday. We're big wine lovers — Primitivo di Manduria in particular. Can you arrange a proper wine tasting at the masseria's cantina? And is it possible to visit one of the historic Primitivo producers nearby? We'd love something more than a standard tourist tasting. Thank you!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear James,<br><br>
+        You're in exactly the right place — Manduria is the epicentre of Primitivo, and our cantina is a working production space with barrels going back several decades.<br><br>
+        For your stay we suggest two experiences:<br><br>
+        1. <em>Masseria Tasting</em> (Day 1): a guided vertical tasting in our cantina with Don Carmelo's winemaker — 5 wines including a Riserva aged 18 months in oak. Paired with local salumi, aged caciocavallo and taralli.<br><br>
+        2. <em>Estate Visit</em> (Day 2): we'll arrange a private morning visit to Cantine Produttori Vini di Manduria — the historic cooperative, the largest Primitivo cellar in the region — with a behind-the-scenes tour reserved for guests arriving through us.<br><br>
+        Shall we confirm both for your stay? Looking forward to welcoming you Thursday.<br><br>
+        Con piacere,<br>
+        The Concierge · Masseria Don Carmelo</p>
+      </div>
+      <div class="card-footer"><div>Wine connoisseur request — dual experience, expert level</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Alberobello Trulli Day Trip</div><div>From: katja.b@freenet.de</div></div>
+        <div>🏠</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Guten Tag! Wir wissen, dass Alberobello mit den Trulli in der Nähe ist. Wie lange ist die Fahrt von der Masseria? Kann man einen Privatführer buchen, der uns die Geschichte der Trulli erklärt? Und gibt es ein gutes Restaurant dort, das Sie empfehlen?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Liebe Katja,<br><br>
+        Alberobello ist ca. 55 km nördlich — eine knappe Stunde Fahrt durch die wunderschöne Murgiakristalllandschaft, sehr empfehlenswert!<br><br>
+        Wir können einen ausgezeichneten deutschsprachigen Privatführer für Sie buchen: er kennt die Rione Monti (das UNESCO-Viertel mit über 1.000 Trulli) wie seine Westentasche und erklärt die Geschichte dieser einzigartigen Rundbauten aus dem 14. Jahrhundert — inklusive des berühmten "Steuertricks" der Einwohner!<br><br>
+        Restaurant: <em>Il Pinnacolo</em> im Zentrum von Alberobello bietet typische Pugliese Küche in einem echten Trullo — orecchiette, ciceri e tria, Primitivo vom offenen Ausschank. Wir reservieren gerne für Sie.<br><br>
+        Für welchen Tag möchten Sie den Ausflug planen? Wir kümmern uns um alles.<br><br>
+        Mit herzlichen Grüßen,<br>
+        Das Concierge-Team · Masseria Don Carmelo</p>
+      </div>
+      <div class="card-footer"><div>German guest → German reply, Puglia heritage</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Cooking Class — Fresh Pasta</div><div>From: sophie.richard@gmail.com</div></div>
+        <div>🍝</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Bonjour, nous arrivons samedi avec ma fille (12 ans). Elle adore cuisiner et on a vu que vous proposez des cours de cuisine. Peut-on faire un cours mère-fille ensemble à la masseria ? Quelque chose de convivial, typique de la Puglia. Merci !</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Chère Sophie,<br><br>
+        Quelle belle idée — et quel endroit parfait pour ça ! La cuisine de la masseria est une vraie cuisine paysanne pugliese, et nos cours sont pensés exactement pour ce genre de moment partagé.<br><br>
+        Pour vous et votre fille, nous proposons notre cours <em>"Nonna's Puglia"</em> : 2h30 en cuisine avec notre cuisinière Carmela — on prépare ensemble les orecchiette à la main (la forme traditionnelle de Puglia, idéale pour les petites mains !), la frisella au bouillon de légumes du jardin, et un tiramisu au Primitivo pour les adultes ou aux fruits pour les enfants.<br><br>
+        Le tout suivi d'un déjeuner convivial à la table de la masseria avec ce qu'on vient de cuisiner. Les cours ont lieu mardi, jeudi et samedi matin (10h00-12h30).<br><br>
+        Voulez-vous que nous réservions le samedi de votre arrivée ou un jour dans la semaine ? Carmela sera ravie de vous accueillir !<br><br>
+        Bien chaleureusement,<br>
+        L'équipe · Masseria Don Carmelo</p>
+      </div>
+      <div class="card-footer"><div>French guest → French reply, mother-daughter warmth</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Ionian Beach & Private Club</div><div>From: luca.ferrari@icloud.com</div></div>
+        <div>🏖️</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Ciao! Saremo in masseria per 5 notti. Volevo sapere: le spiagge ioniche (Torre Colimena, Campomarino) sono vicine? Si può organizzare un ombrellone e lettini in uno stabilimento balneare? E c'è un modo per andare senza macchina?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Ciao Luca,<br><br>
+        Le spiagge ioniche sono a soli 15-20 km dalla masseria — un bel tratto di costa ancora selvaggia e poco costruita, molto diverso da Rimini o Riccione!<br><br>
+        Torre Colimena è la nostra preferita: acqua cristallina, fondali bassi e sabbia bianca. Ci siamo convenzionati con uno stabilimento balneare locale dove vi riserviamo ombrellone e 2 lettini direttamente (senza fare code).<br><br>
+        Per il trasporto senza auto: abbiamo un servizio navetta giornaliero che parte dalla masseria alle 09:30 e rientra alle 18:00 (prenotazione il giorno prima). Oppure noleggio bici elettriche per i più avventurosi (percorso pianeggiante, circa 50 min).<br><br>
+        Quanti giorni volete andare al mare? Prenoto subito i lettini e il posto sulla navetta.<br><br>
+        A presto!<br>
+        Il Concierge · Masseria Don Carmelo</p>
+      </div>
+      <div class="card-footer"><div>Italian guest → Italian reply, beach logistics solved</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Investimento — tariffe chiare per masserie indipendenti</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/mese</sub></div>
+      <div class="setup">+ €800 setup una tantum</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Dashboard completo (5 tab)</li>
+        <li>Volume email illimitato</li>
+        <li>EN / IT / DE / FR replies</li>
+        <li>Integrazione Mews PMS</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Consigliato</span></div>
+      <div class="price">€120<sub>/mese</sub></div>
+      <div class="setup">+ €800 setup una tantum</div>
+      <ul>
+        <li>Tutto lo Standard</li>
+        <li>Miglioramento auto settimanale</li>
+        <li>Report mensile performance</li>
+        <li>Tono & voce Don Carmelo</li>
+        <li>Supporto prioritario</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/mese</sub></div>
+      <div class="setup">+ €1.200 setup una tantum</div>
+      <ul>
+        <li>Tutto il Premium</li>
+        <li>Training su scambi reali</li>
+        <li>Calibrazione approfondita</li>
+        <li>Onboarding in loco</li>
+        <li>Review trimestrale</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Già live all'IBB Palazzo Bettina, Birgu, Malta — boutique 5* con profilo simile</div>
+  <div>Per Masseria Don Carmelo · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

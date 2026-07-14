@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Boheme Mykonos</title>
+<style>
+  :root {
+    --primary: #1A1A2E;       /* deep Mykonos midnight */
+    --accent:  #C8965A;       /* warm Mykonian earth/gold */
+    --azure:   #4A90B8;       /* Aegean blue */
+    --white:   #F8F6F2;       /* Cycladic whitewash */
+    --light:   #F2EFE8;
+    --dark:    #0E0E1A;
+    --text:    #2A2A2A;
+    --muted:   #8A8A9A;
+    --border:  #E0D8CC;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+  }
+  .header .logo { font-size: 1.3rem; letter-spacing: 0.15em; font-weight: normal; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { border: 1px solid var(--accent); color: var(--accent); font-family: sans-serif; font-size: 0.65rem;
+           padding: 4px 14px; border-radius: 20px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 68px 48px 55px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 35%; height: 100%;
+    background: radial-gradient(ellipse at right, rgba(200,150,90,0.12), transparent 70%);
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.16em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 14px; }
+  .hero h1 { font-size: 2.3rem; font-weight: normal; line-height: 1.2; margin-bottom: 12px; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 560px; line-height: 1.65; }
+  .hero .meta { margin-top: 34px; display: flex; gap: 42px; flex-wrap: wrap; }
+  .hero .meta-item .num { font-size: 2.1rem; color: var(--accent); }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.64rem; letter-spacing: 0.08em; opacity: 0.72; text-transform: uppercase; margin-top: 3px; }
+
+  .adults-banner { background: var(--azure); color: #fff; padding: 16px 48px;
+                   font-family: sans-serif; font-size: 0.82rem; letter-spacing: 0.04em;
+                   display: flex; align-items: center; gap: 10px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); border-bottom: 1px solid var(--border);
+               padding: 36px 48px; display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 48px 48px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.15em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 28px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 20px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF8; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 16px 20px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #277A4A; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 20px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--accent); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+  .plan .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-weight: normal; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 18px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "✓ "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 26px 48px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { gap: 20px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .adults-banner, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo"><em>Boheme</em> Mykonos</div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Boheme Mykonos · Mykonos Town, Greece</div>
+  <h1>31 rooms at the heart<br>of the world's most vibrant island.</h1>
+  <p>Five minutes from Little Venice. A pool courtyard. Adults-only silence in a non-stop island. Your guests email every day — sunset boat parties, Delos excursions, beach club access, restaurant tables that don't exist. The AI concierge that drafts every reply in 30 seconds so your team can focus on the magic that only happens in person.</p>
+  <div class="meta">
+    <div class="meta-item"><div class="num">31</div><div class="lbl">Rooms</div></div>
+    <div class="meta-item"><div class="num">~22</div><div class="lbl">Emails / day</div></div>
+    <div class="meta-item"><div class="num">~10 h</div><div class="lbl">Saved / week</div></div>
+    <div class="meta-item"><div class="num">30 s</div><div class="lbl">Draft time</div></div>
+  </div>
+</div>
+
+<div class="adults-banner">
+  <span>🔕</span>
+  <div><strong>Adults-only oasis in the heart of the noise.</strong> Your guests chose Boheme for curated calm. Let your AI concierge handle the logistics — while your team delivers the experience.</div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item"><div class="num">~22</div><div class="lbl">Emails / day<br><small style="font-size:0.62rem;color:#bbb">(31 rooms × 0.7)</small></div></div>
+  <div class="roi-item"><div class="num">~10 h</div><div class="lbl">Hours saved / week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s)</small></div></div>
+  <div class="roi-item"><div class="num">€480</div><div class="lbl">Staff value freed / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h)</small></div></div>
+  <div class="roi-item"><div class="num">6×</div><div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;color:#bbb">(€480 / €80)</small></div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — real Boheme guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Sunset Boat Party</div><div>From: zara.h@me.com</div></div>
+        <div>🛥️</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi! We're checking in Saturday — group of 6. We've heard about sunset boat parties in Mykonos and would love something exclusive, not the 200-person party cruises. Can Boheme arrange something more intimate? And ideally with a DJ? Thanks!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Zara,<br><br>
+        Absolutely — the mass sunset cruises are fun, but for a group of six who chose Boheme, we have something much better in mind.<br><br>
+        We work with a private yacht operator who can arrange a 4-hour exclusive charter: your own captain, a Bluetooth speaker (or a small DJ setup on request), champagne and canapés on board, swimming at sunset off Agios Ioannis beach, and a return to Mykonos Town as the island lights up. Capacity is up to 8, so it's entirely your group.<br><br>
+        Typical departure: 17:30 Saturday. Shall we hold a provisional booking and share the full quote? We'll confirm by end of tomorrow.<br><br>
+        Warmly,<br>
+        The Concierge · Boheme Mykonos</p>
+      </div>
+      <div class="card-footer"><div>Exclusive vs. mass tourism — premium positioning</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Delos Day Trip</div><div>From: marcus.b@web.de</div></div>
+        <div>⛩️</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hallo, wir möchten unbedingt die Insel Delos besuchen — das archäologische UNESCO-Welterbe. Können Sie uns die Fähre und einen Privatführer organisieren? Und gibt es eine beste Tageszeit, um die Massen zu vermeiden? Danke!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Lieber Marcus,<br><br>
+        Delos ist absolut unverzichtbar — eine der bedeutendsten archäologischen Stätten Griechenlands, und von Mykonos aus in 30 Minuten erreichbar.<br><br>
+        Empfehlung: Nehmen Sie die Frühfähre (09:15 ab Altem Hafen) und buchen Sie einen Privatführer, der Sie durch das Heiligtum des Apollo, die Terasse der Löwen und das Dionysos-Mosaik führt — ca. 2,5 Stunden, dann Rückkehr mit der 13:00-Uhr-Fähre, bevor die Hauptmassen ankommen. Im Sommer ist es auf Delos sehr heiß — Wasser und Kopfbedeckung unbedingt mitnehmen!<br><br>
+        Wir organisieren Fährkarten und Privatführer für Ihren Wunschtermin. Wie viele Personen und welcher Tag?<br><br>
+        Mit freundlichen Grüßen,<br>
+        Das Concierge-Team · Boheme Mykonos</p>
+      </div>
+      <div class="card-footer"><div>German guest → German reply, historical expertise</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Impossible Restaurant Reservation</div><div>From: isabella.m@gmail.com</div></div>
+        <div>🍽️</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, we're arriving next Friday. Is there any chance of getting a table at Nobu Mykonos on Saturday evening? We know it's nearly impossible in peak season but thought we'd ask. We're a party of 4. Any other iconic restaurant alternatives if Nobu is full?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Isabella,<br><br>
+        You're right that Nobu is notoriously full in July — but never say never! We'll contact their reservations directly on your behalf as a Boheme guest, which does sometimes make a difference.<br><br>
+        In parallel, may we suggest two equally iconic alternatives: <em>Scorpios</em> (beach club turned cult sunset dining destination — we can get table priority) and <em>Kiki's Tavern</em> in Agios Sostis (no reservations, but we know exactly when to arrive for the legendary grilled meats and Cycladic roses).<br><br>
+        We'll chase Nobu today and have an answer for you by tomorrow. For 4 people, Saturday evening — confirmed.<br><br>
+        With pleasure,<br>
+        The Concierge · Boheme Mykonos</p>
+      </div>
+      <div class="card-footer"><div>"Impossible" request — proactive, connected, honest</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Beach Club Access</div><div>From: pierre.l@orange.fr</div></div>
+        <div>🏖️</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Bonjour, nous arrivons jeudi. On voudrait passer une journée à Paradise Beach ou Super Paradise — avec transat réservé à l'avance. C'est possible de passer par l'hôtel pour réserver ? Et y a-t-il un bus ou faut-il un taxi ?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Bonjour Pierre,<br><br>
+        Bien sûr — nous gérons cela très régulièrement pour nos clients !<br><br>
+        Pour les transats : Super Paradise est légèrement plus exclusif et calme qu'en pleine saison — nous vous recommandons de réserver via <em>Super Paradise Beach Club</em> directement, mais nous pouvons vous mettre en relation avec le bon contact pour des places garanties. Paradise est plus festif et accessible.<br><br>
+        Pour le transport : les bus (ligne KTEL) partent régulièrement depuis le terminal à Fabrika, à 5 min à pied de Boheme — environ 1,80€/personne aller simple. En taxi, comptez 12-15€ selon l'heure. Nous recommandons le bus pour aller et le taxi pour rentrer en soirée si la fête bat son plein !<br><br>
+        Dites-nous pour quel jour et nous arrangerons la réservation.<br><br>
+        À bientôt !<br>
+        L'équipe Conciergerie · Boheme Mykonos</p>
+      </div>
+      <div class="card-footer"><div>French guest → French reply, practical Mykonos knowledge</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Investment — three plans, one AI concierge</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Full dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>EN / DE / FR / IT replies</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Boheme tone & voice tuning</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep brand voice calibration</li>
+        <li>On-site onboarding session</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina, Birgu, Malta — adults-only 5-star boutique, same profile</div>
+  <div>For Boheme Mykonos · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

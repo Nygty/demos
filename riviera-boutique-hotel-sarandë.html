@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Riviera Boutique Hotel Sarandë</title>
+<style>
+  :root {
+    --primary: #1A3050;       /* Ionian deep blue */
+    --accent:  #E8A84A;       /* Albanian amber / Riviera gold */
+    --emerald: #2A7A5A;       /* Albanian nature green */
+    --light:   #F4F2EE;       /* warm Mediterranean linen */
+    --dark:    #0D1E34;
+    --text:    #252830;
+    --muted:   #7A8898;
+    --border:  #D8D2C8;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+  }
+  .header .logo { font-size: 1.05rem; letter-spacing: 0.08em; font-weight: normal; }
+  .header .logo span { color: var(--accent); }
+  .badge { border: 1px solid var(--accent); color: var(--accent); font-family: sans-serif; font-size: 0.65rem;
+           padding: 4px 14px; border-radius: 20px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: linear-gradient(155deg, var(--dark) 0%, var(--primary) 55%, #265080 100%);
+    color: #fff;
+    padding: 64px 48px 52px;
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.16em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 14px; }
+  .hero h1 { font-size: 2.1rem; font-weight: normal; line-height: 1.28; margin-bottom: 12px; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 570px; line-height: 1.65; }
+  .hero .meta { margin-top: 32px; display: flex; gap: 40px; flex-wrap: wrap; }
+  .hero .meta-item .num { font-size: 2rem; color: var(--accent); }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.63rem; letter-spacing: 0.08em; opacity: 0.72; text-transform: uppercase; margin-top: 3px; }
+
+  .destination-banner { background: var(--emerald); color: #fff; padding: 16px 48px;
+                        font-family: sans-serif; font-size: 0.82rem; display: flex; align-items: center; gap: 12px; }
+  .destination-banner strong { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
+  .roi-strip { background: var(--primary); color: #fff; padding: 34px 48px;
+               display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--accent); }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.07em; opacity: 0.82; text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 48px 48px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.15em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 28px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 20px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 16px 20px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #277A4A; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 20px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--accent); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+  .plan .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-weight: normal; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 18px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "✓ "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 26px 48px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { gap: 20px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .destination-banner, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Riviera Boutique Hotel <span>·</span> Sarandë</div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Riviera Boutique Hotel · Sarandë, Albanian Riviera</div>
+  <h1>The Albanian Riviera.<br>Europe's most exciting new destination.</h1>
+  <p>Sarandë faces Corfu across the Ionian. A rooftop pool. 22 rooms where guests from across Europe arrive to discover the Blue Eye, Butrint UNESCO ruins, and a cuisine nobody told them about. They email constantly — in German, Italian, French, English. Your AI concierge answers all of them, in their language, in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item"><div class="num">22</div><div class="lbl">Rooms</div></div>
+    <div class="meta-item"><div class="num">~15</div><div class="lbl">Emails / day</div></div>
+    <div class="meta-item"><div class="num">~7 h</div><div class="lbl">Saved / week</div></div>
+    <div class="meta-item"><div class="num">30 s</div><div class="lbl">Draft time</div></div>
+  </div>
+</div>
+
+<div class="destination-banner">
+  <span>🌍</span>
+  <div><strong>The Riviera that hasn't been overrun yet.</strong> Tourism to Albania's coast grew +47% in 2023-2024. Your guests are early adopters — curious, well-travelled, and expecting thoughtful service from day one.</div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item"><div class="num">~15</div><div class="lbl">Emails / day<br><small style="font-size:0.62rem;opacity:0.6">(22 rooms × 0.7)</small></div></div>
+  <div class="roi-item"><div class="num">~7 h</div><div class="lbl">Hours saved / week<br><small style="font-size:0.62rem;opacity:0.6">(3 min → 30 s)</small></div></div>
+  <div class="roi-item"><div class="num">€336</div><div class="lbl">Staff value freed / month<br><small style="font-size:0.62rem;opacity:0.6">(at €12/h)</small></div></div>
+  <div class="roi-item"><div class="num">4.2×</div><div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;opacity:0.6">(€336 / €80)</small></div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — real Riviera Boutique guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Blue Eye Spring Visit</div><div>From: oliver.k@gmx.de</div></div>
+        <div>💧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Guten Tag, wir kommen Ende Juli nach Sarandë. Das Blaue Auge (Syri i Kaltër) steht ganz oben auf unserer Liste. Wie kommt man am besten hin, gibt es Touren ab dem Hotel? Und was ist die beste Tageszeit? Danke!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Sehr geehrter Oliver,<br><br>
+        Das Blaue Auge ist wirklich einer der unvergesslichsten Orte Albaniens — die Quelle mit ihrem türkisblauen Wasser in einem Waldtal ist atemberaubend schön und keineswegs touristisch überlaufen.<br><br>
+        Es liegt ca. 22 km östlich von Sarandë (30-40 Min. Fahrt). Wir organisieren einen Privatfahrer für den halben Tag (Hin- und Rückfahrt mit Wartezeit, ca. 2 Stunden vor Ort) — so haben Sie alle Freiheit und müssen nichts koordinieren.<br><br>
+        Die beste Tageszeit: morgens zwischen 9:00 und 11:00 Uhr, wenn das Licht durch die Bäume fällt und es noch ruhig ist. Kombiniert man dies mit einem Stopp in Delvinë (altes osmanisches Städtchen) auf dem Rückweg, ergibt das einen perfekten Halbtagsausflug.<br><br>
+        Sollen wir eine Fahrt für einen bestimmten Morgen reservieren?<br><br>
+        Herzliche Grüße,<br>
+        Das Concierge-Team · Riviera Boutique Hotel</p>
+      </div>
+      <div class="card-footer"><div>German guest → German reply, Albania expertise</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Butrint UNESCO Ruins</div><div>From: francesca.m@libero.it</div></div>
+        <div>🏛️</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Ciao! Saremo a Sarandë la settimana prossima. Vogliamo assolutamente visitare Butrinto — sito UNESCO, vicino a Sarandë. C'è un modo per avere una guida privata? E quando conviene andarci per non trovare troppa gente? Grazie!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Cara Francesca,<br><br>
+        Butrinto (Butrint) è una delle sorprese più belle dell'Albania — il sito UNESCO con le rovine greche, romane e bizantine immerse in una laguna naturale è straordinario, e ancora relativamente poco affollato rispetto ai grandi siti italiani o greci.<br><br>
+        Si trova a soli 18 km a sud di Sarandë (20-25 min. in auto). Organizziamo con piacere una visita con guida privata anglofona o italofona: 2-3 ore, perfettamente adattata ai vostri interessi (archeologia, storia, fotografia).<br><br>
+        Per evitare i gruppi: il mattino presto (apertura 08:00) è ideale. In estate conviene anche evitare il martedì e mercoledì quando arrivano tour da Corfù.<br><br>
+        Per quale giorno vorreste programmare la visita?<br><br>
+        A presto,<br>
+        Il Concierge · Riviera Boutique Hotel</p>
+      </div>
+      <div class="card-footer"><div>Italian guest → Italian reply, UNESCO expertise</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Corfu Day Trip</div><div>From: david.holst@hotmail.com</div></div>
+        <div>🚢</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, we can see Corfu from your rooftop! Is it easy to take a day trip to Corfu from Sarandë? We'd love to see the old town. How does the ferry work and can you book it for us?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear David,<br><br>
+        Yes — that's one of Sarandë's magical details! Corfu is literally 45 minutes by fast ferry across the Ionian (the channel is only 12 km wide at this point).<br><br>
+        The Ionian Seaways ferry runs daily between Sarandë and Corfu Town. A typical day trip: depart Sarandë 08:00, arrive Corfu Town 08:45, spend the morning in the UNESCO-listed Old Town (Liston arcade, Old Fortress, Byzantine Museum), lunch at a traditional Corfiot taverna, afternoon stroll through the Venetian lanes, return ferry around 18:30.<br><br>
+        We can book your round-trip tickets in advance — just let us know your preferred date and how many people. We'll also give you a short printed guide to Corfu Town's best stops.<br><br>
+        Enjoy the view from the rooftop in the meantime!<br>
+        The Concierge · Riviera Boutique Hotel, Sarandë</p>
+      </div>
+      <div class="card-footer"><div>Cross-border day trip — practical, exciting, effortless</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Gjirokastër Excursion</div><div>From: emma.v@wanadoo.fr</div></div>
+        <div>🏰</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Bonjour, nous avons lu que Gjirokastra (patrimoine UNESCO également) est à environ 1h de route. C'est faisable en journée depuis Sarandë ? Peut-on avoir un chauffeur-guide qui parle français ? Et y a-t-il un restaurant local typique là-bas ?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Chère Emma,<br><br>
+        Gjirokastra est l'un des joyaux cachés des Balkans — la "ville de pierre" avec sa citadelle ottomane classée UNESCO est absolument saisissante, surtout par beau temps. Oui, c'est très faisable en journée depuis Sarandë (environ 1h de route à travers un paysage montagneux magnifique).<br><br>
+        Nous avons un contact avec un guide francophone excellent — historien de formation, né à Gjirokastra, qui connaît chaque recoin du bazar ottoman et de la forteresse. La visite dure environ 3 heures.<br><br>
+        Pour le déjeuner : nous recommandons le restaurant Kujtimi, dans la vieille ville — cuisine albanaise traditionnelle authentique (byrek maison, tave kosi, boza). Simple, délicieux, pas touristique.<br><br>
+        Souhaitez-vous que nous organisions le chauffeur-guide pour cette excursion ? Pour quel jour envisagez-vous le départ ?<br><br>
+        Bien chaleureusement,<br>
+        L'équipe Conciergerie · Riviera Boutique Hotel</p>
+      </div>
+      <div class="card-footer"><div>French guest → French reply, hidden gem knowledge</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Investment — boutique-scale pricing</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Full dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>EN / DE / IT / FR replies</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Albania-specific content learning</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep local voice calibration</li>
+        <li>On-site onboarding session</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina, Birgu, Malta — Mediterranean boutique, same international clientele</div>
+  <div>For Riviera Boutique Hotel · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

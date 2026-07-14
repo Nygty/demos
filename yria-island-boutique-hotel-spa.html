@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Yria Island Boutique Hotel & Spa</title>
+<style>
+  :root {
+    --primary: #2C5F6A;       /* Aegean teal */
+    --accent:  #C9A96E;       /* warm gold / Cycladic sand */
+    --light:   #F5F0E8;       /* linen white */
+    --dark:    #1A2D35;
+    --text:    #3A3A3A;
+    --muted:   #7A8B8F;
+    --border:  #DDD5C5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--primary);
+    color: #fff;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+  }
+  .header .logo { font-size: 1.15rem; letter-spacing: 0.12em; font-weight: normal; text-transform: uppercase; }
+  .header .logo span { color: var(--accent); }
+  .badge { background: var(--accent); color: #fff; font-family: sans-serif; font-size: 0.7rem;
+           padding: 4px 12px; border-radius: 20px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* ── HERO BANNER ── */
+  .hero {
+    background: linear-gradient(135deg, var(--primary) 0%, #3D7A88 50%, #4A8E9C 100%);
+    color: #fff; padding: 60px 48px 50px;
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 14px; }
+  .hero h1 { font-size: 2.2rem; font-weight: normal; margin-bottom: 10px; line-height: 1.25; }
+  .hero p  { font-size: 1rem; opacity: 0.85; max-width: 580px; line-height: 1.6; }
+  .hero .meta { margin-top: 28px; display: flex; gap: 32px; }
+  .hero .meta-item { text-align: center; }
+  .hero .meta-item .num { font-size: 2rem; color: var(--accent); }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; opacity: 0.8; text-transform: uppercase; margin-top: 2px; }
+
+  /* ── SECTION ── */
+  .section { padding: 48px 48px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-size: 0.72rem; font-family: sans-serif; letter-spacing: 0.15em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 28px; }
+
+  /* ── ROI STRIP ── */
+  .roi-strip { background: var(--primary); color: #fff; padding: 36px 48px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.4rem; color: var(--accent); }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.72rem; letter-spacing: 0.08em; opacity: 0.85; text-transform: uppercase; margin-top: 4px; }
+
+  /* ── EMAIL DEMO CARDS ── */
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .email-card { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--dark); color: #fff; padding: 14px 20px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; }
+  .email-card .inbound { background: #f9f9f9; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .email-card .inbound .label { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .email-card .inbound p { font-size: 0.88rem; line-height: 1.55; color: #555; }
+  .email-card .outbound { padding: 16px 20px; }
+  .email-card .outbound .label { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase;
+                                   color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; }
+  .email-card .outbound .label span { background: #E8F4EE; color: #2A7A4F; padding: 2px 8px; border-radius: 10px; font-size: 0.6rem; }
+  .email-card .outbound p { font-size: 0.88rem; line-height: 1.6; color: var(--text); }
+  .email-card .footer { background: var(--light); padding: 10px 20px; font-family: sans-serif; font-size: 0.7rem; color: var(--muted);
+                         display: flex; justify-content: space-between; }
+  .email-card .footer .time { color: var(--accent); font-weight: bold; }
+
+  /* ── PRICING ── */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .plan { border: 1px solid var(--border); border-radius: 8px; padding: 28px 24px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--accent); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+  .plan .plan-name .badge-plan { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 8px; font-size: 0.62rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.9rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.75rem; color: var(--muted); margin-bottom: 16px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.7); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.82rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.15); }
+  .plan ul li::before { content: "✓ "; color: var(--accent); }
+
+  /* ── FOOTER ── */
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.6); padding: 28px 48px;
+                  font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 20px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Yria Island <span>·</span> AI Concierge</div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="tag">Personalised demo — Yria Island Boutique Hotel & Spa · Paros, Greece</div>
+  <h1>Your AI Concierge,<br>ready in 30 seconds</h1>
+  <p>Every day, guests at Yria email about boat charters, windsurfing at Golden Beach, Naousa food tours and marble village visits. 
+     Your team deserves an intelligent assistant that drafts the perfect personalised reply instantly — so your guests feel the Yria magic, even before arrival.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">40</div>
+      <div class="lbl">Bungalows</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~28</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">14 h</div>
+      <div class="lbl">Saved / week</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Draft time</div>
+    </div>
+  </div>
+</div>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~28</div>
+    <div class="lbl">Guest emails per day<br><small style="font-size:0.65rem;opacity:0.7">(40 bungalows × 0.7 avg emails/room)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~14 h</div>
+    <div class="lbl">Hours saved per week<br><small style="font-size:0.65rem;opacity:0.7">(3 min draft → 30 s with AI)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€720</div>
+    <div class="lbl">Staff time saved / month<br><small style="font-size:0.65rem;opacity:0.7">(at €12/h — conservative)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">4.5×</div>
+    <div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.65rem;opacity:0.7">(€720 saved vs. €80/month)</small></div>
+  </div>
+</div>
+
+<!-- EMAIL DEMOS -->
+<div class="section">
+  <div class="section-title">How it works — Real email scenarios for Yria</div>
+  <div class="email-grid">
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Boat Charter Request</div>
+          <div>From: sarah.mills@gmail.com</div>
+        </div>
+        <div>📧 Inbound</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hello, we are arriving at Yria on July 18th (2 couples, 4 people). We'd love to arrange a full-day private boat trip around Paros — ideally visiting Antiparos, some sea caves and having lunch on board. Could you recommend something and help with the booking? Thank you!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — generated in 30 s <span>Ready to send</span></div>
+        <p>Dear Sarah,<br><br>
+        What a wonderful way to discover the Cyclades! We would be delighted to arrange a private full-day boat charter for your group of four.<br><br>
+        We work with a trusted local captain who can take you along the southwestern coast, through the sea caves of Paros, across to Antiparos and the famous Blue Cave — with a fresh seafood lunch on board. The trip typically runs from 10:00 to 17:00.<br><br>
+        We will have all details confirmed before your arrival on the 18th. Could you let us know your preferred departure time?<br><br>
+        With warmest regards,<br>
+        The Concierge Team · Yria Island Boutique Hotel & Spa</p>
+      </div>
+      <div class="footer">
+        <div>Guest satisfaction: personalised, immediate</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Windsurfing & Activities</div>
+          <div>From: k.meyer@web.de</div>
+        </div>
+        <div>📧 Inbound</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Guten Tag, wir kommen im August für 7 Nächte. Mein Sohn (16 Jahre) möchte unbedingt Windsurfen lernen und wir würden gerne wissen, ob ihr Unterricht direkt am Golden Beach oder über das Hotel organisiert werden kann. Auch Kitesurfen wäre interessant. Danke!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — generated in 30 s <span>Ready to send</span></div>
+        <p>Dear Mr Meyer,<br><br>
+        We are very much looking forward to welcoming your family in August! Golden Beach is indeed one of the finest windsurfing spots in Europe, and we are happy to arrange everything for your son.<br><br>
+        We partner with a certified windsurf school located directly on Golden Beach — they offer beginner courses (3-day programme ideal for first-timers at age 16) as well as kitesurfing introduction sessions. We can pre-book a slot in your name before arrival.<br><br>
+        Shall we go ahead and reserve a place? Please confirm your exact arrival date and we will take care of the rest.<br><br>
+        Kind regards,<br>
+        The Concierge Team · Yria Island Boutique Hotel & Spa</p>
+      </div>
+      <div class="footer">
+        <div>Multilingual response — DE guest, EN reply tailored</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Naousa Food Tour & Gastronomy</div>
+          <div>From: pierre.dubois@orange.fr</div>
+        </div>
+        <div>📧 Inbound</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Bonjour, nous réservons pour notre anniversaire de mariage fin août. Nous sommes très foodie et souhaiterions une recommandation pour une belle soirée à Naousa — un restaurant avec vue sur le port, cuisine grecque authentique, bon vin local. Pouvez-vous réserver pour nous? Merci</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — generated in 30 s <span>Ready to send</span></div>
+        <p>Cher Pierre,<br><br>
+        Félicitations pour votre anniversaire de mariage — quel endroit magnifique pour le célébrer !<br><br>
+        Naousa est effectivement l'une des plus belles tables des Cyclades. Nous vous recommandons vivement <em>Soso</em>, directement sur le port de Naousa, pour sa cuisine grecque créative et sa carte des vins locaux — en particulier les blancs de Moraitis. Nous pouvons effectuer une réservation à votre nom pour le soir de votre choix.<br><br>
+        Pourriez-vous nous indiquer la date souhaitée et l'heure préférentielle (19h30 ou 20h00) ? Nous nous occupons de tout.<br><br>
+        Bien chaleureusement,<br>
+        L'équipe Conciergerie · Yria Island Boutique Hotel & Spa</p>
+      </div>
+      <div class="footer">
+        <div>French guest → French reply, highly personalised</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <!-- EMAIL 4 -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Marble Village & Cultural Tour</div>
+          <div>From: emma.j.harris@icloud.com</div>
+        </div>
+        <div>📧 Inbound</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, could you organise a guided day trip to the marble villages — I've read about Lefkes and the Byzantine Road, and also the Museum of Marble Crafts in Pyrgos. Would love a private guide if possible, and maybe combine with a winery visit on the way back? Thank you!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — generated in 30 s <span>Ready to send</span></div>
+        <p>Dear Emma,<br><br>
+        What a beautiful itinerary you have in mind! The Byzantine Road from Lefkes to Prodromos is one of the island's hidden gems, and the Museum of Marble Crafts in Apiranthos is truly remarkable.<br><br>
+        We can arrange a private guide for a full-day cultural tour: Lefkes & the Byzantine trail in the morning, the Marble Museum, and a visit to the Moraitis or Agios Pavlos winery in the afternoon — finishing with sunset views over the valley.<br><br>
+        We will share a detailed programme and quote within the hour. Would you prefer the tour early in your stay or towards the end?<br><br>
+        With pleasure,<br>
+        The Concierge Team · Yria Island Boutique Hotel & Spa</p>
+      </div>
+      <div class="footer">
+        <div>Cultural request — detailed, expert local knowledge</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="section" style="background:#fff;">
+  <div class="section-title">Pricing — Transparent, no surprises</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>Mews PMS integration</li>
+        <li>Multilingual drafts</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="badge-plan">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly automatic improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+        <li>Tone tuned to Yria's voice</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real Yria exchanges</li>
+        <li>Deep brand voice calibration</li>
+        <li>Dedicated onboarding session</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <div>AI Concierge · already live at IBB Palazzo Bettina (Birgu, Malta) — a similar 5-star boutique</div>
+  <div>Prepared for Yria Island · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

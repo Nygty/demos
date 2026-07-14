@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Elivi Hotel, Skiathos</title>
+<style>
+  :root {
+    --primary: #1B3040;       /* Aegean deep navy */
+    --accent:  #D4A853;       /* warm Skiathos gold */
+    --teal:    #3A8A8A;       /* Aegean teal pool */
+    --light:   #F5F3EF;       /* warm linen */
+    --dark:    #0D1C26;
+    --text:    #252A2E;
+    --muted:   #7A8A90;
+    --border:  #D8D0C0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 70px;
+  }
+  .header .logo { font-size: 1.2rem; letter-spacing: 0.18em; font-weight: normal; font-family: sans-serif; text-transform: uppercase; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { border: 1px solid var(--accent); color: var(--accent); font-family: sans-serif; font-size: 0.65rem;
+           padding: 4px 14px; border-radius: 20px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: linear-gradient(150deg, var(--dark) 0%, var(--primary) 60%, #285070 100%);
+    color: #fff;
+    padding: 66px 50px 54px;
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.16em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 14px; }
+  .hero h1 { font-size: 2.2rem; font-weight: normal; line-height: 1.25; margin-bottom: 12px; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 560px; line-height: 1.65; }
+  .hero .meta { margin-top: 34px; display: flex; gap: 42px; flex-wrap: wrap; }
+  .hero .meta-item .num { font-size: 2.1rem; color: var(--accent); }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.63rem; letter-spacing: 0.08em; opacity: 0.72; text-transform: uppercase; margin-top: 3px; }
+
+  .slh-banner { background: var(--teal); color: #fff; padding: 16px 50px;
+                font-family: sans-serif; font-size: 0.82rem; display: flex; align-items: center; gap: 12px; }
+  .slh-banner strong { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); border-bottom: 1px solid var(--border);
+               padding: 36px 50px; display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.66rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 50px 50px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.15em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 28px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 20px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF8; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 16px 20px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #277A4A; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 20px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--accent); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+  .plan .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-weight: normal; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 18px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "✓ "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 26px 50px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { gap: 20px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .slh-banner, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo"><em>Elivi</em> Hotel</div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Elivi Hotel · Skiathos, Greece</div>
+  <h1>Adults-only. Infinity pools.<br>Every email, perfectly answered.</h1>
+  <p>Small Luxury Hotels of the World. 44 rooms. Infinity pools over the Aegean. A spa and a celebrated restaurant. Guests email about speedboat trips to Lalaria, Skopelos excursions and private charters — round the clock, from every time zone. Your AI concierge drafts the perfect reply in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item"><div class="num">44</div><div class="lbl">Rooms</div></div>
+    <div class="meta-item"><div class="num">~31</div><div class="lbl">Emails / day</div></div>
+    <div class="meta-item"><div class="num">~15 h</div><div class="lbl">Saved / week</div></div>
+    <div class="meta-item"><div class="num">30 s</div><div class="lbl">Draft time</div></div>
+  </div>
+</div>
+
+<div class="slh-banner">
+  <span>⭐</span>
+  <div><strong>Small Luxury Hotels of the World</strong> — SLH guests choose Elivi for an experience beyond the ordinary. Every interaction — including email — must reflect that promise.</div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item"><div class="num">~31</div><div class="lbl">Emails / day<br><small style="font-size:0.62rem;color:#bbb">(44 rooms × 0.7)</small></div></div>
+  <div class="roi-item"><div class="num">~15 h</div><div class="lbl">Hours saved / week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s)</small></div></div>
+  <div class="roi-item"><div class="num">€720</div><div class="lbl">Staff value freed / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h)</small></div></div>
+  <div class="roi-item"><div class="num">9×</div><div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;color:#bbb">(€720 / €80)</small></div></div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — real Elivi guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Lalaria Beach Speedboat</div><div>From: katherine.r@icloud.com</div></div>
+        <div>🚤</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi there! We check in Saturday for 5 nights. We've seen photos of Lalaria beach and it looks stunning — I understand it's only accessible by boat. Can Elivi arrange a private speedboat trip there? Ideally an early morning visit before the crowds. Thank you!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Katherine,<br><br>
+        Lalaria is without question the most breathtaking beach in Skiathos — and the early morning idea is exactly right. The famous white pebbles and the natural arch catch extraordinary light before 10:00.<br><br>
+        We work with a trusted private speedboat operator based at Skiathos port. We suggest departing at 08:30, reaching Lalaria by 09:00 before the day-trip boats arrive, spending 90 minutes swimming and exploring the sea caves, and returning for a late breakfast at Elivi.<br><br>
+        Shall we book for Sunday (your first full day)? We'll send over the quote and all details this evening.<br><br>
+        Can't wait to welcome you on Saturday,<br>
+        The Concierge Team · Elivi Hotel, Skiathos</p>
+      </div>
+      <div class="card-footer"><div>Signature Skiathos experience — early, exclusive, expert</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Skopelos Day Trip</div><div>From: georg.w@gmx.at</div></div>
+        <div>⛵</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Guten Tag, wir möchten gerne einen Tagesausflug nach Skopelos machen — wir haben den Film Mamma Mia gesehen und die Kapelle Agios Ioannis auf dem Felsen möchten wir unbedingt sehen. Gibt es Fähren von Skiathos nach Skopelos? Können Sie helfen?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Sehr geehrter Herr W.,<br><br>
+        Natürlich — die Kapelle Agios Ioannis Kastri auf dem Fels von Skopelos (bekannt aus Mamma Mia!) ist wirklich atemberaubend, besonders bei gutem Licht am frühen Vormittag.<br><br>
+        Es gibt tägliche Fährverbindungen ab Skiathos-Hafen nach Skopelos (ca. 50 Minuten, Hellenic Seaways oder Anes Ferries). Wir empfehlen die Frühfähre um ca. 09:00, was Ihnen einen vollen Tag auf Skopelos ermöglicht. Die Kapelle ist ein steiler, aber kurzer Aufstieg — ca. 103 Stufen mit fantastischem Meerblick.<br><br>
+        Wir reservieren die Fahrkarten für Sie und geben Ihnen eine kleine Karte mit den besten Spots auf Skopelos (Altstadt, Glossa-Dorf, Taverne am Hafen). Für welchen Tag planen Sie den Ausflug?<br><br>
+        Mit freundlichen Grüßen,<br>
+        Das Concierge-Team · Elivi Hotel</p>
+      </div>
+      <div class="card-footer"><div>Austrian guest → German reply, Mamma Mia pilgrimage!</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Private Charter Request</div><div>From: marco.pellegrini@gmail.com</div></div>
+        <div>🛥️</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Buongiorno, siamo in 8 persone (4 coppie) e vorremmo noleggiare uno yacht o un catamarano per 2-3 giorni per esplorare le Sporadi. Budget flessibile. L'hotel può coordinare questo tipo di charter? Partiamo il 10 agosto. Grazie!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Gentile Marco,<br><br>
+        Che progetto magnifico — le Sporadi in charter sono un'esperienza indimenticabile, specialmente tra Skiathos, Skopelos e Alonissos (quest'ultima nel cuore del Parco Marino Nazionale).<br><br>
+        Collaboriamo con un broker di charter di fiducia basato a Skiathos: catamaran di 42-50 piedi ideale per 8 persone, con skipper e hostess inclusi, cucina a bordo e tutto il necessario per 2-3 notti. Itinerario personalizzabile: baie nascoste, soste a Glossa, snorkeling con foche monache...<br><br>
+        Avrei bisogno di: data di partenza conferma (10 agosto va bene), durata preferita (2 o 3 notti) e un'indicazione se preferite cucinare a bordo o mangiare a terra. Vi invierò 2-3 proposte con preventivo entro domani.<br><br>
+        Con piacere,<br>
+        Il Concierge · Elivi Hotel</p>
+      </div>
+      <div class="card-footer"><div>Italian group, multi-day charter → Italian reply</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div><div class="type">Spa & Couples Retreat</div><div>From: sarah.f@outlook.com</div></div>
+        <div>🌿</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hello, we want a truly relaxing stay — no itinerary, just spa, pool and good food. Can you tell us what spa treatments are available, and whether we need to pre-book? Also, what's the recommended restaurant for dinner — on-site or somewhere in Skiathos Town?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Sarah,<br><br>
+        You've come to exactly the right place — and exactly the right mindset for Elivi!<br><br>
+        Our spa offers a full menu of treatments: signature Aegean stone massage, couples' body scrub & wrap (60 or 90 minutes), deep tissue, aromatherapy, and facial rituals using Greek natural ingredients. We strongly recommend pre-booking (especially high season) — we'll reserve your preferred sessions as soon as you confirm arrival.<br><br>
+        For dinner: our restaurant, with its terrace overlooking the Aegean, is exceptional — fresh local fish, Greek mezze, excellent wines. On alternate evenings, we suggest Pergola in Skiathos Town (15 min taxi, very authentic) for something equally wonderful with a different atmosphere.<br><br>
+        Shall I provisionally book a couples' massage for your second evening, and a restaurant table for your first night?<br><br>
+        Looking forward to welcoming you,<br>
+        The Concierge · Elivi Hotel</p>
+      </div>
+      <div class="card-footer"><div>Slow travel request — anticipates every need</div><div class="time">⚡ 30 sec</div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Investment — SLH-quality service, startup-friendly pricing</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Full dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>EN / DE / IT / FR replies</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Elivi SLH tone calibration</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep voice calibration</li>
+        <li>On-site onboarding session</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina, Birgu, Malta — 5-star adults-only boutique, similar SLH profile</div>
+  <div>For Elivi Hotel · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Casa Dani, Lagos</title>
+<style>
+  :root {
+    --primary: #1C3B4A;       /* Atlantic deep blue */
+    --accent:  #D4935A;       /* Algarve clay/terracotta */
+    --sand:    #E8D5B0;       /* golden Algarve sand */
+    --light:   #F6F1E8;       /* warm linen */
+    --dark:    #0F2230;
+    --text:    #2A2A2A;
+    --muted:   #7A8A90;
+    --border:  #DDD0BC;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.08em; font-weight: normal; }
+  .header .logo em { color: var(--accent); font-style: italic; }
+  .badge { border: 1px solid var(--accent); color: var(--accent); font-family: sans-serif; font-size: 0.65rem;
+           padding: 4px 14px; border-radius: 20px; letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: linear-gradient(155deg, var(--dark) 0%, var(--primary) 50%, #26526A 100%);
+    color: #fff;
+    padding: 65px 48px 52px;
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 14px; }
+  .hero h1 { font-size: 2.2rem; font-weight: normal; line-height: 1.25; margin-bottom: 12px; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 560px; line-height: 1.65; }
+  .hero .meta { margin-top: 32px; display: flex; gap: 40px; flex-wrap: wrap; }
+  .hero .meta-item .num { font-size: 2rem; color: var(--accent); }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.64rem; letter-spacing: 0.08em; opacity: 0.75; text-transform: uppercase; margin-top: 3px; }
+
+  .roi-strip { background: var(--accent); color: #fff; padding: 34px 48px;
+               display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.08em; opacity: 0.88; text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 48px 48px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.15em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 28px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 20px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; }
+  .email-card .card-header .type { color: var(--sand); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 16px 20px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #277A4A; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 20px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 6px; padding: 28px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--accent); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 16px; }
+  .plan .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-weight: normal; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 18px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "✓ "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 26px 48px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { gap: 20px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo"><em>Casa Dani</em> — Maison de Charme · Lagos</div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Casa Dani Maison de Charme · Lagos, Algarve, Portugal</div>
+  <h1>12 rooms. Endless requests.<br>One AI concierge.</h1>
+  <p>At Casa Dani, every guest is a personal guest — and they feel it. They email about sea cave boat tours, surfing at Meia Praia, Cape St. Vincent sunsets and Sagres seafood. With only 12 rooms, every email reply matters enormously. An AI concierge drafts the perfect answer in 30 seconds — in any language, any time.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">12</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~8</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~4 h</div>
+      <div class="lbl">Saved / week</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Draft time</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~8</div>
+    <div class="lbl">Guest emails / day<br><small style="font-size:0.62rem;opacity:0.75">(12 rooms × 0.7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~4 h</div>
+    <div class="lbl">Hours saved / week<br><small style="font-size:0.62rem;opacity:0.75">(3 min → 30 s per draft)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€192</div>
+    <div class="lbl">Staff value freed / month<br><small style="font-size:0.62rem;opacity:0.75">(at €12/h — conservative)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">2.4×</div>
+    <div class="lbl">Direct ROI (Standard plan)<br><small style="font-size:0.62rem;opacity:0.75">+ guest experience value</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — real Casa Dani guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Sea Cave Boat Tour</div>
+          <div>From: anna.schmidt@gmx.de</div>
+        </div>
+        <div>🚤</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hallo! Wir kommen nächste Woche nach Lagos. Können Sie eine Bootstour zu den Meereshöhlen organisieren? Am liebsten eine kleine private Tour, nicht mit 30 anderen Touristen. Und wann ist die beste Tageszeit für die Beleuchtung in den Grotten? Danke!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Liebe Anna,<br><br>
+        Sehr gerne — die Grotten von Ponta da Piedade gehören zu den schönsten an der gesamten Atlantikküste!<br><br>
+        Für eine private Tour empfehlen wir ein Kajak- oder Schlauchboot für 2-6 Personen ab dem Strand Camilo (5 Minuten zu Fuß von Casa Dani). Die optimale Tageszeit ist morgens zwischen 9:00 und 11:00 Uhr — das Licht in den Grotten ist dann goldgelb und traumhaft schön.<br><br>
+        Wir arbeiten mit einem lokalen Anbieter zusammen und reservieren gerne eine private Tour für Ihren Wunschtermin. Wie viele Personen kommen? Und welche Tage der Woche passen Ihnen am besten?<br><br>
+        Herzliche Grüße,<br>
+        Das Team von Casa Dani · Lagos</p>
+      </div>
+      <div class="card-footer">
+        <div>German guest → German reply, Algarve expertise</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Surfing Lessons — Meia Praia</div>
+          <div>From: tom.lawson@hotmail.co.uk</div>
+        </div>
+        <div>🏄</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi Casa Dani! My partner and I have never surfed before but we'd love to try during our stay. I've heard Meia Praia is good for beginners. Could you book surfing lessons for us — 2 adults, maybe a 2-3 day course? We arrive on Saturday.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Tom,<br><br>
+        Perfect choice for first-timers — Meia Praia's long sandy beach with consistent gentle waves is one of the best beginner spots on the entire Algarve.<br><br>
+        We'll book a 2-day beginner surf course for two (typically 2 hours each morning, equipment included) with a certified local surf school. The instructors speak excellent English and have a brilliant reputation with complete beginners.<br><br>
+        Since you arrive Saturday, shall we start from Sunday morning? We'll arrange a transfer to the beach included in the booking — it's only 10 minutes from Casa Dani.<br><br>
+        Looking forward to welcoming you!<br>
+        The Casa Dani Team · Lagos</p>
+      </div>
+      <div class="card-footer">
+        <div>Beginner activity request — warm & well-organised</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Cape St. Vincent & Sagres</div>
+          <div>From: marie-claire.dupont@sfr.fr</div>
+        </div>
+        <div>🌅</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Bonsoir, nous voudrions passer une journée à Sagres et au Cap Saint-Vincent. Peut-on louer une voiture via l'hôtel, ou recommandez-vous un taxi/chauffeur privé ? Et y a-t-il un restaurant de fruits de mer authentique à Sagres que vous pouvez recommander ? Merci!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Chère Marie-Claire,<br><br>
+        Quelle belle journée en perspective — le Cap Saint-Vincent au coucher du soleil est l'un de mes moments préférés de toute l'Algarve !<br><br>
+        Pour le transport : je vous conseille une voiture de location (environ 40€/jour depuis Lagos — nous vous mettons en contact avec un prestataire fiable à prix correct) plutôt qu'un taxi, car cela vous laisse la liberté de flâner à votre rythme entre Sagres et le Cap.<br><br>
+        Pour les fruits de mer à Sagres : le restaurant Mar à Vista, juste au-dessus de la Forteresse, est remarquablement authentique — poulpe grillé, perceves (balanes fraîches) et vinho verde à la carafe, vue sur l'Atlantique.<br><br>
+        Souhaitez-vous que nous réservions une voiture pour votre excursion ?<br><br>
+        À bientôt,<br>
+        L'équipe Casa Dani · Lagos</p>
+      </div>
+      <div class="card-footer">
+        <div>French guest → French reply, true local knowledge</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Arrival & Parking Query</div>
+          <div>From: nils.ericsson@outlook.com</div>
+        </div>
+        <div>🚗</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hello, we're arriving by car from Seville on Thursday evening around 8pm. Is there parking available at Casa Dani? And is it easy to find with GPS — any tips for the last few kilometres? Also, what's the check-in cut-off time? Thanks!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Nils,<br><br>
+        Welcome — driving from Seville is a beautiful route!<br><br>
+        For parking: we have a private parking space reserved for guests — no charge, just let us know you're arriving by car (which you have!). GPS works perfectly to our address; the last stretch through the Lagos old town can feel narrow, but just follow the signs and trust it — you'll arrive.<br><br>
+        Check-in: our reception is staffed until 22:00. Since you're arriving around 20:00, we'll be very much here to welcome you. If anything delays you, please do send us a quick message and we'll leave your key safely.<br><br>
+        See you Thursday evening!<br>
+        The Casa Dani Team · Lagos</p>
+      </div>
+      <div class="card-footer">
+        <div>Practical arrival query — friendly & reassuring</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Pricing — made for independent boutiques</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Full dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>EN / DE / FR / NL replies</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Casa Dani tone & voice tuning</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep personality calibration</li>
+        <li>On-site onboarding session</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina, Birgu, Malta — a similar intimate boutique property</div>
+  <div>For Casa Dani Lagos · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

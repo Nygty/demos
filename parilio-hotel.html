@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Parilio Hotel</title>
+<style>
+  :root {
+    --primary: #1E2B26;       /* deep Cycladic sage/graphite */
+    --accent:  #B8976A;       /* warm terracotta gold */
+    --light:   #F7F4EF;       /* warm off-white linen */
+    --dark:    #111918;
+    --text:    #2E2E2E;
+    --muted:   #8A9090;
+    --border:  #E0D9CC;
+    --sky:     #8CAEB8;       /* Aegean blue accent */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.3rem; letter-spacing: 0.25em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(184,151,106,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.05em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 560px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF8; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Pari<em>lio</em></div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Parilio Hotel · Naoussa, Paros, Greece</div>
+  <h1>Every email.<br>Perfectly answered.</h1>
+  <p>Design Hotels. Small Luxury Hotels of the World. With 33 rooms and a clientele that expects flawless service at every touchpoint — including email — Parilio deserves an AI concierge as refined as its architecture. Drafts in 30 seconds. Your voice, always.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">33</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~23</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~10 h</div>
+      <div class="lbl">Saved / week</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Draft time</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~23</div>
+    <div class="lbl">Guest emails per day<br><small style="font-size:0.62rem;color:#bbb">(33 rooms × 0.7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~10 h</div>
+    <div class="lbl">Hours saved per week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s per draft)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€480</div>
+    <div class="lbl">Staff time saved / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h — conservative)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">6×</div>
+    <div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;color:#bbb">(€480 saved / €80 month)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — Parilio guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Sunset Sailing Charter</div>
+          <div>From: a.lindqvist@gmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hello, checking in next Saturday for 5 nights. Could you arrange a private sunset sailing trip for two? Preferably a catamaran, with some wine and light snacks on board. We'd love to watch the sunset from the sea. Is this possible?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Ms Lindqvist,<br><br>
+        What a perfect way to experience Paros! We would be delighted to arrange this for you.<br><br>
+        We work with a trusted sailing partner who offers intimate private catamaran tours departing from Naoussa harbour — typically from 17:30 to 21:00. The itinerary includes the sea caves of Kolymbithres, a swim stop, and a leisurely return at sunset with chilled local wine and mezze on deck.<br><br>
+        We'll have everything confirmed before your arrival on Saturday. Shall we proceed with a provisional reservation?<br><br>
+        Warmly,<br>
+        The Concierge · Parilio, Naoussa</p>
+      </div>
+      <div class="card-footer">
+        <div>Luxury experience booking — seamless</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Wine Bar & Dining</div>
+          <div>From: f.berardi@outlook.it</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Buongiorno, stiamo arrivando il 2 agosto per la nostra luna di miele. Vorremmo sapere se il vostro wine bar ha una selezione di vini locali delle Cicladi, e se si possono organizzare degustazioni private. Grazie mille!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Gentile Francesco,<br><br>
+        Congratulazioni per il vostro matrimonio — siamo onorati di accogliervi per la luna di miele a Parilio!<br><br>
+        Il nostro wine bar presenta una selezione curata di vini delle Cicladi e dell'Egeo, con un'attenzione particolare ai bianchi di Paros (Moraitis, Agios Pavlos) e ai vini vulcanici di Santorini. Organizziamo con piacere una degustazione privata guidata dalla nostra sommelier, in un orario a vostra scelta — al tramonto è particolarmente evocativo.<br><br>
+        Vi prepareremo un'esperienza speciale per l'occasione. Ci fate sapere la serata preferita?<br><br>
+        Con i nostri più cari auguri,<br>
+        Il Team Concierge · Parilio</p>
+      </div>
+      <div class="card-footer">
+        <div>Italian guest → Italian reply, honeymoon context</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Truffle Dinner & Private Chef</div>
+          <div>From: henry.w@privatemail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, we're looking for something truly special for our last evening — perhaps a private dinner on our terrace with a local chef? We love modern Greek cuisine, and truffles if possible. Budget is not a concern. Can Parilio make this happen?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Henry,<br><br>
+        Absolutely — this is exactly the kind of evening we love to create.<br><br>
+        We can arrange a private dining experience on your terrace: a curated 5-course menu by our chef, inspired by the Cycladic larder with contemporary technique, including black truffle elements where the season allows. We will pair each course with wines selected by our sommelier.<br><br>
+        Candles, fresh flowers, a personalised menu card — the details are entirely our pleasure. Could you confirm the evening date and the number of guests (2, or more)? We will design the experience around you.<br><br>
+        With pleasure,<br>
+        The Concierge · Parilio</p>
+      </div>
+      <div class="card-footer">
+        <div>Ultra-premium bespoke experience — no hesitation</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Early Check-in & Transfer</div>
+          <div>From: claire.moreau@sfr.fr</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Bonjour, notre ferry de Santorin arrive à Parikia à 10h30 le jour de notre arrivée. Est-il possible d'avoir un early check-in ou au moins de laisser nos bagages ? Et pouvez-vous organiser le transfert depuis le port ? Merci</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Chère Claire,<br><br>
+        Pas de souci — nous nous occupons de tout !<br><br>
+        Nous organisons votre transfert depuis le port de Parikia à votre arrivée du ferry (10h30). Concernant le check-in à 10h30, nous ne pouvons le garantir mais ferons tout notre possible pour que votre chambre soit prête — et dans tous les cas, vous pourrez déposer vos bagages immédiatement et profiter de l'espace piscine et restaurant dès votre arrivée.<br><br>
+        Pouvez-vous nous confirmer la date d'arrivée et le nombre de personnes ? Nous transmettrons directement au chauffeur.<br><br>
+        À très bientôt,<br>
+        L'équipe Conciergerie · Parilio</p>
+      </div>
+      <div class="card-footer">
+        <div>French guest, logistical request — warm & efficient</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Pricing — designed for boutique hotels</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>Multilingual drafts</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Tone tuned to Parilio's voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep brand voice calibration</li>
+        <li>Onboarding session on-site</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina (Birgu, Malta) — 5-star boutique, similar profile</div>
+  <div>For Parilio Hotel · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

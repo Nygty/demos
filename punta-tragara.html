@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Punta Tragara, Capri</title>
+<style>
+  :root {
+    --primary: #2A1E10;       /* deep Capri cliff/earth */
+    --accent:  #C8922A;       /* Mediterranean terracotta gold */
+    --cream:   #F9F3E8;       /* warm villa cream */
+    --azure:   #3A7A9C;       /* Capri azure */
+    --light:   #F5F0E5;
+    --dark:    #180F06;
+    --text:    #2A2015;
+    --muted:   #8A7A62;
+    --border:  #DDD0BC;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 72px;
+    border-bottom: 2px solid var(--accent);
+  }
+  .header .logo { font-size: 1.2rem; letter-spacing: 0.1em; font-weight: normal; }
+  .header .logo em { color: var(--accent); font-style: italic; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 58px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(200,146,42,0.06));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; line-height: 1.2; margin-bottom: 12px; font-style: italic; }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 560px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 44px; flex-wrap: wrap; }
+  .hero .meta-item .num { font-size: 2.1rem; color: var(--accent); }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.64rem; letter-spacing: 0.09em; opacity: 0.75; text-transform: uppercase; margin-top: 3px; }
+
+  .corbusier-strip { background: var(--azure); color: #fff; padding: 18px 52px;
+                     font-family: sans-serif; font-size: 0.83rem; letter-spacing: 0.03em;
+                     font-style: italic; border-left: 4px solid var(--accent); }
+
+  .roi-strip { background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+               padding: 38px 52px; display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.3rem; color: var(--primary); font-weight: normal; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 30px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FDFAF5; padding: 17px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 17px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 24px; background: #fff; text-align: center; }
+  .plan.featured { border: 2px solid var(--accent); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.67rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 16px; }
+  .plan .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-weight: normal; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 18px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "✦ "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { gap: 22px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .corbusier-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo"><em>Punta Tragara</em> — Capri</div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Punta Tragara · Capri, Italy</div>
+  <h1>The <em>art</em> of concierge,<br>at the speed of technology.</h1>
+  <p>Le Corbusier's villa. The Faraglioni at dawn. 44 rooms where every guest expects the impossible — and gets it. From the Blue Grotto to Da Paolino truffle dinners, private speedboats to Anacapri transfers: your guests email constantly. An AI concierge drafts the perfect reply in 30 seconds, in any language.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">44</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~31</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~15 h</div>
+      <div class="lbl">Saved / week</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Draft time</div>
+    </div>
+  </div>
+</div>
+
+<div class="corbusier-strip">
+  "Architecture is the learned game, correct and magnificent, of forms assembled in the light." — Le Corbusier designed this villa. Your guests deserve replies that match its perfection.
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~31</div>
+    <div class="lbl">Guest emails / day<br><small style="font-size:0.62rem;color:#bbb">(44 rooms × 0.7 avg)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~15 h</div>
+    <div class="lbl">Hours saved / week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s per draft)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€720</div>
+    <div class="lbl">Staff time freed / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h — conservative)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">9×</div>
+    <div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;color:#bbb">(€720 / €80 month)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — Punta Tragara guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Blue Grotto Private Boat</div>
+          <div>From: james.whitmore@gmail.com</div>
+        </div>
+        <div>⛵</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hello, we arrive on July 20th. We want to visit the Blue Grotto — ideally on a private boat, not the tourist queue. And if possible, combine it with a swim at some hidden coves. Can Punta Tragara arrange this for us?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear James,<br><br>
+        Absolutely — we share your distaste for tourist queues. We work exclusively with a private captain based in the Marina Grande who knows every cove on the island.<br><br>
+        The itinerary we would suggest: depart at 09:00 (before the larger boats arrive), circle the Faraglioni for the classic photograph, enter the Blue Grotto with your private rowboat entry (tickets pre-purchased), then continue to the hidden coves of Cala di Mezzo and Punta Carena for a swim in completely secluded water. Return for lunch, or extend with a coastal lunch stop at a fisherman's table.<br><br>
+        Shall we hold a provisional booking from July 20th? Please let us know your preferred time.<br><br>
+        With pleasure,<br>
+        The Concierge · Punta Tragara, Capri</p>
+      </div>
+      <div class="card-footer">
+        <div>Signature Capri experience — expert & seamless</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Da Paolino Dinner Reservation</div>
+          <div>From: claudia.ferrari@gmail.com</div>
+        </div>
+        <div>🍋</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Buongiorno! Siamo grandi fan di Da Paolino — il ristorante sotto i limoni. Sarà possibile avere una prenotazione per 4 persone il 22 luglio sera? Sappiamo che è difficile da ottenere in alta stagione, ma speravamo che l'hotel potesse aiutarci. Grazie!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Cara Claudia,<br><br>
+        Ottima scelta — cena sotto i limoni di Da Paolino è una delle esperienze più iconiche di Capri. Avete ragione: luglio è affollatissimo, ma grazie al rapporto storico di Punta Tragara con il ristorante, abbiamo quasi sempre qualche chance.<br><br>
+        Contatteremo immediatamente la loro direzione a vostro nome per 4 persone il 22 luglio sera. Preferite 20:00 o 20:30?<br><br>
+        Vi confirmeremo entro domani mattina. In caso di indisponibilità, vi proporremo in alternativa una serata privata sulla vostra terrazza con lo stesso menu caprese.<br><br>
+        A presto,<br>
+        La Conciergerie · Punta Tragara, Capri</p>
+      </div>
+      <div class="card-footer">
+        <div>Italian guest, iconic restaurant — proactive & confident</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Anacapri Day Trip & Villa</div>
+          <div>From: sophie.beaumont@wanadoo.fr</div>
+        </div>
+        <div>🚡</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Bonjour, nous souhaitons visiter Anacapri et la Villa San Michele (Axel Munthe). Peut-on organiser un transfert privé en évitant la foule des téléphériques ? Et y a-t-il une heure idéale pour visiter la villa ? Merci d'avance</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Chère Sophie,<br><br>
+        Excellente idée — la Villa San Michele est l'un des joyaux de Capri, avec une vue sur le Golfe de Naples absolument inoubliable.<br><br>
+        Pour éviter la foule : nous vous recommandons le matin à l'ouverture (9h00), en semaine si possible. Le transfert depuis Punta Tragara en voiture privée (10 min, route côtière) est de loin la meilleure option — nous l'organisons pour vous, avec reprise à l'heure que vous souhaitez.<br><br>
+        Vous pourrez ensuite flâner dans le centre d'Anacapri (bien plus calme que Capri Town) et déjeuner à La Rondinella, une table locale très appréciée.<br><br>
+        Souhaitez-vous que nous réservions le transfert et les billets d'entrée à l'avance ?<br><br>
+        Bien chaleureusement,<br>
+        La Conciergerie · Punta Tragara</p>
+      </div>
+      <div class="card-footer">
+        <div>French guest → French reply, local expertise</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Pool Upgrade & Special Request</div>
+          <div>From: david.stern@me.com</div>
+        </div>
+        <div>🌊</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, I'm arriving on August 3rd. Is it possible to have our room upgraded to one with a direct Faraglioni view? Also, my wife has a birthday on August 5th — could the hotel do something special to mark it? Thank you</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear David,<br><br>
+        Happy to help make this a truly memorable stay.<br><br>
+        On the room upgrade: I have noted your preference for a Faraglioni-facing room and will do everything possible to accommodate you, subject to availability on August 3rd. Our Reservations team will confirm within 24 hours.<br><br>
+        For your wife's birthday on the 5th — wonderful news. We will prepare a surprise: fresh flowers from the island, a small Limoncello di Capri gift, and a personalised card from us awaiting her. And if you would like a special dinner — on the terrace, candlelit, with a birthday dessert — simply tell us and we will arrange every detail.<br><br>
+        Looking forward to welcoming you both,<br>
+        The Concierge · Punta Tragara, Capri</p>
+      </div>
+      <div class="card-footer">
+        <div>Upgrade + occasion — warm, personal, proactive</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Investment — one plan for every ambition</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Full dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>EN / IT / FR / DE replies</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Punta Tragara tone & voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real Capri exchanges</li>
+        <li>Deep brand calibration</li>
+        <li>On-site onboarding</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina, Birgu, Malta — a 5-star historic boutique similar to Punta Tragara</div>
+  <div>For Punta Tragara · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>
