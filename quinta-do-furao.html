@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Quinta do Furao, Madeira</title>
+<style>
+  :root {
+    --primary: #1E2F1A;       /* deep Atlantic forest green */
+    --accent:  #B8912A;       /* aged Verdelho gold */
+    --light:   #F5F7F2;       /* Atlantic morning white */
+    --dark:    #111D0E;
+    --text:    #242C20;
+    --muted:   #7A8C74;
+    --border:  #DDE4D8;
+    --ocean:   #4A7A8A;       /* Atlantic ocean blue */
+    --basalt:  #5A5A5A;       /* volcanic basalt */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.26em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(74,122,138,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #F2F5F0; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+  .note a { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo"><em>Quinta</em> do Furao &nbsp;·&nbsp; Madeira</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Santana, North Coast · Madeira, Portugal</div>
+  <h1>45 rooms on a cliff vineyard.<br><em>Your guests deserve better than waiting.</em></h1>
+  <p>Quinta do Furao sits on Madeira's dramatic north coast cliffs, combining hotel hospitality with a working vineyard and farm restaurant. Your guests arrive seeking levada walks, whale watching, private wine tastings from your own Verdelho grapes — and they expect a reply that feels handcrafted. This AI concierge delivers exactly that, in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">45</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~30</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">5+</div>
+      <div class="lbl">Languages handled</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~30</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~3 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~10 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~43 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">3.1×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — daily emails at Quinta do Furao</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Levada walk -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Activity Planning</div>
+          <div>Levada Walk — Paul &amp; Susan A.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 08:11</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hi, we arrive Thursday and would love to do a levada walk during our stay. We're reasonably fit but not serious hikers — we'd like something with great views and not too technical. We're also curious if there's a walk we could do starting directly from the Quinta? Paul &amp; Susan</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 25 seconds</span>
+        </div>
+        <p>Dear Paul and Susan, you're in exactly the right place for levada walking! The Levada do Furado starts very close to Santana and is one of our favourites for guests who enjoy great scenery without technical difficulty — it passes through laurisilva forest (a UNESCO World Heritage ecosystem) with views over the dramatic north coast, and the terrain is mostly flat along the water channel. It takes about 3 hours at a comfortable pace. We also have a shorter morning walk starting from the Quinta grounds itself, through our vineyard and along the clifftop — roughly 45 minutes, stunning sea views, ideal before breakfast. We recommend Thursday for the Levada do Furado (clear forecast) and can arrange a local guide if you'd prefer — they add a lot to the experience. Shall I hold that for you? Looking forward to Thursday! Quinta do Furao</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Activity-matched to fitness level · Estate walk highlighted</span>
+        <span class="time">Draft in 25s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Whale watching + estate wine -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Marine Experience + Wine</div>
+          <div>Whale Watching + Verdelho Tasting — Dieter &amp; Ute S.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 14:52</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Guten Tag, wir haben gehört, dass man bei Madeira Wale und Delfine beobachten kann. Ist das von Santana aus möglich oder müssen wir nach Funchal fahren? Außerdem würden wir gerne die Weine Ihrer Quinta verkosten. Herzliche Grüße, Dieter und Ute</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 24 seconds</span>
+        </div>
+        <p>Guten Tag, liebe Dieter und Ute — beide Wünsche lassen sich wunderbar kombinieren! Für das Whale Watching empfehlen wir die Ausflüge ab São Jorge oder Porto Moniz, also direkt an der Nordküste — 30 bis 40 Minuten Fahrt von uns. Diese Anbieter haben oft bessere Sichtungen als die Funchal-Touren, da sie andere Routen fahren. Wir sehen hauptsächlich Große Tümmler und gelegentlich Pottwale. Ich kann für morgen früh (9 Uhr) buchen, wenn das Wetter passt. Für die Weinverkostung: unsere eigene Quinta produziert Verdelho-Weißwein und einen charaktervollen Rosé direkt aus dem Weinberg über dem Atlantik. Ich reserviere Ihnen eine private Verkostung mit unserem Kellermeister am Nachmittag. Darf ich beides für Sie festhalten? Mit freundlichen Grüßen, Quinta do Furao</p>
+      </div>
+      <div class="card-footer">
+        <span>DE → DE · North coast routing expertise · Estate winery featured</span>
+        <span class="time">Draft in 24s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Group reservation + dietary needs -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Group Booking + Dietary Requirements</div>
+          <div>10-Person Group — Walking Club — Margaret F.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 19:35</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hello, I'm organising a walking trip to Madeira for a group of 10 (all retired, very keen walkers — we do this every year in a different destination). We're looking at staying for 7 nights. We need 5 double rooms. Could you confirm availability for mid-September? Also, one member is diabetic and needs a low-sugar diet, and two are vegetarian. We'd also love a private dinner on our last evening with Madeiran wine pairings. Thank you, Margaret</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 37 seconds</span>
+        </div>
+        <p>Dear Margaret, what a wonderful group to welcome — and Madeira in mid-September is absolutely stunning, with the levadas at their most beautiful and the grape harvest beginning on the terraces. We would be delighted to host your walking club. I am checking our availability for 5 double rooms for 7 nights in mid-September and will confirm precise dates within the hour. On the dietary requirements: our kitchen handles these with care. For your diabetic guest, we will prepare a dedicated low-glycaemic menu for all meals including breakfast, noting it clearly with your team. For the two vegetarians, our restaurant has a strong vegetable-forward menu anchored in Madeiran produce — not an afterthought. For your farewell dinner, I suggest a private table set on our sea-view terrace: a 5-course menu of Madeiran specialities — espada com banana, alcatra, lapas grelhadas — paired with a selection of our own estate Verdelho and aged Malvasia. Our sommelier will guide the evening. Could you let me know your preferred dates in September? We very much look forward to hosting your group. Warmly, Quinta do Furao</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Group logistics · 3 dietary profiles handled · Private dinner proposal included</span>
+        <span class="time">Draft in 37s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — transparent pricing</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Full AI concierge access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>EN, PT, DE, FR and more</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Adapted to Quinta do Furao guests</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>Quinta tone &amp; voice learned</li>
+        <li>Full team onboarding</li>
+        <li>Harvest season updates</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a 4-star boutique, live in production since 2026. This demo was built specifically for Quinta do Furao. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Quinta do Furao, Santana, Madeira · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>

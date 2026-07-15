@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Masseria Montenapoleone, Puglia</title>
+<style>
+  :root {
+    --primary: #2A2018;       /* deep Puglia trullo stone */
+    --accent:  #C8A040;       /* Puglia gold-olive */
+    --light:   #FAF7F2;       /* whitewashed limestone */
+    --dark:    #18120C;
+    --text:    #28201A;
+    --muted:   #8A806C;
+    --border:  #E4DDD0;
+    --olive:   #6A8A3A;       /* Puglia olive grove */
+    --adriatic: #4A7A9A;      /* Adriatic blue */
+    --white:   #F0EDE6;       /* masseria white */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 0.95rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(74,122,154,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.3rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #F7F3EC; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+  .note a { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Masseria <em>Montenapoleone</em> &nbsp;·&nbsp; Monopoli</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Monopoli, Puglia · Adriatic Coast, Italy</div>
+  <h1>18th-century masseria. Olive grove.<br><em>Every guest email, a piece of hospitality.</em></h1>
+  <p>Masseria Montenapoleone is a whitewashed 18th-century estate near Monopoli, on Puglia's rising Adriatic coast — 20 rooms set among ancient olives, with a cooking school and direct beach access. Your guests write every day about the trulli at Alberobello, Polignano a Mare's sea caves, local burrata tastings and cooking classes. This AI concierge replies with the warmth and knowledge of a Pugliese local, in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">20</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~14</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">4+</div>
+      <div class="lbl">Languages handled</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~14</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~3 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~5 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~20 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">1.7×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — Puglia guests writing to Masseria Montenapoleone</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Alberobello + Polignano -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Day Trip Planning</div>
+          <div>Alberobello + Polignano — Mark &amp; Julia H.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 10:30</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hi, we're arriving Friday and would love your suggestions for the area. Alberobello and Polignano a Mare both look incredible — is it possible to do both in one day? And any tips for avoiding the worst crowds? We're quite flexible. Mark &amp; Julia</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 22 seconds</span>
+        </div>
+        <p>Dear Mark and Julia, great choices — and yes, both are very doable in one day from Monopoli. We suggest the following: leave early (8:15 am) for Alberobello — the trulli district of Rione Monti is magical before 9:30 am when tour buses arrive. Spend 2 hours there. Then drive to Polignano a Mare (30 minutes) for lunch — arrive by noon and eat at Ristorante Grotta Palazzese if you can book, or Da Tuccino for simpler excellent fish. The famous sea cave views from the cliffs are best in the afternoon light. You'll be back at the masseria by 5:30 pm for a swim before dinner. We can arrange a driver for the full day if you prefer not to drive — highly recommended, Puglia's roads are narrow in places. Shall I look into the car service? Looking forward to welcoming you Friday! Masseria Montenapoleone</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Crowd-timing expertise · Full logistics included</span>
+        <span class="time">Draft in 22s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Burrata + cooking class -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Food Experience</div>
+          <div>Burrata Tasting + Cooking Class — Hanna S.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 17:45</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hallo! Ich lese, dass die Burrata hier in Puglia die beste der Welt sein soll. Stimmt das? Gibt es eine Möglichkeit, eine Käserei zu besuchen und vielleicht auch einen Kochkurs zu machen? Ich bin leidenschaftliche Hobbyköchin. Herzliche Grüße, Hanna</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 25 seconds</span>
+        </div>
+        <p>Liebe Hanna, das stimmt absolut — Puglia ist die Heimat der echten Burrata, und die Milch aus Andria und Monopoli hat eine Qualität, die anderswo nicht reproduzierbar ist. Wir haben eine besondere Verbindung zu einem kleinen Caseificio in der Nähe von Putignano, der privaten Gruppen erlaubt, bei der Burrata-Herstellung zuzuschauen und zu verkosten — es dauert etwa eineinhalb Stunden und ist eines der authentischsten Erlebnisse dieser Gegend. Für den Kochkurs: unsere Küchenchefin Rosaria gibt Kurse direkt in der Masseria-Küche — sie kocht Orecchiette mit cime di rapa, Fave e cicorie, und tiella di riso patate e cozze (ein Muss). Alles mit Produkten aus dem Garten und vom lokalen Markt. Als Hobbyköchin werden Sie begeistert sein. Darf ich beides für Sie kombinieren? Mit herzlichen Grüßen, Masseria Montenapoleone</p>
+      </div>
+      <div class="card-footer">
+        <span>DE → DE · Burrata expertise · Own cooking school featured</span>
+        <span class="time">Draft in 25s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Wedding anniversary + beach -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Special Occasion + Beach Access</div>
+          <div>10th Wedding Anniversary + Sunset Dinner — Lucia &amp; Roberto F.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 22:00</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Buonasera, arriviamo venerdì con mia moglie per i nostri 10 anni di matrimonio. Vorremmo qualcosa di speciale per sabato sera — magari una cena romantica sulla spiaggia della masseria o in un posto panoramico vicino? E il giorno dopo ci piacerebbe fare una gita in barca alle grotte di Polignano. Grazie, Roberto</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 31 seconds</span>
+        </div>
+        <p>Buonasera Roberto, che bel traguardo — dieci anni! Organizziamo una serata indimenticabile. Per sabato sera, la nostra opzione più romantica è la cena privata sulla terrazza che affaccia sul nostro tratto di spiaggia: tavolo per due, candele, fiori di campo, e un menu pugliese preparato dal nostro chef con prodotti freschi — crudo di mare locale, pasta fresca, agnello della Murgia. Il tramonto sul mare è compreso. Abbiamo anche la possibilità di allestire un tavolo direttamente sulla riva, con i piedi quasi nell'acqua, se il tempo lo permette. Per domenica, organizziamo un'uscita in barca privata con un barcaiolo locale di Polignano — visita alle grotte marine (la Grotta Palazzese vista dall'acqua è mozzafiato) con bagno nelle acque cristalline. Durata circa 3 ore. Confermo entrambe le esperienze? Benvenuti, e tanti auguri a voi! Masseria Montenapoleone</p>
+      </div>
+      <div class="card-footer">
+        <span>IT → IT · Anniversary detected · Beach dining + private boat both proposed</span>
+        <span class="time">Draft in 31s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — honest, simple pricing</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Full AI concierge access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>EN, IT, DE, FR and more</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Adapted to Puglia masseria voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>Masseria tone &amp; voice learned</li>
+        <li>Full team onboarding</li>
+        <li>Seasonal product updates</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a 4-star historic boutique, live in production since 2026. This demo was built specifically for Masseria Montenapoleone. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Masseria Montenapoleone, Monopoli, Puglia · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>

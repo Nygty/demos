@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Villa Cipriani, Asolo</title>
+<style>
+  :root {
+    --primary: #2C3E2D;       /* deep Veneto green */
+    --accent:  #C9A86C;       /* antique gold */
+    --light:   #F8F5EF;       /* warm parchment */
+    --dark:    #1A2218;
+    --text:    #2E2E2E;
+    --muted:   #8A8F86;
+    --border:  #E2DDD2;
+    --terracotta: #A0614A;    /* Venetian terracotta */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.3em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(201,168,108,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.5rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Villa <em>Cipriani</em> &nbsp;·&nbsp; Asolo</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Asolo, Veneto · Italy</div>
+  <h1>Your AI Concierge,<br><em>live in 48 hours.</em></h1>
+  <p>Villa Cipriani's guests arrive with elevated expectations. They write to ask about Palladian villa tours, private Prosecco tastings in the Treviso hills, transfers to Venice — often in four languages at once. This is your concierge, powered by AI, drafting the perfect reply in under 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">31</div>
+      <div class="lbl">Rooms &amp; Suites</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~22</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">4</div>
+      <div class="lbl">Languages handled</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~22</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~3 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~8 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~34 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">2.4×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">How it works — real email types from your guests</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Palladian tour request -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Guest Request</div>
+          <div>Palladian Villa Tour — Sarah H.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 09:14</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Dear Villa Cipriani team, we are arriving on Thursday for 4 nights. My husband and I are huge admirers of Andrea Palladio and would love to visit Villa Barbaro at Maser and Villa Emo during our stay. Could you organise a private guide for Friday morning, and perhaps arrange a light picnic lunch among the gardens? Many thanks, Sarah</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 27 seconds</span>
+        </div>
+        <p>Dear Sarah, what a wonderful way to begin your stay in Asolo. We would be delighted to arrange a private guided visit to both Villa Barbaro at Maser and Villa Emo for Friday morning — our preferred guide, who specialises in Palladian architecture, is available from 9:30 am. We can also prepare a hamper with local Asolan cheeses, cured meats and a bottle of Prosecco Superiore di Cartizze to enjoy in the Villa Emo gardens. Shall I confirm this arrangement? We look forward to welcoming you on Thursday. Warm regards, Villa Cipriani Concierge</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Formal-warm tone</span>
+        <span class="time">Draft in 27s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Venice transfer + restaurant -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Logistics + Dining</div>
+          <div>Venice Day Trip — Marco B.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 16:47</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Buonasera, vorremmo trascorrere sabato a Venezia. Potete organizzare un trasferimento in auto da Asolo e magari consigliarci un ristorante non turistico vicino a San Polo per il pranzo? Siamo in due. Grazie mille!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 23 seconds</span>
+        </div>
+        <p>Buonasera Marco, con piacere organizziamo il Suo sabato a Venezia. Il nostro autista è disponibile per un trasferimento privato da Asolo con partenza alle ore 9:00 (circa 80 minuti fino al Piazzale Roma). Per il pranzo, Le consigliamo vivamente Antiche Carampane, in zona San Polo — cucina veneziana autentica, nessuna insegna fuori, solo frequentatori locali e prodotti di laguna. Prenoto un tavolo per due a mezzogiorno? Cordiali saluti, Concierge Villa Cipriani</p>
+      </div>
+      <div class="card-footer">
+        <span>IT → IT · Native fluency</span>
+        <span class="time">Draft in 23s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Special occasion -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Special Occasion</div>
+          <div>Wedding Anniversary Surprise — Thomas &amp; Claire W.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 22:03</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hello, I'm checking in on Sunday with my wife Claire — it's our 25th wedding anniversary and I'd love to surprise her with something special. We got married in Treviso many years ago. Could you arrange something memorable for our first evening, perhaps flowers, a private dinner location, and maybe a bottle of something exceptional from your cellar? Budget is not the issue — I just want it to be perfect. Thank you, Thomas</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 31 seconds</span>
+        </div>
+        <p>Dear Thomas, twenty-five years — and Treviso. What a beautiful circle to complete. We will make it perfect. On your arrival Sunday, your room will be dressed with white garden roses from our grounds, and a handwritten welcome card from our team. For the evening, we have reserved the private corner table in our restaurant terrace — candlelit, overlooking the Veneto hills at dusk. Our sommelier has set aside a 2017 Amarone della Valpolicella from a small producer in Negrar; very few bottles remain and it pairs beautifully with the degustazione menu we will prepare for you. Should I confirm this arrangement and liaise with the restaurant and sommelier directly? We are truly honoured to be part of this occasion. With warmest regards, Villa Cipriani Concierge</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Elegant personal tone · Special occasion detected automatically</span>
+        <span class="time">Draft in 31s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — no long-term commitment</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>AI concierge agent — full access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>Mews PMS integration</li>
+        <li>EN, IT, FR, DE, ES</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+        <li>Adapted to Asolo guest profile</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>Tone &amp; vocabulary fine-tuned</li>
+        <li>Onboarding session with team</li>
+        <li>Villa Cipriani voice, learned</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a 13-room luxury boutique, live in production. This demo was built specifically for Villa Cipriani using the same platform. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Villa Cipriani, Asolo · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>

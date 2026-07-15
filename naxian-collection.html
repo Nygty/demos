@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Naxian Collection, Naxos</title>
+<style>
+  :root {
+    --primary: #1A1A2E;       /* deep Cycladic midnight */
+    --accent:  #C8A26A;       /* Naxian marble gold */
+    --light:   #F9F7F4;       /* warm whitewashed */
+    --dark:    #0F0F1E;
+    --text:    #2A2A2A;
+    --muted:   #8A8C9A;
+    --border:  #E0DCDC;
+    --azure:   #5B99C2;       /* Aegean blue */
+    --marble:  #E8E0D8;       /* marble white */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.32em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(91,153,194,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--azure); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--azure); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #F7F5F5; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+  .note a { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo"><em>Naxian</em> Collection &nbsp;·&nbsp; Naxos</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Stelida, Naxos · Cyclades, Greece</div>
+  <h1>16 villas. Premium guests.<br><em>Zero email left waiting.</em></h1>
+  <p>The Naxian Collection attracts a sophisticated adults-only clientele who arrive with very specific expectations — sailing charters, private chef dinners, temple visits at sunrise, winery tours in the Halki valley. Each email is a hospitality moment. This AI concierge, already live at a 5-star Mediterranean boutique, handles it in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">16</div>
+      <div class="lbl">Villas &amp; Suites</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~12</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">5★</div>
+      <div class="lbl">Ultra-premium tone</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~12</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~4 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~6 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~24 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">2.1×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — requests from your premium Cycladic guests</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Private sailing charter -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Luxury Experience</div>
+          <div>Private Sailing Charter — David &amp; Sophie R.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 07:38</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hello, we check in on Friday to villa Stelida Suite. We would like to organise a private sailing day — ideally a catamaran for just the two of us, visiting the small Cycladic islands nearby, swimming in sea caves, with a catered lunch onboard. Could you arrange this for Saturday or Sunday? Budget is flexible. David</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 28 seconds</span>
+        </div>
+        <p>Dear David, what a wonderful way to spend your first full day. We work with an exceptional private skipper who operates a beautifully appointed 42-foot catamaran — exclusively yours for the day. The itinerary we typically suggest includes sailing south to the Kalantas sea caves, anchoring for a morning swim, then continuing to the sheltered bay of Mikri Vigla for lunch. Our partner taverna prepares a full catered picnic onboard: fresh local fish, Naxian graviera, Cycladic salads and a bottle of chilled Assyrtiko. Both Saturday and Sunday are forecast clear with a light meltemi — shall I confirm Saturday, with Sunday as a backup? We will have all details in your villa upon arrival. Best regards, The Naxian Collection</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Luxury tone · Local expertise woven in</span>
+        <span class="time">Draft in 28s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Temple of Apollo at sunrise -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Cultural Excursion</div>
+          <div>Temple of Apollo — Sunrise Visit — Lena K.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 19:55</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Guten Abend, ich habe gelesen, dass das Portara (Apollo-Tempel) bei Sonnenaufgang besonders beeindruckend sein soll. Gibt es eine Möglichkeit, dies früh morgens zu besuchen, vielleicht mit einem Frühstück danach? Herzlichen Dank, Lena</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 22 seconds</span>
+        </div>
+        <p>Guten Abend, liebe Lena — Sie haben völlig recht, die Portara bei Sonnenaufgang ist eines der bewegendsten Bilder ganz Griechenlands. Der Tempel des Apollo ist frei zugänglich und liegt nur wenige Minuten zu Fuß vom Hafen von Naxos-Stadt entfernt. Unser Fahrer bringt Sie jederzeit dorthin — bei einem Sonnenaufgang gegen 6:15 Uhr empfehlen wir Abfahrt um 5:50 Uhr. Anschließend arrangieren wir einen Frühstückstisch in unserem Lieblingscafé am Hafen: griechischer Kaffee, frische Tiropita, Honig und Naxianer Joghurt mit Blick auf das Kastro. Darf ich dies für Sie buchen? Mit freundlichen Grüßen, The Naxian Collection</p>
+      </div>
+      <div class="card-footer">
+        <span>DE → DE · Perfect German · Cultural depth</span>
+        <span class="time">Draft in 22s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Private chef dinner -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Private Dining — Special Request</div>
+          <div>In-Villa Chef Dinner + Sommelier — Michael &amp; Elena T.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 23:10</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hi, we're celebrating my wife's 40th birthday during our stay (Wednesday the 16th). We'd love to arrange a private chef dinner in our villa terrace — something special with local Naxian products, maybe 5 or 6 courses with wine pairing. Also wondering if a local musician could be arranged for part of the evening? We want to make it unforgettable. Thank you, Michael</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 33 seconds</span>
+        </div>
+        <p>Dear Michael, a 40th birthday on a Naxian terrace under the Cycladic stars — we will make it extraordinary. We have a wonderful local chef, Yannis, who builds menus entirely around the island's finest products: Naxian graviera aged in caves, line-caught sea bass from the Aegean, wild thyme honey from the interior, and fresh vegetables from family farms near Halki. We suggest a six-course tasting menu with a paired Naxian wine selection including an aged barrel Assyrtiko and a rare late-harvest Muscat for dessert. For music, we work with a local bouzouki player who performs quietly in the background — his repertoire blends traditional Cycladic melodies with modern Greek acoustic pieces; guests consistently call it the highlight of their stay. Shall I confirm Wednesday the 16th from 8 pm? We will decorate the terrace with florals and candles at no additional charge. Many congratulations to Elena — we will make sure she remembers this evening. With warmest regards, The Naxian Collection</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Ultra-luxury tone · Multi-service coordination detected automatically</span>
+        <span class="time">Draft in 33s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — built for 5-star boutiques</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Full AI concierge access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>EN, DE, FR, GR, IT and more</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Adapted to Naxian Collection voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>5★ luxury tone fine-tuned</li>
+        <li>Full onboarding with team</li>
+        <li>Seasonal profile updates</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a 5-star boutique, live in production since 2026. This demo was built specifically for The Naxian Collection. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Naxian Collection, Naxos · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>

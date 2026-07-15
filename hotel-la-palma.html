@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Hotel La Palma, Stresa</title>
+<style>
+  :root {
+    --primary: #1C3A52;       /* deep Lago Maggiore blue */
+    --accent:  #C8A04A;       /* warm lake-light gold */
+    --light:   #F5F8FA;       /* lake morning white */
+    --dark:    #0E2234;
+    --text:    #252C33;
+    --muted:   #7A8F9C;
+    --border:  #DCE5EA;
+    --silver:  #9DBBD0;       /* lake silver */
+    --green:   #5A7E5A;       /* Borromean island green */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.28em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(157,187,208,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--silver); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--silver); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #F3F7FA; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+  .note a { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Hotel <em>La Palma</em> &nbsp;·&nbsp; Stresa</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Stresa, Lago Maggiore · Italy</div>
+  <h1>Lake Maggiore's guests write daily.<br><em>Reply perfectly, every time.</em></h1>
+  <p>Hotel La Palma's terrace looks out over one of Italy's most romantic landscapes. Your international guests — Italian, Swiss, British, American — write every day about boat trips to Isola Bella, Villa Taranto gardens, day excursions across the Swiss border to Locarno. This AI concierge handles each request with the warmth and precision La Palma is known for.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">30</div>
+      <div class="lbl">Rooms &amp; Suites</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~21</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">4+</div>
+      <div class="lbl">Languages handled</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~21</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~3 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~7.5 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~30 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">2.2×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — the emails your team receives every day</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Isola Bella private boat -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Excursion Request</div>
+          <div>Private Boat to Isola Bella — William &amp; Patricia H.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 09:05</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Dear La Palma, we're arriving Wednesday for 3 nights. We'd love to visit Isola Bella — ideally by private boat rather than the public ferry, and preferably early morning before the crowds. Can you also arrange entry to the Borromeo palace? We're two adults, retired, very keen on gardens. William &amp; Patricia</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 26 seconds</span>
+        </div>
+        <p>Dear William and Patricia, what excellent taste — Isola Bella before 9 am, when the light is on the terraces and the crowds have not yet arrived, is simply magical. We can arrange a private wooden taxi boat directly from La Palma's jetty for Thursday morning, departing at 8:15 am. The crossing takes about 10 minutes. We will book your palace and garden tickets in advance; the Borromeo gardens are among the finest baroque horticultural designs in Italy and typically require 2 hours at a gentle pace. I suggest returning to the hotel by noon for lunch on our terrace. Shall I confirm this for Thursday? We look forward to welcoming you on Wednesday. Warmly, Hotel La Palma Concierge</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Warm tone · Early-bird logistics anticipated</span>
+        <span class="time">Draft in 26s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Switzerland day trip -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Day Trip Planning</div>
+          <div>Locarno &amp; Ascona — Famiglia Rossi</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 15:30</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Buongiorno, siamo interessati a una gita in Svizzera — Locarno e magari Ascona. Ci servono i documenti particolari per entrare? Come ci consigliate di andare, con la vostra auto o con i mezzi? Grazie!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 22 seconds</span>
+        </div>
+        <p>Buongiorno! Ottima scelta: Locarno e Ascona sono a soli 40 minuti da Stresa attraversando il confine svizzero. Per i cittadini UE è sufficiente la carta d'identità (il passaporto non è necessario). La soluzione più piacevole è il battello di linea: parte direttamente dal pontile di Stresa, attraversa il lago e arriva a Locarno in circa 2 ore — paesaggio mozzafiato. In alternativa possiamo organizzare un autista privato che vi porta direttamente ad Ascona in 35 minuti. I prezzi a Locarno e Ascona sono in franchi svizzeri, ma le carte di credito sono accettate ovunque. Le consiglio di non perdere il Castello Visconteo a Locarno e il lungolago di Ascona per l'aperitivo serale. Vuole che prenoti la traversata in battello? Cordiali saluti, Hotel La Palma</p>
+      </div>
+      <div class="card-footer">
+        <span>IT → IT · Practical cross-border info · Proactive tips</span>
+        <span class="time">Draft in 22s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Villa Taranto + honeymoon -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Special Occasion + Garden Tour</div>
+          <div>Honeymoon Stay + Villa Taranto — James &amp; Emma S.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 22:18</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hello, my wife and I will be staying for our honeymoon next Friday for 4 nights. We'd love a lake-view room if possible. We're also big garden lovers and heard the Villa Taranto gardens in Verbania are unmissable — could you arrange a visit? And would there be any way to have a romantic dinner on the terrace, just the two of us, on our first evening? Emma is vegetarian. Many thanks, James</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 34 seconds</span>
+        </div>
+        <p>Dear James and Emma, congratulations from all of us at Hotel La Palma — we are so honoured to be part of your honeymoon. I have noted a lake-view room for your arrival Friday; you will wake to the Borromean Islands on the horizon each morning. For your first evening, I will arrange a private table for two at the far end of our terrace overlooking the lake — flowers, candlelight, and a dedicated vegetarian menu prepared by our chef just for Emma: expect a tasting of local lake herbs, risotto al Barolo with Parmigiano 36 months, and a seasonal dessert. Regarding Villa Taranto: the botanical gardens in Verbania are one of the finest in all of Europe and reach their peak in late spring and summer. We will arrange a private transfer on Saturday morning (20 minutes) and reserve tickets — I suggest arriving at 9 am when the dahlias are still jewelled with dew. Welcome to the lake, and many congratulations to you both. With warmest regards, Hotel La Palma</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Honeymoon detected · Dietary flag auto-logged · Garden expertise shown</span>
+        <span class="time">Draft in 34s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — straightforward pricing</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Full AI concierge access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>EN, IT, DE, FR and more</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Adapted to Lago Maggiore guests</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>La Palma tone &amp; voice learned</li>
+        <li>Full team onboarding</li>
+        <li>Seasonal refresh included</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a lakeside-equivalent luxury boutique, live in production since 2026. This demo was built specifically for Hotel La Palma. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Hotel La Palma, Stresa · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>

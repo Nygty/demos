@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Lefkada Nefeli Boutique Hotel</title>
+<style>
+  :root {
+    --primary: #1C3A4A;       /* deep Ionian sea blue */
+    --accent:  #D4AF6E;       /* warm gold */
+    --light:   #F6F8F9;       /* sea-light white */
+    --dark:    #0F2330;
+    --text:    #2C2C2C;
+    --muted:   #7A8F99;
+    --border:  #DCE4E8;
+    --aqua:    #6BAEC6;       /* Ionian turquoise */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.28em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(107,174,198,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--aqua); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--aqua); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #F5F8FA; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+  .note a { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo"><em>Nefeli</em> Boutique Hotel &nbsp;·&nbsp; Lefkada</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Lefkada Town · Ionian Islands, Greece</div>
+  <h1>Your Ionian guests deserve<br><em>a perfect reply in 30 seconds.</em></h1>
+  <p>Lefkada Nefeli attracts discerning travellers who come for Porto Katsiki, the sailing circuit and the island's living lace traditions. They write to you with specific, personal requests — and they judge your hospitality before they even arrive. This AI concierge, already deployed at a similar boutique in Malta, drafts the perfect reply instantly.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">18</div>
+      <div class="lbl">Rooms &amp; Suites</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~13</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">5+</div>
+      <div class="lbl">Languages handled</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~13</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~3 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~5 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~22 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">1.9×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — the type of emails your team handles every day</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Porto Katsiki + sailing -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Excursion Request</div>
+          <div>Porto Katsiki + Sailing — James L.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 08:52</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hi there, we're arriving Saturday for 5 nights (2 adults, 1 child age 9). We're keen to see Porto Katsiki beach — is it walkable or do we need a car? Also thinking about a half-day sailing trip if the weather holds. Can you advise? Thanks, James</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 24 seconds</span>
+        </div>
+        <p>Dear James, great to hear from you — Porto Katsiki will not disappoint! The beach is accessible by a short steep staircase (around 100 steps), perfectly manageable for a 9-year-old with good footwear. We recommend driving or joining one of the boat excursions from Nydri that drop guests directly onto the sand — we can arrange this for you. For sailing, we work with a fantastic local skipper who runs 4-hour trips around the southern cape with a swimming stop at Egremni; his boat accommodates families easily. Weather is looking excellent this weekend. Shall I reserve the sailing trip for Sunday morning? We look forward to welcoming you on Saturday. Kind regards, Nefeli Concierge Team</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Friendly-informative tone</span>
+        <span class="time">Draft in 24s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Lace workshop -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Cultural Experience</div>
+          <div>Lefkada Lace Workshop — Helene M.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 14:20</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Bonjour, j'ai lu que la dentelle de Lefkada est une tradition très ancienne et j'aimerais vraiment participer à un atelier artisanal pendant mon séjour la semaine prochaine. Est-ce possible? Merci d'avance, Hélène</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 26 seconds</span>
+        </div>
+        <p>Chère Hélène, vous avez très bien fait de demander — la dentelle au fuseau de Lefkada (appelée ici «Lefkaditiko» ou «kadenia») est l'un des trésors les plus authentiques de l'île. Nous travaillons avec une artisane locale de la vieille ville qui organise des ateliers privés de deux heures les mardis et jeudis matin — vous repartez avec votre propre création et le patron correspondant. Les places sont limitées ; souhaitez-vous que je vous réserve un créneau la semaine prochaine ? Avec plaisir, L'équipe Nefeli</p>
+      </div>
+      <div class="card-footer">
+        <span>FR → FR · Culturally-informed tone</span>
+        <span class="time">Draft in 26s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Late arrival -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Reservation + Logistics</div>
+          <div>Late Arrival + Special Dietary Needs — Anna &amp; Nik P.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 21:15</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hello, we're arriving Tuesday from Amsterdam via Athens — our connecting flight lands in Preveza at 22:40 so we'll probably reach Lefkada Town around midnight. Will reception be open? Also, my partner is coeliac and we'd love to know if breakfast can accommodate a gluten-free diet. We're really looking forward to our stay! Anna &amp; Nik</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 29 seconds</span>
+        </div>
+        <p>Dear Anna and Nik, welcome — we are already looking forward to your arrival on Tuesday! Late arrivals are never a problem at Nefeli; your key will be placed in our secure after-hours box and we will leave a brief welcome note with all the details at the front. A cold drink and some local pastries will be waiting in your room. As for breakfast — absolutely yes. Our kitchen is fully equipped to prepare a dedicated gluten-free spread: rice breads, GF yoghurt with Lefkadian honey, fresh fruit, eggs any style and GF pita. We flag it in your booking so there is no need to explain every morning. Safe travels from Amsterdam — see you Tuesday! Warm regards, Nefeli Team</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Warm reassuring tone · Dietary flag logged automatically</span>
+        <span class="time">Draft in 29s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — simple, transparent, no lock-in</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Full AI concierge access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>EN, GR, FR, DE, IT and more</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Adapted to Lefkada guest profile</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>Nefeli tone &amp; voice learned</li>
+        <li>Onboarding with your team</li>
+        <li>Seasonal updates included</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a 13-room luxury boutique, live in production since 2026. This demo was built specifically for Lefkada Nefeli. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Lefkada Nefeli Boutique Hotel · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>

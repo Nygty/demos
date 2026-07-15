@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Castello di Velona, Montalcino</title>
+<style>
+  :root {
+    --primary: #2E1A0E;       /* deep Brunello earth */
+    --accent:  #B5892A;       /* aged wine gold */
+    --light:   #F8F4EE;       /* warm parchment */
+    --dark:    #1A0D06;
+    --text:    #2A2520;
+    --muted:   #8A7F74;
+    --border:  #E4DDD4;
+    --terracotta: #A05435;    /* Tuscan terracotta */
+    --sage:    #7A8C6A;       /* Maremma sage */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.0rem; letter-spacing: 0.25em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(181,137,42,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.3rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAF6F0; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+  .note a { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Castello di <em>Velona</em> &nbsp;·&nbsp; Montalcino</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Montalcino, Val d'Orcia · Tuscany, Italy</div>
+  <h1>Brunello country. 28 rooms.<br><em>Every email, a hospitality moment.</em></h1>
+  <p>Castello di Velona sits at the heart of one of the world's most celebrated wine landscapes. Your guests arrive with grand expectations: private cellar tastings, truffle hunts in the white hills, thermal spa retreats and Siena day trips. Each email they send is a chance to impress — or disappoint. The AI concierge drafts the perfect Velona reply in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">28</div>
+      <div class="lbl">Rooms &amp; Suites</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~20</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">5</div>
+      <div class="lbl">Languages handled</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~20</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~3.5 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~8 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~32 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">2.2×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — daily emails from your Brunello guests</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Private wine tasting -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Wine Experience</div>
+          <div>Private Brunello Tasting — Robert &amp; Anne K.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 10:22</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Good morning, we're arriving Saturday and are very keen wine collectors — particularly Brunello di Montalcino. We'd love to arrange a private vertical tasting of your estate's Brunello (different vintages), preferably with your winemaker or a knowledgeable sommelier. We'd also like to visit one or two other top producers in the area — Biondi-Santi and Ciacci Piccolomini come to mind. Could you arrange this? Robert &amp; Anne</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 30 seconds</span>
+        </div>
+        <p>Dear Robert and Anne, a collector's welcome — you have chosen exactly the right place for a Brunello immersion. For a vertical tasting of Castello di Velona's own production, our head winemaker Marco is available Sunday morning from 10:30 am in the estate's barrel room; we suggest tasting the 2015, 2016 and 2019 vintages alongside our current release. Regarding visits to other estates: Ciacci Piccolomini d'Aragona is a superb choice and we have a strong relationship there — private cellar visits are available by arrangement. Biondi-Santi receives collectors by appointment only; we recommend at least five days' notice and would be delighted to make the call on your behalf. Shall we build out a full wine day for Sunday? We look forward to welcoming you Saturday. Warmly, Castello di Velona Concierge</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Expert wine tone · Multi-property coordination</span>
+        <span class="time">Draft in 30s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Truffle hunt -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Culinary Experience</div>
+          <div>Truffle Hunt &amp; Cooking — Familie Müller</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 17:08</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Guten Tag, wir kommen nächste Woche mit unserer Familie (2 Erwachsene, 2 Kinder 8 und 11 Jahre). Ist es möglich, eine Trüffeljagd in der Umgebung zu organisieren, eventuell mit anschließendem Kochkurs? Die Kinder wären dabei, muss also familiengerecht sein. Vielen Dank, Familie Müller</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 25 seconds</span>
+        </div>
+        <p>Guten Tag, liebe Familie Müller — was für ein wunderschönes Erlebnis für die Kinder! Wir arbeiten mit einem lokalen Trüffelsucher zusammen, der regelmäßig Familien durch die Eichenwälder rund um Montalcino führt — sein Lagotto-Hund ist der eigentliche Star der Veranstaltung. Die Tour dauert etwa zwei Stunden, ist für Kinder ab 6 Jahren bestens geeignet und endet mit einer kleinen Verkostung der gefundenen Trüffeln. Im Anschluss können wir einen Kochkurs in unserer Hotelküche organisieren, bei dem die gesamte Familie unter Anleitung unseres Chefs eine einfache Trüffelpasta zubereitet — die Kinder lieben es. Darf ich beides für Sie vormerken? Mit freundlichen Grüßen, Castello di Velona Concierge</p>
+      </div>
+      <div class="card-footer">
+        <span>DE → DE · Family-adapted · Local expertise</span>
+        <span class="time">Draft in 25s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Spa + Siena -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Spa + Day Trip Planning</div>
+          <div>Thermal Spa Session + Siena — Charlotte D.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 20:44</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hello, I'm arriving alone on Thursday for a 4-night stay — a bit of a solo retreat really. I'd like to book a thermal spa day (I saw you have an infinity pool and thermal baths) and also spend one day in Siena. Could you let me know about the spa treatments available, and whether you can arrange a transfer to Siena with a guided tour? I speak some Italian if that helps. Charlotte</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 32 seconds</span>
+        </div>
+        <p>Dear Charlotte, a solo retreat at Velona is one of the most restorative experiences we offer — we will make sure it feels like the world has paused. For the spa: our thermal complex includes a natural hot spring pool at 38°C, an infinity pool overlooking the Val d'Orcia, and a full treatment menu. We recommend the Brunello wine body wrap followed by the deep tissue massage — the combination is transformative and takes about two and a half hours. I'd suggest booking this for your first full day (Friday) so you arrive well rested into the weekend. For Siena: it is just 40 minutes by car. We can arrange a private driver for the morning and pair you with a local guide who specialises in the city's medieval history and art — she is bilingual and her Italian is beautiful if you'd like to practise. The Palio stables and the Piazza del Campo at golden hour are not to be missed. Shall I hold Friday morning for the spa and Saturday for Siena? Benvenuta, Charlotte — we look forward to Thursday. With warm regards, Castello di Velona</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Solo-traveller warmth · Proactive 3-day itinerary built</span>
+        <span class="time">Draft in 32s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — no long-term commitment</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Full AI concierge access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>EN, IT, DE, FR, ES and more</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Adapted to Velona wine-estate voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>Castello di Velona tone learned</li>
+        <li>Onboarding with reception team</li>
+        <li>Seasonal vintage updates</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a 5-star historic boutique, live in production since 2026. This demo was built specifically for Castello di Velona. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Castello di Velona Resort, Thermal SPA &amp; Winery · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>

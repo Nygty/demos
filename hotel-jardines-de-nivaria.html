@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Hotel Jardines de Nivaria, Tenerife</title>
+<style>
+  :root {
+    --primary: #1A2830;       /* deep volcanic Atlantic */
+    --accent:  #D4A84B;       /* warm Canarian gold */
+    --light:   #F4F7F8;       /* Atlantic white */
+    --dark:    #0D181F;
+    --text:    #1E2830;
+    --muted:   #7A9099;
+    --border:  #D8E2E8;
+    --lava:    #7A4A3A;       /* volcanic lava */
+    --ocean:   #4A8FAA;       /* Atlantic blue */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 0.95rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(74,143,170,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--ocean); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.3rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--ocean); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #F0F5F8; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+  .note a { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Hotel <em>Jardines de Nivaria</em> &nbsp;·&nbsp; Tenerife</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Adeje, South Tenerife · Canary Islands, Spain</div>
+  <h1>5-star adults-only. Year-round guests.<br><em>Replies that never disappoint.</em></h1>
+  <p>Hotel Jardines de Nivaria delivers luxury 365 days a year to a demanding international clientele. Your guests write year-round about whale watching off the Adeje coast, Teide National Park excursions, private catamaran charters and spa reservations. With an AI concierge handling first drafts in 30 seconds, your team focuses on what they do best: genuine human hospitality.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">43</div>
+      <div class="lbl">Rooms &amp; Suites</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~30</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">24/7</div>
+      <div class="lbl">Always-on drafts</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~30</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~3 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~10 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~43 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">3.0×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — typical Jardines de Nivaria guest emails</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Whale watching -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Marine Excursion</div>
+          <div>Whale Watching + Catamaran — Alistair M.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 08:30</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hi, arriving Saturday for a week. I've heard the whale watching off Adeje is world-class — ideally I'd like a private small boat rather than a big tourist catamaran. I'm also interested in a sunset cruise one evening. Can you arrange both? Alistair</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 23 seconds</span>
+        </div>
+        <p>Dear Alistair, you are absolutely right — the waters off Adeje and Los Gigantes are among the best in Europe for resident pilot whales and bottlenose dolphins, with sperm whale sightings not uncommon. For a private experience, we work with a local operator who runs a 6-metre RIB (rigid inflatable) with a marine biologist guide — maximum 4 passengers, so you have an entirely different experience from the large catamarans. Morning departures have the highest sighting rates. For the sunset cruise, the same partner operates a beautiful 40-foot sailing yacht; the Los Gigantes cliffs at golden hour with a glass of cava is one of the finest views in Tenerife. Shall I reserve the whale watching for Sunday morning and the sunset cruise for Wednesday or Thursday? Welcome to Jardines de Nivaria — we will have everything organised for your arrival. Kind regards, Jardines de Nivaria Concierge</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Expert local knowledge · Small private boat highlighted</span>
+        <span class="time">Draft in 23s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Teide excursion -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Volcano Excursion</div>
+          <div>Teide &amp; Summit Permit — Klaus &amp; Ingrid B.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 18:15</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Sehr geehrtes Team, wir möchten unbedingt den Teide besteigen, auch bis zum Gipfel wenn möglich. Braucht man dafür eine spezielle Genehmigung? Und gibt es eine Möglichkeit, mit dem Teleferik zu fahren? Wir sind sportlich und haben keine Höhenangst. Mit freundlichen Grüßen, Klaus und Ingrid Bauer</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 24 seconds</span>
+        </div>
+        <p>Sehr geehrte Bauers, der Teide bei klarem Wetter ist ein absolutes Highlight — Sie haben die richtige Entscheidung getroffen. Für den Gipfelbereich (ab 3.260 m, oben auf 3.718 m) benötigen Sie tatsächlich eine kostenlose offizielle Genehmigung vom Teide-Nationalpark, die leider sehr schnell ausgebucht ist — ich empfehle dringend, dies jetzt sofort zu beantragen, damit wir Ihre bevorzugten Daten sichern können. Die Seilbahn (Teleférico) fährt bis zur Schulter auf 3.555 m; von dort ist der Gipfelweg zu Fuß etwa 40 Minuten. Morgens frisch, mittags can es windig werden — wir legen warme Kleidung ans Herz, auch im Sommer. Ich kümmere mich heute noch um die Genehmigung und organisiere den Transfer (circa 1,5 Stunden Fahrt). Für welchen Tag haben Sie Interesse? Mit freundlichen Grüßen, Jardines de Nivaria Concierge</p>
+      </div>
+      <div class="card-footer">
+        <span>DE → DE · Permit process explained · Urgency noted</span>
+        <span class="time">Draft in 24s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Spa + long stay planning -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Long-Stay + Spa Planning</div>
+          <div>10-Night Retreat Planning — Beatrice H.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 22:55</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hello, I'm a 58-year-old woman travelling solo, arriving next Friday for 10 nights — a proper holiday. I've never been to Tenerife. I'd love you to help me plan my stay: I'm interested in spa treatments, gentle yoga if available, one or two excursions (not too strenuous), and ideally one really special dinner. I also need to know if there's a pool away from noise. Any guidance appreciated! Beatrice</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 38 seconds</span>
+        </div>
+        <p>Dear Beatrice, ten nights at Jardines de Nivaria — we will make this the restorative holiday you deserve. Let me offer a gentle framework for your stay that you can adapt as you settle in. For the spa: our therapists suggest beginning with the 90-minute deep relaxation ritual on your first full day — it combines warm volcanic stone, argan oil and Canarian rosemary; guests consistently call it transformative. We offer a morning yoga session on the terrace at 8:30 am on Tuesday, Thursday and Saturday — ocean views, all levels welcome, about 12-15 guests maximum; very calm. For excursions: we recommend the Masca Valley walk for a scenic half-day at a gentle pace — a dramatic volcanic gorge with local guides, ending at a small beach where a boat picks you up. For something more relaxed, the Loro Parque wildlife park or the historic town of Garachico are lovely full-day outings by car. For your special dinner: our restaurant Terraza del Duque has a Michelin-selected tasting menu; we suggest Thursday evening when the kitchen is at its quietest. On the pool: yes — there is a smaller adults-only pool at the east side of the garden, further from the main bar, which is considerably more peaceful in the afternoons. I will make a note for your reservation. We are so looking forward to welcoming you Friday. Warmly, Jardines de Nivaria Concierge</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Solo traveller care · Full 10-night itinerary proposed · Quiet pool flagged</span>
+        <span class="time">Draft in 38s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — straightforward, no lock-in</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Full AI concierge access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>EN, DE, FR, ES, NL and more</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Adapted to Jardines de Nivaria voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>Hotel tone &amp; voice learned</li>
+        <li>Full team onboarding</li>
+        <li>Year-round seasonal updates</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a 5-star adults-only boutique, live in production since 2026. This demo was built specifically for Hotel Jardines de Nivaria. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Hotel Jardines de Nivaria, Tenerife · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>

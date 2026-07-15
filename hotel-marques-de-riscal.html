@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Hotel Marqués de Riscal, Rioja</title>
+<style>
+  :root {
+    --primary: #1A0A2A;       /* deep Rioja night purple */
+    --accent:  #C4A035;       /* aged Rioja gold */
+    --light:   #F7F4F8;       /* titanium-light white */
+    --dark:    #0E041A;
+    --text:    #221A2C;
+    --muted:   #8A7A9A;
+    --border:  #E0D8E8;
+    --titanium: #9AB0C4;      /* Gehry titanium blue */
+    --rioja:   #8B2342;       /* Rioja red */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 0.95rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 45%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(139,35,66,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--titanium); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.3rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero h1 em { color: var(--accent); font-style: normal; }
+  .hero p  { font-size: 0.95rem; opacity: 0.82; max-width: 580px; line-height: 1.7; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--titanium); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #F6F3FA; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.6; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.65; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .note { background: #fff; border-left: 3px solid var(--accent); padding: 18px 22px; margin-top: 28px; border-radius: 0 4px 4px 0; font-family: sans-serif; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .note strong { color: var(--primary); }
+  .note a { color: var(--primary); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 768px) {
+    .hero, .section, .roi-strip, .page-footer, .header { padding-left: 22px; padding-right: 22px; }
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.7rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .email-card.full { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Hotel <em>Marqués de Riscal</em> &nbsp;·&nbsp; Rioja</div>
+  <div class="badge">AI Concierge — Private Demo</div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Personalised Preview · Elciego, La Rioja Alavesa · Spain</div>
+  <h1>Frank Gehry. 43 rooms. The world<br><em>watches. Your guests email daily.</em></h1>
+  <p>Hotel Marqués de Riscal is one of the most photographed hotel buildings in the world — and it attracts guests who arrive with the highest expectations. Private cellar tours under centuries-old arches, vintner dinners, Guggenheim tickets, Bilbao day trips. Each email is a test of your luxury standards. This AI concierge meets it in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">43</div>
+      <div class="lbl">Rooms &amp; Suites</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~30</div>
+      <div class="lbl">Emails per day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">Draft generated</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">6+</div>
+      <div class="lbl">Languages handled</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~30</div>
+    <div class="lbl">Emails / day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~4 min</div>
+    <div class="lbl">Avg. reply time saved</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~12 h</div>
+    <div class="lbl">Saved per week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~48 h</div>
+    <div class="lbl">Saved per month</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">3.6×</div>
+    <div class="lbl">ROI at 80€/month</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — emails your concierge team handles every day</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Private cellar tour -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Wine Experience</div>
+          <div>Private Cellar Tour — Charles &amp; Diane W.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 10:05</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hello, we're wine collectors and we'll be staying three nights from Friday. We'd love a private tour of the historic Marqués de Riscal cellars — the ones with the 19th-century vintages. Is this possible? We'd also like to meet someone from the winemaking team, not just a standard group tour. Charles</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 29 seconds</span>
+        </div>
+        <p>Dear Charles, we are delighted to welcome two collectors. The historic cellar at Marqués de Riscal is indeed extraordinary — it holds bottles going back to the 1860s, making it one of the most storied wine libraries in all of Spain. We will arrange a private visit, separate from the public tours, on Saturday morning at 10 am. Our chief oenologist, who oversees the Gran Reserva programme, will accompany you personally. The tour includes a tasting of three vintages across different decades, selected to show the evolution of the house style over more than 150 years. This is not available through standard booking and we are pleased to offer it exclusively to our hotel guests. Shall I confirm Saturday? We look forward to welcoming you Friday. Best regards, Hotel Marqués de Riscal</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · Collector tone · Exclusive access highlighted</span>
+        <span class="time">Draft in 29s</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Guggenheim + Bilbao -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Day Trip + Tickets</div>
+          <div>Guggenheim Bilbao — Sophie L.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 16:22</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Bonjour, je souhaiterais visiter le musée Guggenheim de Bilbao pendant mon séjour. Pouvez-vous m'obtenir des billets coupe-file et m'indiquer le meilleur moyen de me rendre à Bilbao depuis l'hôtel ? J'aimerais aussi peut-être déjeuner sur place. Merci, Sophie</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 21 seconds</span>
+        </div>
+        <p>Bonjour Sophie, avec plaisir ! Le Guggenheim de Bilbao est à environ 1h15 de l'hôtel. Notre chauffeur peut vous y conduire et revenir vous chercher à l'heure de votre choix — nous vous recommandons de partir à 9h30 pour arriver à l'ouverture (10h) et profiter des salles avant l'affluence. Je réserve vos billets en ligne dès aujourd'hui pour vous éviter la file d'attente. Pour le déjeuner, le restaurant Nerua, à l'intérieur du Guggenheim, est excellent et étoilé Michelin — il faut réserver à l'avance, ce que je peux faire pour vous. Quelle date vous convient le mieux ? Bien cordialement, Hôtel Marqués de Riscal</p>
+      </div>
+      <div class="card-footer">
+        <span>FR → FR · Proactive Michelin restaurant suggestion · Logistics handled</span>
+        <span class="time">Draft in 21s</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Vintner dinner -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Special Dining Experience</div>
+          <div>Private Vintner Dinner for 6 — Jonathan R.</div>
+        </div>
+        <div style="font-size:0.68rem; opacity:0.7;">Received 21:48</div>
+      </div>
+      <div class="inbound">
+        <div class="label">📩 Incoming guest email</div>
+        <p>Hi, I'm arriving with 5 colleagues on Wednesday — we're all in the hospitality industry and this is partly a research trip. We'd love to arrange a private dinner, ideally in one of the historic cellars if possible, with a curated Rioja pairing. We want to understand the terroir properly. Budget is not an issue. We also need to know: is the Caudalie spa bookable for a group treatment session? Jonathan</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          ✦ AI Draft — ready to send
+          <span>⚡ 35 seconds</span>
+        </div>
+        <p>Dear Jonathan, a group of hospitality professionals — this is precisely the kind of evening the Marqués de Riscal is built for. We can arrange a private dinner for six in the historic Cámara de Vinos, a 19th-century cellar barrel room that hosts perhaps 20 people at most; the setting is unlike anything else in Rioja. We suggest a six-course menu designed around the principal terroir expressions of the Rioja Alavesa — with the Clos, the single-vineyard Baron de Chirel, and a library wine from the 1990s to close. Our head sommelier will lead the tasting narrative, which your team will find directly applicable to your own properties. Regarding the Caudalie vinothérapie spa: group bookings are welcomed; the signature Barrel Bath and Crushed Cabernet Scrub treatments are ideal for a small group and run approximately 1.5 hours. I can hold both the cellar dinner for Thursday evening and a spa session for Friday morning — shall I proceed with both? We will make this a stay your team remembers. With warmest regards, Hotel Marqués de Riscal</p>
+      </div>
+      <div class="card-footer">
+        <span>EN → EN · B2B hospitality tone · Cellar access + Spa group booking · Both services confirmed proactively</span>
+        <span class="time">Draft in 35s</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Choose your plan — no long-term commitment</div>
+  <div class="pricing-grid">
+
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Full AI concierge access</li>
+        <li>Inbox analysis &amp; draft replies</li>
+        <li>5-tab dashboard (V3.0)</li>
+        <li>EN, ES, FR, DE, IT and more</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">120€<sub>/month</sub></div>
+      <div class="setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Automatic weekly improvement</li>
+        <li>Monthly performance report</li>
+        <li>Adapted to Marqués de Riscal voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150€<sub>/month</sub></div>
+      <div class="setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real exchanges</li>
+        <li>Luxury Collection tone learned</li>
+        <li>Full team onboarding</li>
+        <li>Harvest season knowledge base</li>
+      </ul>
+    </div>
+
+  </div>
+  <div class="note">
+    <strong>Reference client:</strong> IBB Palazzo Bettina, Birgu, Malta — a 5-star historic boutique, live in production since 2026. This demo was built specifically for Hotel Marqués de Riscal. Enzo Cosnard · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="page-footer">
+  <span>AI Concierge · Private demo for Hotel Marqués de Riscal, Elciego, Rioja · July 2026</span>
+  <span>Built by <a href="mailto:enzo26cosnard@gmail.com">Enzo Cosnard</a> · IBB Palazzo Bettina, Malta</span>
+</footer>
+
+</body>
+</html>
