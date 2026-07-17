@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Milos Breeze Boutique Hotel</title>
+<style>
+  :root {
+    --primary: #2A4A5E;       /* deep Aegean navy-teal */
+    --accent:  #E8B87A;       /* warm volcanic sand gold */
+    --light:   #F6F4F0;       /* Sarakiniko white pumice */
+    --dark:    #182D3A;
+    --text:    #2C2C2C;
+    --muted:   #8A9499;
+    --border:  #DDD9D0;
+    --breeze:  #7ABBE0;       /* Aegean breeze blue */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.3em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(232,184,122,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF8; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Milos <em>Breeze</em></div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Milos Breeze Boutique Hotel · Adamas, Milos, Greece</div>
+  <h1>70 beaches. Sarakiniko's lunar landscape.<br>Every question lands in your inbox.</h1>
+  <p>Milos is the Cyclades' most striking island — and your 20-room boutique hotel fields a constant stream of emails about boat excursions, volcanic cave dives and sunset sailing charters. An AI concierge already live at a comparable Mediterranean boutique in Malta drafts the perfect reply in 30 seconds, in any language — so your team can focus on the island experience, not the inbox.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">20</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~14</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~6 h</div>
+      <div class="lbl">Saved / week</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Draft time</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~14</div>
+    <div class="lbl">Guest emails per day<br><small style="font-size:0.62rem;color:#bbb">(20 rooms × 0.7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~6 h</div>
+    <div class="lbl">Hours saved per week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s per draft)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€288</div>
+    <div class="lbl">Staff time saved / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h — conservative)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">3.6×</div>
+    <div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;color:#bbb">(€288 saved / €80 month)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — Milos Breeze guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Boat Excursion to Kleftiko & Caves</div>
+          <div>From: m.vanderberg@gmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi! We arrive on 5th August and would love to do a full-day boat trip to Kleftiko and the sea caves — we've seen amazing photos. Is this something you can organise for us? We're a family of four including two teenagers who love snorkelling.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Maria,<br><br>
+        Kleftiko is simply unmissable — a great choice for your family! The sea caves there are among the most spectacular in the Mediterranean.<br><br>
+        We can arrange a full-day private boat tour departing from Adamas harbour at 09:00. The typical itinerary covers the sea caves of Kleftiko (with plenty of time to snorkel inside the caves), the coloured cliffs of Tsigrado, and a swim stop at Gerakas — all remote locations reachable only by boat. Snorkelling equipment is included on board, along with a simple Greek lunch and refreshments.<br><br>
+        The trip runs approximately 7 hours. For a family of four in August, I'd suggest booking as soon as possible — shall I check availability for the 5th?<br><br>
+        Warmly,<br>
+        The Concierge · Milos Breeze Boutique Hotel</p>
+      </div>
+      <div class="card-footer">
+        <div>Family excursion, Milos-specific — detailed & actionable</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Sarakiniko Sunrise & Photography</div>
+          <div>From: l.ferrari@icloud.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Buongiorno! Sono un fotografo e vorrei visitare Sarakiniko all'alba, prima che arrivino i turisti. Posso raggiungere la spiaggia a piedi dall'hotel? Verso che ora sorge il sole in agosto? Grazie mille.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Gentile Luca,<br><br>
+        Che scelta magnifica — Sarakiniko all'alba è davvero magico, con quella luce radente sul paesaggio lunare bianco.<br><br>
+        In agosto il sole sorge intorno alle 06:20. Sarakiniko dista circa 8 km dall'hotel — raggiungibile a piedi richiederebbe quasi 2 ore, ma possiamo organizzarle un trasferimento mattutino in taxi o auto a noleggio per le 05:45, così avrà almeno 30-40 minuti di luce pre-alba esclusiva prima dell'arrivo dei primi visitatori.<br><br>
+        In alternativa, il nostro team può indicarle alcune scogliere vulcaniche molto vicine all'hotel che al mattino presto offrono prospettive straordinarie e rimangono completamente deserte.<br><br>
+        Come preferisce procedere? È un piacere aiutarla a catturare Milos al suo meglio.<br><br>
+        Cordiali saluti,<br>
+        Il Concierge · Milos Breeze Boutique Hotel</p>
+      </div>
+      <div class="card-footer">
+        <div>Italian photographer guest → Italian reply, specific local knowledge</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Sunset Sailing Charter</div>
+          <div>From: robert.j.chase@hotmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hello, my wife and I are celebrating our 25th anniversary during our stay. We'd love to do a private sunset sailing trip for two — something special, with champagne. What can you arrange and what's the rough cost?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Robert,<br><br>
+        Congratulations on your 25th anniversary — what a beautiful occasion to celebrate on the Aegean!<br><br>
+        We can arrange a private 3-hour sunset sailing trip for two aboard a traditional wooden caïque. Departing at 18:00, you'll sail along the volcanic coastline with the colours of Milos at golden hour, anchor at a secluded bay for a swim, and return at dusk. We'll arrange chilled Assyrtiko wine and a selection of local mezze on board — or we can upgrade to Champagne on request.<br><br>
+        The cost for a private charter of this type is typically in the range of €250–350 for two, depending on the vessel and duration. I'll confirm the exact availability and pricing as soon as you give me your preferred date.<br><br>
+        With warmest wishes for a wonderful anniversary,<br>
+        The Concierge · Milos Breeze Boutique Hotel</p>
+      </div>
+      <div class="card-footer">
+        <div>Anniversary celebration — romantic, specific, with pricing guidance</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Airport Transfer & Early Check-in</div>
+          <div>From: anna.schmidt@gmx.de</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hallo, wir landen am 10. Juli um 08:15 Uhr am Flughafen Milos. Können Sie uns einen Transfer zum Hotel organisieren? Und ist ein früher Check-in möglich — idealerweise ab 09:00 Uhr?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Liebe Anna,<br><br>
+        Herzlich willkommen — wir freuen uns auf Ihre Ankunft am 10. Juli!<br><br>
+        Den Transfer vom Flughafen Milos (ca. 5 km vom Hotel entfernt) organisieren wir sehr gerne — unser Fahrer wartet nach der Landung auf Sie. Die Fahrtzeit beträgt etwa 10 Minuten.<br><br>
+        Ein früher Check-in ab 09:00 Uhr können wir nicht garantieren, da das Zimmer je nach Vorgänger-Abreise vorbereitet wird. Wir werden jedoch unser Bestes tun, damit Ihr Zimmer bereit ist. Sollte das nicht klappen, können Sie umgehend nach der Ankunft Ihr Gepäck ablegen, das Frühstück genießen und die Poolterrasse nutzen — alles andere steht Ihnen sofort zur Verfügung.<br><br>
+        Darf ich den Transfer für 08:15 Uhr vormerken?<br><br>
+        Mit freundlichen Grüßen,<br>
+        Das Concierge-Team · Milos Breeze Boutique Hotel</p>
+      </div>
+      <div class="card-footer">
+        <div>German guest, transfer + early check-in — practical & reassuring</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Pricing — designed for boutique hotels</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>Multilingual drafts</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Tone tuned to Milos Breeze's voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep brand voice calibration</li>
+        <li>Onboarding session on-site</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina (Birgu, Malta) — 5-star Mediterranean boutique, similar profile</div>
+  <div>For Milos Breeze · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

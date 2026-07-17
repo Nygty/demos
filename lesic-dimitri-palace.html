@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Lesic Dimitri Palace, Korčula</title>
+<style>
+  :root {
+    --primary: #1E2C3A;       /* deep Adriatic night navy */
+    --accent:  #C4924A;       /* Korčula golden stone */
+    --light:   #F6F4EF;       /* limestone palazzo white */
+    --dark:    #111D28;
+    --text:    #252D35;
+    --muted:   #8A919A;
+    --border:  #DDD8CC;
+    --adriatic: #3E7A98;      /* Adriatic deep blue */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(196,146,74,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF8; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Lesic <em>Dimitri</em> Palace</div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Lesic Dimitri Palace · Korčula Town, Croatia</div>
+  <h1>Five residences in a medieval palazzo.<br>Birthplace of Marco Polo. Ultra-premium guests.</h1>
+  <p>Korčula Town is one of the Adriatic's most beautiful walled cities. Your 5-residence boutique palazzo hosts an ultra-premium clientele who email every day about private sailing charters to Pelješac, Plavac Mali wine tastings and cooking classes with local fishermen. An AI concierge already live at a similarly scaled historic palazzo in Malta drafts the perfect personalised reply in 30 seconds — exactly the bespoke standard your residences demand.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">5</div>
+      <div class="lbl">Residences</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~7</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~3 h</div>
+      <div class="lbl">Saved / week</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Draft time</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~7</div>
+    <div class="lbl">Guest emails per day<br><small style="font-size:0.62rem;color:#bbb">(5 residences × 1.4 avg)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~3 h</div>
+    <div class="lbl">Hours saved per week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s per draft)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€144</div>
+    <div class="lbl">Staff time saved / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h — conservative)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">★★★★★</div>
+    <div class="lbl">Quality, not just speed<br><small style="font-size:0.62rem;color:#bbb">Ultra-premium tone, every time</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — Lesic Dimitri guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Private Sailing Charter to Pelješac</div>
+          <div>From: william.ashworth@barclays.net</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hello, we're arriving on the 8th for 5 nights. We'd like to arrange a private yacht charter to explore the Pelješac peninsula — ideally a full day with a knowledgeable skipper who knows the hidden anchorages. The group is 4 adults. Quality over price.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear William,<br><br>
+        A full-day private charter to Pelješac for four is something we arrange regularly for our guests — and we know exactly the right skipper for your criteria.<br><br>
+        We work with Captain Ivan Blažević, who has sailed these waters for thirty years and maintains an immaculate 50-foot sailboat. His itinerary for Pelješac typically takes you into the Pelješac Channel via the oyster beds of Ston, then north to the wild anchorage at Prapratno, and rounds the peninsula to the stone-village cove of Zuljana — where the swimming and lunch stop (fresh fish, local wine from Dingač) are memorable. He adapts the route entirely to the conditions and your preferences.<br><br>
+        I'll contact Ivan to confirm availability for the 9th or 10th (which gives you a day to settle in). Shall I proceed and come back to you with the details?<br><br>
+        With pleasure,<br>
+        The Concierge · Lesic Dimitri Palace, Korčula</p>
+      </div>
+      <div class="card-footer">
+        <div>Ultra-premium client — named skipper, detailed itinerary, proactive</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Plavac Mali Wine Tasting — Winemaker Visit</div>
+          <div>From: dr.h.steinert@kpmg.de</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Sehr geehrte Damen und Herren, ich bin ein leidenschaftlicher Weinkenner und würde gerne Produzenten von Plavac Mali auf der Halbinsel Pelješac persönlich besuchen — nicht die üblichen Touristenverkostungen, sondern echte Winzer. Ist das möglich?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Sehr geehrter Dr. Steinert,<br><br>
+        Das ist genau das richtige Anliegen für Pelješac — und wir haben die richtigen Kontakte, um Ihnen etwas Außergewöhnliches zu ermöglichen.<br><br>
+        Das Weingut <em>Saints Hills</em> in Dingač (eines der renommiertesten Häuser der Region) empfängt ausgewählte Besucher auf persönliche Empfehlung — ihre Dingač-Parzellen auf den steilen, schiefer-grauen Südlagen gehören zum Besten, was Kroatien zu bieten hat. Für etwas noch Intimeres empfehlen wir <em>Andro Tomić</em> in Potomje: ein Familienbetrieb der dritten Generation, der seinen Plavac Mali ausschließlich in Amphoren ausgebaut hat — das ist in dieser Appellation einzigartig.<br><br>
+        Ich setze mich persönlich in Verbindung, um einen Besuch während Ihres Aufenthalts zu arrangieren. Darf ich nach dem genauen Datum fragen, das Ihnen am besten passen würde?<br><br>
+        Mit freundlichen Grüßen,<br>
+        Das Concierge-Team · Lesic Dimitri Palace, Korčula</p>
+      </div>
+      <div class="card-footer">
+        <div>German wine connoisseur → German reply, named producers, artisanal</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Cooking Class with Local Fishermen</div>
+          <div>From: s.oconnor@eircom.net</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, we'd love to do something really authentic — we've heard about cooking classes with local fishermen somewhere near Korčula. Is that possible to arrange, and what would it involve exactly? We're two adults and love Croatian food.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Siobhán,<br><br>
+        This is one of our favourite experiences to arrange — and in Korčula we're fortunate to have the genuine article.<br><br>
+        We work with Nikola, a third-generation fisherman from the village of Lumbarda (5 km from Korčula Town). The morning begins at the harbour at 07:00, where you join him on the boat to pull in the overnight nets — whatever comes up becomes lunch. Back on shore, Nikola's wife Marta takes over in the kitchen: you'll prepare black risotto (cuttlefish ink, fresh squid), peka-baked sea bass under the bell, and a simple salad of island tomatoes and capers. The meal is eaten together at their table with a bottle of local white wine from Grk grape — it doesn't get more authentic than this.<br><br>
+        Available Tuesday and Thursday mornings during your stay. Would the 10th work for you?<br><br>
+        Warmly,<br>
+        The Concierge · Lesic Dimitri Palace, Korčula</p>
+      </div>
+      <div class="card-footer">
+        <div>Authentic local experience — named people, full detail, personal</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Marco Polo History & Old Town Tour</div>
+          <div>From: j.marchetti@alice.it</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Buongiorno, sappiamo che Korčula è il luogo natale di Marco Polo. Siamo molto interessati alla storia della città medievale — c'è possibilità di avere una visita guidata approfondita? Preferiremmo qualcosa di più accademico, non per turisti.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Gentile Jacopo,<br><br>
+        Benvenuto a Korčula — la "piccola Dubrovnik" dell'Adriatico, con le sue torri medievali e i vicoli disposti a lisca di pesce per moderare la bora. Certamente possiamo organizzare qualcosa di molto più approfondito della visita standard.<br><br>
+        Collaboriamo con il Professor Mario Andrić, storico locale e autore di saggi sul periodo veneziano di Korčula (XIII–XVIII sec.). Propone visite di 2–3 ore attraverso la città medievale con accesso a spazi normalmente chiusi al pubblico, incluse le sale del Palazzo Gabrielis e la Casa di Marco Polo con il suo contesto storico genuino (lungi dalla leggenda turistica). Parla italiano correntemente.<br><br>
+        Posso verificare la sua disponibilità durante il vostro soggiorno. Quali date preferite?<br><br>
+        Cordiali saluti,<br>
+        Il Concierge · Lesic Dimitri Palace, Korčula</p>
+      </div>
+      <div class="card-footer">
+        <div>Italian cultural guest → Italian reply, academic guide, insider access</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Pricing — designed for ultra-boutique properties</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>Multilingual drafts</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium+ <span class="rec">Best fit</span></div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep brand voice calibration</li>
+        <li>Onboarding session on-site</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium</div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Tone tuned to Lesic Dimitri's voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina (Birgu, Malta) — 5-star historic palazzo, comparable ultra-boutique profile</div>
+  <div>For Lesic Dimitri Palace · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

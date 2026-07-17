@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Démo Agent Concierge — Hôtel Casa Musicale, Feliceto</title>
+<style>
+  :root {
+    --primary: #3A2E1C;       /* chêne vert corse — brun chaleureux profond */
+    --accent:  #C17F3A;       /* or du maquis corse */
+    --light:   #F8F5EE;       /* pierre de Balagne calcaire crème */
+    --dark:    #221A0E;
+    --text:    #2E2820;
+    --muted:   #9A9080;
+    --border:  #E0D8C8;
+    --maquis:  #6B8A5A;       /* vert maquis corse */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.2em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(193,127,58,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.2rem; font-weight: normal; margin-bottom: 12px; line-height: 1.25;
+             font-family: sans-serif; letter-spacing: 0.03em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 600px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF5; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Casa <em>Musicale</em></div>
+  <div class="badge">Démo privée</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Démo personnalisée — Hôtel Casa Musicale · Feliceto, Haute-Corse, France</div>
+  <h1>12 chambres au cœur du Balagne.<br>Chaque demande mérite une réponse à la hauteur.</h1>
+  <p>Perchée dans la « région des cent villages », votre maison d'hôtes familiale reçoit chaque jour des demandes très personnalisées — randonnées vers Calvi, excursions en barque vers Girolata, dégustations chez les vignerons locaux. Pendant mon stage à IBB Palazzo Bettina à Malte (même taille, même ADN familial), j'ai déployé un agent IA qui rédige le brouillon parfait en 30 secondes.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">12</div>
+      <div class="lbl">Chambres</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~8</div>
+      <div class="lbl">Emails / jour</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~4 h</div>
+      <div class="lbl">Économisées / sem.</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Temps de brouillon</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~8</div>
+    <div class="lbl">Emails clients / jour<br><small style="font-size:0.62rem;color:#bbb">(12 chambres × 0,7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~4 h</div>
+    <div class="lbl">Heures économisées / sem.<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s par brouillon)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">192 €</div>
+    <div class="lbl">Temps récupéré / mois<br><small style="font-size:0.62rem;color:#bbb">(à 12 €/h — conservateur)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">2.4×</div>
+    <div class="lbl">ROI vs. formule Standard<br><small style="font-size:0.62rem;color:#bbb">(192 € économisés / 80 €/mois)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">L'IA en action — scénarios clients Casa Musicale</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Randonnée & Villages du Balagne</div>
+          <div>De : martin.lacroix@sfr.fr</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email client reçu</div>
+        <p>Bonjour, nous arrivons le 14 août pour une semaine. Nous adorons la randonnée et souhaiterions explorer les villages du Balagne à pied. Pouvez-vous nous conseiller des itinéraires au départ de Feliceto ? Nous sommes deux, bon niveau, et avons une voiture.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Brouillon IA — 30 secondes <span>Prêt à envoyer</span></div>
+        <p>Cher Martin,<br><br>
+        Bienvenue à Feliceto — vous êtes au cœur du Balagne, et la région se prête parfaitement à la randonnée entre villages !<br><br>
+        Avec votre voiture et votre niveau, voici quelques suggestions de notre équipe : la boucle Feliceto–Muro–Cateri (environ 12 km, avec le beau village baroque de Muro) est réalisable à la journée. Le GR20 version « maritime » entre Calenzana et l'Île-Rousse est magnifique sur 2-3 étapes, et vous pouvez y accéder en voiture depuis l'hôtel.<br><br>
+        Nous préparons une petite carte des itinéraires au départ de chez nous — elle sera dans votre chambre à l'arrivée le 14 août. Si vous souhaitez un guide local pour l'une des journées, je peux également vous recommander quelqu'un de confiance.<br><br>
+        À très bientôt,<br>
+        La famille Mathieu · Casa Musicale, Feliceto</p>
+      </div>
+      <div class="card-footer">
+        <div>Conseil randonnée Balagne — précis, local, chaleureux</div>
+        <div class="time">⚡ 30 s</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Excursion Girolata & Porto</div>
+          <div>De : helene.bernard@orange.fr</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email client reçu</div>
+        <p>Bonjour, nous avons vu que Girolata et les calanques de Porto sont classés UNESCO. Comment y accéder depuis votre hôtel ? Y a-t-il des excursions organisées depuis Calvi ou l'Île-Rousse ? Merci d'avance pour vos conseils.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Brouillon IA — 30 secondes <span>Prêt à envoyer</span></div>
+        <p>Chère Hélène,<br><br>
+        Oui, Girolata et les calanques de Porto font partie des plus beaux paysages de Corse — et depuis Feliceto, l'accès est très pratique.<br><br>
+        Pour Girolata (accessible uniquement par mer ou par un sentier de montagne), les excursions en bateau partent chaque matin depuis Porto ou Galeria (à environ 45 min de voiture de l'hôtel). La traversée des calanques en bateau est magnifique — comptez une journée complète.<br><br>
+        Pour Porto et ses calanques, la route depuis Feliceto via Ponte Leccia est spectaculaire (environ 1h15 de route). Nous recommandons d'arriver tôt le matin pour éviter les foules.<br><br>
+        Je peux noter les coordonnées des bateliers que nous connaissons à Galeria si vous souhaitez réserver directement. Faites-moi signe !<br><br>
+        Bien cordialement,<br>
+        La famille Mathieu · Casa Musicale, Feliceto</p>
+      </div>
+      <div class="card-footer">
+        <div>Excursion UNESCO — pratique, avec ressources locales</div>
+        <div class="time">⚡ 30 s</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Dégustation de Vins Corses</div>
+          <div>De : pierre.roux@gmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email client reçu</div>
+        <p>Bonjour, nous sommes amateurs de vins et très curieux de découvrir les vins corses — Patrimonio, Calvi, Nielluccio... Avez-vous des contacts avec des vignerons locaux qui acceptent des visites de particuliers ? Merci !</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Brouillon IA — 30 secondes <span>Prêt à envoyer</span></div>
+        <p>Cher Pierre,<br><br>
+        Excellente curiosité — les vins de Corse sont vraiment à part, et le Balagne est entouré de très belles appellations !<br><br>
+        Nous travaillons en direct avec quelques vignerons de la région qui accueillent des visiteurs sur rendez-vous. Le domaine Maestracci à Feliceto (oui, tout proche !) produit un excellent Calvi blanc et rouge — quelques mots de notre part et ils seront ravis de vous faire découvrir le chai. Pour Patrimonio (environ 1h de route), le domaine Orenga de Gaffory est l'une des références de l'appellation.<br><br>
+        Si vous me confirmez vos dates et le nombre de personnes, je prends contact pour vous organiser une visite de dégustation. C'est toujours plus riche avec un vigneron qui vous raconte l'histoire de ses vignes.<br><br>
+        Avec plaisir,<br>
+        La famille Mathieu · Casa Musicale, Feliceto</p>
+      </div>
+      <div class="card-footer">
+        <div>Dégustation vins corses — noms réels, contact direct vignerons</div>
+        <div class="time">⚡ 30 s</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Demande Spéciale — Régime Alimentaire</div>
+          <div>De : alice.moreau@wanadoo.fr</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email client reçu</div>
+        <p>Bonjour, je souhaitais vous informer que mon mari est diabétique et doit éviter les sucres rapides au petit-déjeuner. Est-ce que vous pouvez adapter le petit-déjeuner pour lui ? Nous arrivons le 2 septembre pour 5 nuits.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Brouillon IA — 30 secondes <span>Prêt à envoyer</span></div>
+        <p>Chère Alice,<br><br>
+        Merci de nous en informer — c'est exactement le genre de détail qui compte pour que votre séjour se passe parfaitement.<br><br>
+        Nous notons la contrainte de votre mari pour les 5 matins à partir du 2 septembre. Nous préparerons pour lui un plateau avec des œufs, fromages corses, charcuterie locale, yaourt nature et pain complet — sans viennoiseries ni confitures sucrées au poste de votre mari. Si d'autres aliments sont à éviter ou si vous avez d'autres restrictions, n'hésitez pas à nous le préciser.<br><br>
+        Nous avons hâte de vous accueillir.<br><br>
+        À bientôt,<br>
+        La famille Mathieu · Casa Musicale, Feliceto</p>
+      </div>
+      <div class="card-footer">
+        <div>Demande diététique — attentionné, sans formalisme excessif</div>
+        <div class="time">⚡ 30 s</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Tarifs — conçus pour les maisons d'hôtes et hôtels boutique</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">80 €<sub>/mois</sub></div>
+      <div class="setup">+ 800 € setup unique</div>
+      <ul>
+        <li>Analyse & brouillons IA</li>
+        <li>Dashboard 5 onglets</li>
+        <li>Volume illimité</li>
+        <li>Brouillons multilingues</li>
+        <li>Intégration PMS Mews</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommandé</span></div>
+      <div class="price">120 €<sub>/mois</sub></div>
+      <div class="setup">+ 800 € setup unique</div>
+      <ul>
+        <li>Tout ce qui est dans Standard</li>
+        <li>Amélioration auto hebdomadaire</li>
+        <li>Rapport mensuel de performance</li>
+        <li>Ton calibré à la voix Casa Musicale</li>
+        <li>Support prioritaire</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">150 €<sub>/mois</sub></div>
+      <div class="setup">+ 1 200 € setup unique</div>
+      <ul>
+        <li>Tout ce qui est dans Premium</li>
+        <li>Formation sur vrais échanges réception</li>
+        <li>Calibration voix de marque approfondie</li>
+        <li>Session onboarding sur place</li>
+        <li>Suivi trimestriel</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Déjà déployé à IBB Palazzo Bettina (Birgu, Malte) — boutique 5 étoiles, même ADN familial et patrimonial</div>
+  <div>Pour Casa Musicale · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

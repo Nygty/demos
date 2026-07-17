@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Lykia Lodge & Houses, Kalkan</title>
+<style>
+  :root {
+    --primary: #2A3328;       /* deep Lycian pine-forest green */
+    --accent:  #C49A5A;       /* Turkish Riviera warm gold */
+    --light:   #F5F3EC;       /* Kalkan limestone white */
+    --dark:    #171F16;
+    --text:    #272D24;
+    --muted:   #8A9285;
+    --border:  #DDD8C5;
+    --turquoise: #4A91A8;     /* turquoise coast blue */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.2rem; letter-spacing: 0.26em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(196,154,90,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Lykia <em>Lodge</em></div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Lykia Lodge & Houses · Kalkan, Antalya, Turkey</div>
+  <h1>The Turkish Riviera's most refined address.<br>International guests in a dozen languages.</h1>
+  <p>Perched above Kalkan's turquoise bay, your 22-room adults-only lodge attracts a sophisticated international clientele from the UK, Germany, the Netherlands and beyond — who email every day about private gulet charters, the Sunken City of Kekova and day trips to ancient Xanthos. An AI concierge already live at a similar Mediterranean boutique in Malta drafts the perfect personalised reply in 30 seconds, in any language.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">22</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~15</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~6.5 h</div>
+      <div class="lbl">Saved / week</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Draft time</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~15</div>
+    <div class="lbl">Guest emails per day<br><small style="font-size:0.62rem;color:#bbb">(22 rooms × 0.7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~6.5 h</div>
+    <div class="lbl">Hours saved per week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s per draft)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€312</div>
+    <div class="lbl">Staff time saved / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h — conservative)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">3.9×</div>
+    <div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;color:#bbb">(€312 saved / €80 month)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — Lykia Lodge guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Private Gulet Charter — Kekova</div>
+          <div>From: nigel.hartley@gmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, we're arriving on the 14th for a week. Our main wish is a full-day private gulet trip to the Sunken City of Kekova — we want to swim over the ruins and explore Simena Castle. There are 6 of us. Can you arrange this and what's the approximate cost?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Nigel,<br><br>
+        Kekova is absolutely one of the highlights of the Turkish Riviera — and a private gulet for six is the ideal way to experience it.<br><br>
+        We regularly arrange this for our guests and can organise a traditional wooden gulet departing from Kaş harbour (30 minutes from Lykia Lodge) at 09:00. The full-day itinerary includes the Sunken City of Kekova (swimming over the submerged Lycian ruins), a stop at Tersane Bay for lunch on board, and the short walk up to Simena Castle for the famous view over the islands. The crew serves a fresh mezze lunch with local seafood.<br><br>
+        For a private charter of this size, costs typically range from £600–800 for the day (6 people), depending on the vessel. I'll get confirmed availability and pricing to you within 24 hours — shall I proceed?<br><br>
+        Warmly,<br>
+        The Concierge · Lykia Lodge, Kalkan</p>
+      </div>
+      <div class="card-footer">
+        <div>Group private gulet — specific route, practical cost guidance</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Xanthos & Lycian Way Day Trip</div>
+          <div>From: a.van.houten@ziggo.nl</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Goedemiddag, we zijn geïnteresseerd in een daguitstap naar de oude Lycische ruïnes van Xanthos en misschien een stuk van de Lycische wandelroute. Is er een gids die ons kan begeleiden? We spreken geen Turks en hopen op een Engelstalige gids.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Anna,<br><br>
+        Xanthos is one of the most impressive Lycian sites in Turkey — a wonderful choice for a day away from the coast!<br><br>
+        We can arrange a private guided day trip to Xanthos (UNESCO World Heritage Site, approximately 50 km from Kalkan) with an English-speaking guide who specialises in Lycian history. The visit covers the royal tombs, the theatre, and the extraordinary Nereid Monument site — your guide provides the context that transforms the ruins from stones into a story. If you have the energy, the trailhead for the Lycian Way near Pınara is en route and allows a short, beautiful walk through the pine forests.<br><br>
+        Private guided day trips of this type typically cost around €80–120 per couple including transport and guide. I'll arrange the details if you confirm your preferred date.<br><br>
+        Kind regards,<br>
+        The Concierge · Lykia Lodge, Kalkan</p>
+      </div>
+      <div class="card-footer">
+        <div>Dutch guest, English reply per request — guided archaeology tour</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Romantic Dinner Reservation</div>
+          <div>From: marcus.schreiber@web.de</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Guten Tag, ich möchte meiner Frau zu unserem Hochzeitstag einen unvergesslichen Abend bereiten. Können Sie ein romantisches Abendessen — vielleicht auf einer Dachterrasse mit Blick auf die Bucht — arrangieren? Idealerweise mit einem kleinen persönlichen Überraschungsmoment.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Lieber Marcus,<br><br>
+        Herzlichen Glückwunsch zu Ihrem Hochzeitstag — wir freuen uns, Ihnen einen wirklich unvergesslichen Abend zu bereiten!<br><br>
+        Kalkan ist für seine Dachterrassenrestaurants mit Blick über die Bucht bekannt — wir reservieren Ihnen einen Fensterplatz mit Panoramaaussicht bei unserem bevorzugten Partnerrestaurant, das auf frische lokale Fische und mezes spezialisiert ist. Wir koordinieren im Voraus: ein kleines Arrangement mit Rosen und einem handgeschriebenen Gruß auf dem Tisch, dazu ein Glas türkischen Schaumweins zur Begrüßung — ohne dass Sie sich darum kümmern müssen.<br><br>
+        Darf ich wissen, auf welches Datum Ihr Jahrestag fällt, und ob Sie eher um 19:30 oder 20:00 Uhr bevorzugen? Den Rest übernehme ich.<br><br>
+        Mit herzlichen Grüßen,<br>
+        Das Concierge-Team · Lykia Lodge, Kalkan</p>
+      </div>
+      <div class="card-footer">
+        <div>German guest, anniversary surprise → German reply, attentive detail</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Snorkelling & Blue Cave Exploration</div>
+          <div>From: fiona.mclachlan@sky.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi there, we're keen snorkellers and would love to find some really clear water with good marine life near Kalkan. Are there organised snorkelling trips, or is it better to hire a kayak and go independently? We've read about a blue cave somewhere?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Fiona,<br><br>
+        You're in the right place — the waters around Kalkan are among the clearest on the Turkish coast, with excellent visibility and diverse marine life.<br><br>
+        The Blue Cave you've read about is Mavi Mağara, accessible by kayak or small boat about 2 km along the coast. It's best visited in the morning when the light streams in and creates the famous blue glow inside. For snorkellers, the sea grass meadows and rocky outcrops around Kaputaş Gorge (20 minutes west) are superb — you'll encounter octopus, sea bream, moray eels and, in season, the odd sea turtle.<br><br>
+        We'd suggest a half-day kayak rental from the harbour (we have a trusted local supplier) with a waterproof map of the best spots — completely independent and very rewarding. Alternatively, there are small-boat snorkelling day trips that cover both the cave and Kaputaş. Which would you prefer?<br><br>
+        Warmly,<br>
+        The Concierge · Lykia Lodge, Kalkan</p>
+      </div>
+      <div class="card-footer">
+        <div>Marine activity — specific local knowledge, two options offered</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Pricing — designed for boutique hotels</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>Multilingual drafts</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Tone tuned to Lykia Lodge's voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep brand voice calibration</li>
+        <li>Onboarding session on-site</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina (Birgu, Malta) — 5-star Mediterranean boutique, similar international clientele</div>
+  <div>For Lykia Lodge & Houses · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>
