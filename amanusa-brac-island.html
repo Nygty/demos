@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — Amanusa Brac Island</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #edf2f5; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Amanusa Brac : bleu Adriatique cristallin, blanc calcaire, bois d'olivier, sable doré */
+        :root {
+            --primary: #1a3448;      /* bleu Adriatique profond */
+            --accent: #4a98b5;       /* bleu cristallin Brač */
+            --bg: #edf2f5;
+            --bg-card: #ffffff;
+            --border: #cdd8e0;
+            --text-dark: #0d2030;
+            --text-light: #6b7280;
+            --blue: #4a98b5;
+        }
+        .header { background-color: #ffffff; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #80b5d0; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--blue); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #ffffff; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--blue); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #254860; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #ccdce8; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #d5dfe8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f0f5f8; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #e8f2f8; border-left: 3px solid var(--blue); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--blue); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #80b5d0; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--blue); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #d5dfe8; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Amanusa Brac Island · 4 Star · Postira, Brač, Croatia · Adriatic Boutique · Zlatni Rat Island</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★</div>
+            <div class="hotel-name">AMANUSA BRAC ISLAND</div>
+            <div class="subtitle">AI Concierge · Postira, Brač · International Adriatic Boutique Guests</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Zlatni Rat boat charter -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Thomas & Laura Van den Berg</div>
+                        <div class="email-date">Today, 09:45</div>
+                    </div>
+                    <div class="email-subject">Private boat to Zlatni Rat + hidden coves — 5 nights July</div>
+                    <div class="email-preview">Hello, we are arriving for 5 nights from Amsterdam. We'd love to visit Zlatni Rat beach by private boat and explore some of the hidden coves around Brač that are inaccessible by road. Is there a boat charter you can recommend, and can we snorkel in the clear water?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 27 sec</div>
+                        Dear Thomas & Laura,<br><br>
+                        Exploring Brač by private boat is the best decision you'll make on the island — Zlatni Rat is stunning, and the hidden coves between Postira and Bol are extraordinary. Here is what we have arranged:<br><br>
+                        <b>Private boat charter — half day (5h):</b><br>
+                        • Skipper: Ante (local fisherman, English speaking, knows every cove on the island)<br>
+                        • Departure from Postira harbour: 09:00<br>
+                        • Route: Luka Osibova (emerald cove, no road access, 20m visibility) → Zlatni Rat beach (arrive before the day-trippers, 10:30) → Murvica cave beach (sea cave, crystal water) → swim stop in open sea above Posidonia meadow<br>
+                        • Snorkelling equipment provided on board<br>
+                        • Picnic on board: grilled local fish (catch of the day), Dalmatian prosciutto, Plavac Mali wine, watermelon<br>
+                        • Return: 14:00 · Cost: €220 for two (all inclusive)<br><br>
+                        Which morning would you prefer? We recommend Day 2 so you can relax and settle in on arrival day.<br><br>
+                        Warmly,<br>
+                        Amanusa Brac Island · Concierge, Postira
+                    </div>
+                </div>
+
+                <!-- Email 2 : Plavac Mali wine tasting -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">David & Sarah Williams</div>
+                        <div class="email-date">Today, 08:10</div>
+                    </div>
+                    <div class="email-subject">Plavac Mali wine tasting + private transfer to Split — 4 nights August</div>
+                    <div class="email-preview">Hi, we are wine lovers and we've read that Brač produces excellent Plavac Mali. Can you organise a wine tasting at a local producer? We'd also like a private transfer to Split for a day trip — we want to see Diocletian's Palace. Thank you.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear David & Sarah,<br><br>
+                        Two excellent choices — Brač's Plavac Mali is exceptional, and Split is one of the most impressive Roman cities in the world. Here is everything organised:<br><br>
+                        <b>Plavac Mali wine tasting — Vineyard Stina, Bol:</b><br>
+                        • Stina is Brač's finest winery, carved into the island's white limestone (the same stone used to build Diocletian's Palace)<br>
+                        • Private tasting: 5 wines including their flagship Plavac Mali and a Brač rosé · 60 minutes with the winemaker · bottle of your favourite to take home<br>
+                        • Our hotel transfer to Stina (25 min) and back: included<br>
+                        • Cost: €55 for two · We recommend the late afternoon slot (17:00) for the best light on the vineyard<br><br>
+                        <b>Private transfer to Split:</b><br>
+                        • Morning ferry Supetar (Brač) → Split (50 min) + private driver in Split<br>
+                        • Diocletian's Palace: our curated self-guided map includes Vestibule, Peristyle, underground chambers, Cathedral of Saint Domnius (Roman mausoleum), the Golden Gate<br>
+                        • Lunch recommendation: <b>Zoi Restaurant</b> (inside the Palace walls, excellent fresh fish) — booked in your name for 13:00<br>
+                        • Return: afternoon ferry at your convenience<br>
+                        • Ferry tickets: €12pp · Split driver (half day): €80<br><br>
+                        For which days would you like these activities?<br><br>
+                        Best regards,<br>
+                        Amanusa Brac Island · Concierge, Postira
+                    </div>
+                </div>
+
+                <!-- Email 3 : Family arrival logistics -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Henrik & Astrid Larsson</div>
+                        <div class="email-date">Yesterday, 14:30</div>
+                    </div>
+                    <div class="email-subject">Arrival logistics from Split airport — family of 4 — 6 nights</div>
+                    <div class="email-preview">Hi, we are a family arriving from Stockholm via Split airport. We have 2 children (7 and 10). What is the best way to reach your hotel from the airport? We'd also like to know what activities are available for kids on the island. Thank you very much.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Henrik & Astrid,<br><br>
+                        Welcome to the Amanusa Brac family — we love hosting families and children aged 7 and 10 are perfect for the island. Here is everything you need to know:<br><br>
+                        <b>Arrival from Split Airport to Postira:</b><br>
+                        • Option A (recommended): Private transfer — Split Airport → Split harbour (20 min) → ferry Supetar (50 min, family-friendly with outdoor decks) → Postira (15 min private taxi from Supetar) · Total: approx. 1h45 · Cost for family of 4: €85 all-in · We arrange everything<br>
+                        • Option B: Taxi Airport to Split Port + public ferry (€9pp) + local taxi Supetar-Postira (€20)<br>
+                        Let us know your flight arrival time and we will coordinate the transfer.<br><br>
+                        <b>Activities for children (ages 7 & 10):</b><br>
+                        • 🏊 Swimming & snorkelling at Lovrečina Beach (the calmest water on the island — ideal for children)<br>
+                        • 🚴 Cycling the island's olive grove trails (bikes available from hotel, easy flat route for families)<br>
+                        • ⛵ Family boat trip to Zlatni Rat (the kids will love the golden cape that changes direction with the current)<br>
+                        • 🍕 Pizza-making lesson with our chef (favourite of children staying with us)<br>
+                        • 🐟 Fishing with Ante from the harbour wall at sunset (free, he teaches the children his techniques)<br><br>
+                        We look forward to welcoming the whole Larsson family!<br><br>
+                        Warmly,<br>
+                        Amanusa Brac Island · Concierge, Postira
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Amanusa Brac Island</div>
+                <div class="roi-subtitle">Postira, Brač, Croatia · 18 Rooms · 4 Stars · Adriatic Island Boutique</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">18</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~216</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">43h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,080</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>18 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Standard — €800 setup + €80/month</span><br>
+                    Multilingual (EN, DE, NL, HR) auto-responses — ideal for an island property with a lean team and high international expectations.<br>
+                    Return on investment: <b>13× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste a guest email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Amanusa Brac tone within 30 seconds. Works in English, German, Dutch, Croatian and more..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Thomas & Laura Van den Berg</td>
+                            <td>Private boat to Zlatni Rat + hidden coves</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>David & Sarah Williams</td>
+                            <td>Plavac Mali tasting + Split day trip</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>27 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 17, 2026</td>
+                            <td>Henrik & Astrid Larsson</td>
+                            <td>Family arrival logistics + kids activities</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>28 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Amanusa Brac Island · Postira, Brač, Croatia</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

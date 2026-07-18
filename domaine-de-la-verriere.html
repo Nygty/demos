@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Concierge IA — Domaine de la Verrière</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f2ec; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Domaine de la Verrière : lavande provençale, ocre Luberon, vert olivier, pierre de taille */
+        :root {
+            --primary: #3d3420;      /* olive provençal profond */
+            --accent: #7a6a3a;       /* ocre Luberon / or vin */
+            --lavande: #8c7faa;      /* lavande */
+            --bg: #f5f2ec;
+            --bg-card: #fffdf9;
+            --border: #ddd8cc;
+            --text-dark: #1e1a0e;
+            --text-light: #7a7260;
+            --gold: #7a6a3a;
+        }
+        .header { background-color: #fffdf9; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #c4b88a; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #fffdf9; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #554830; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e2ddd0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e5e0d5; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f2ede5; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f0ede4; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #c4b88a; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e5e0d5; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Domaine de la Verrière · 5 Étoiles · Goult, Luberon, Vaucluse · Vignobles AOC · Clientèle internationale EN/FR/DE</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">DOMAINE DE LA VERRIÈRE</div>
+            <div class="subtitle">Agent Concierge IA · Goult, Luberon · Domaine viticole de prestige</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Boîte de réception</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyser un email</div>
+        <div class="tab" data-tab="history">Historique</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Actualiser</button>
+                <div class="filters">
+                    <div class="filter active">Tous <span class="count">3</span></div>
+                    <div class="filter">À valider <span class="count">1</span></div>
+                    <div class="filter">Répondus auto <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 (EN) : Wine tasting + market -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">William & Sarah Ashworth</div>
+                        <div class="email-date">Aujourd'hui, 09:50</div>
+                    </div>
+                    <div class="email-subject">Private wine tasting + Gordes market — 5 nights September</div>
+                    <div class="email-preview">Good morning, we are staying for 5 nights in September and would love a private tasting of your estate wines with the winemaker, followed by a morning at the Gordes market. We are also interested in a dinner recommendation at a Michelin restaurant nearby. Could you arrange all of this?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">À valider</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ Réponse IA suggérée — rédigée en 29 sec</div>
+                        Dear William & Sarah,<br><br>
+                        We are delighted to arrange this for you — September is our most beautiful season, harvest time in the Luberon.<br><br>
+                        <b>Private estate wine tasting with our winemaker:</b><br>
+                        • 2-hour private tasting in the cave with Vincent, our winemaker — he will walk you through our AOC Luberon whites and reds, and our Côtes du Rhône rosé<br>
+                        • Included: cheese & charcuterie from our local producers (Apt market), one bottle of your choice to take home<br>
+                        • Recommended timing: Day 2 of your stay, 10:00–12:00<br><br>
+                        <b>Gordes market (Sunday):</b><br>
+                        • We provide a market basket, our chef's shopping list and a map of the best producers — free, included in your stay<br>
+                        • Transfer by our hotel vehicle: 15 min from the Domaine<br><br>
+                        <b>Michelin dinner recommendation:</b><br>
+                        • <b>La Bastide de Capelongue</b>, Bonnieux (1 Michelin star) — 20 min drive — exceptional Provençal cuisine. We will book in your name for the evening of your choice.<br><br>
+                        Shall I confirm all three for your stay?<br><br>
+                        With pleasure,<br>
+                        Domaine de la Verrière · Conciergerie, Goult
+                    </div>
+                </div>
+
+                <!-- Email 2 (FR) : Séjour romantique -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Antoine & Marie Rousseau</div>
+                        <div class="email-date">Aujourd'hui, 08:15</div>
+                    </div>
+                    <div class="email-subject">Séjour romantique — anniversaire de mariage — 3 nuits juillet</div>
+                    <div class="email-preview">Bonjour, nous fêtons notre anniversaire de mariage au Domaine de la Verrière en juillet, 3 nuits. Nous aimerions un accueil spécial dans la chambre, un dîner aux chandelles sous les étoiles dans les vignes si possible, et une suggestion de promenade le matin pour voir le lever du soleil sur le Luberon. Merci d'avance.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Répondu auto</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ Réponse IA envoyée automatiquement</div>
+                        Chers Antoine et Marie,<br><br>
+                        Quel beau projet — le Luberon en juillet est un cadre parfait pour célébrer. Voici ce que nous avons préparé pour vous :<br><br>
+                        <b>Accueil dans la chambre :</b><br>
+                        • Pétales de roses des jardins du Domaine, bouquet de lavande fraîche<br>
+                        • Bouteille de notre Rosé AOC Luberon millésimé avec carte manuscrite personnalisée<br>
+                        • Corbeille de fruits de saison et nougat de Montélimar<br><br>
+                        <b>Dîner aux chandelles dans les vignes :</b><br>
+                        • Table privée dressée entre les rangs de vigne au coucher du soleil (20h30)<br>
+                        • Menu 4 plats élaboré par notre chef : produits du marché d'Apt, truffes noires du Luberon si saison, accord vins du Domaine<br>
+                        • Durée : environ 2h30 — une expérience unique sous le ciel étoilé de Provence<br>
+                        • Disponible le soir de votre choix — nous vous recommandons votre deuxième soir<br><br>
+                        <b>Lever du soleil sur le Luberon :</b><br>
+                        • Notre circuit matinal vous est remis à l'arrivée : 45 min à pied depuis le Domaine jusqu'au belvédère de Goult — vue panoramique sur le Grand Luberon et le Petit Luberon dès 06h20 en juillet<br>
+                        • Panier petit-déjeuner préparé par nos soins pour le retour<br><br>
+                        Nous ferons de ces 3 nuits un souvenir exceptionnel.<br><br>
+                        Avec plaisir,<br>
+                        Domaine de la Verrière · Conciergerie, Goult
+                    </div>
+                </div>
+
+                <!-- Email 3 (DE) : L'Isle-sur-la-Sorgue antiquités -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Klaus & Brigitte Hoffmann</div>
+                        <div class="email-date">Hier, 17:30</div>
+                    </div>
+                    <div class="email-subject">Antiquitäten L'Isle-sur-la-Sorgue + Weinprobe — 4 Nächte August</div>
+                    <div class="email-preview">Guten Tag, wir kommen für 4 Nächte im August. Wir sind leidenschaftliche Antiquitätensammler und möchten gerne den berühmten Antiquitätenmarkt in L'Isle-sur-la-Sorgue besuchen. Können Sie uns auch eine private Weinprobe auf dem Domaine arrangieren? Vielen Dank.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Répondu auto</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ Réponse IA envoyée automatiquement</div>
+                        Sehr geehrte Frau Hoffmann, sehr geehrter Herr Hoffmann,<br><br>
+                        Herzlich willkommen im Domaine de la Verrière — Sie kommen zur perfekten Zeit: Anfang August ist der Antiquitätenmarkt in L'Isle-sur-la-Sorgue in voller Hochsaison.<br><br>
+                        <b>Antiquitätenmarkt L'Isle-sur-la-Sorgue (Sonntag, 07:00–13:00):</b><br>
+                        • Das Domaine liegt nur 25 Minuten entfernt — wir organisieren gerne einen privaten Transfer (Hinfahrt 07:00, Rückfahrt nach Belieben)<br>
+                        • Empfehlung unseres Teams: Villagedes Antiquaires de la Gare (300+ Händler) + die Galeristen am Kanal für Antiquitäten des 18. und 19. Jahrhunderts<br>
+                        • Wir stellen Ihnen vorab eine kuratierte Liste der besten Händler für Ihr Sammelgebiet zusammen — bitte teilen Sie uns mit, worauf Sie spezialisiert sind<br><br>
+                        <b>Private Weinprobe auf dem Domaine:</b><br>
+                        • 1,5 Stunden mit unserem Kellermeister Vincent — auf Englisch oder Französisch (leider kein Deutsch — wir entschuldigen uns dafür)<br>
+                        • Verkostung von 5 Weinen: unser AOC Luberon Rouge, Blanc und Rosé sowie zwei besondere Reserven<br>
+                        • Käse- und Aufschnittplatte inbegriffen<br><br>
+                        Für welchen Tag soll ich den Transfer und die Weinprobe reservieren?<br><br>
+                        Mit freundlichen Grüßen,<br>
+                        Domaine de la Verrière · Conciergerie, Goult
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">ROI estimé — Domaine de la Verrière</div>
+                <div class="roi-subtitle">Goult, Luberon · 16 Chambres · 5 Étoiles · Clientèle internationale EN/FR/DE/US</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">16</div>
+                        <div class="roi-label">Chambres</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~192</div>
+                        <div class="roi-label">Emails / mois</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">38h</div>
+                        <div class="roi-label">Temps gagné / mois</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€960</div>
+                        <div class="roi-label">Économie mensuelle</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Basé sur <b>16 chambres</b> × ~12 emails par chambre par mois × <b>12 minutes économisées</b> par email.<br>
+                    Coût horaire estimé du personnel : 25€/h · <b>ROI positif dès le premier mois</b> avec la formule Standard (80€/mois).<br><br>
+                    💡 <b>Formule recommandée :</b> <span class="roi-highlight">Premium — 800€ setup + 120€/mois</span><br>
+                    Réponses multilingues (FR, EN, DE) + amélioration automatique hebdomadaire + rapport mensuel sur les typologies de demandes.<br>
+                    Retour sur investissement : <b>8× le coût mensuel</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Coller un email à analyser</h3>
+                <textarea placeholder="Collez ici n'importe quel email de client — l'IA le classifie, identifie l'intention et rédige une réponse personnalisée dans le ton du Domaine de la Verrière en 30 secondes. Fonctionne en français, anglais, allemand..."></textarea>
+                <button class="analyze-btn">Analyser avec l'IA</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Client</th>
+                            <th>Objet</th>
+                            <th>Statut</th>
+                            <th>Temps de réponse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>18 juil. 2026</td>
+                            <td>William & Sarah Ashworth</td>
+                            <td>Wine tasting + Gordes market + Michelin dinner</td>
+                            <td><span class="status-badge pending">En attente</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>18 juil. 2026</td>
+                            <td>Antoine & Marie Rousseau</td>
+                            <td>Séjour romantique anniversaire</td>
+                            <td><span class="status-badge sent">Envoyé</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                        <tr>
+                            <td>17 juil. 2026</td>
+                            <td>Klaus & Brigitte Hoffmann</td>
+                            <td>Antiquitäten L'Isle + Weinprobe</td>
+                            <td><span class="status-badge sent">Envoyé</span></td>
+                            <td>31 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">Agent Concierge IA V3.0 — Domaine de la Verrière · Goult, Luberon, Vaucluse</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

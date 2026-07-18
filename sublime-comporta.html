@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — Sublime Comporta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f0e8; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Sublime Comporta : sable des dunes, vert rice paddy, bois flotté, blanc solaire */
+        :root {
+            --primary: #2a2616;      /* terre de dune foncée */
+            --accent: #8c7a45;       /* sable doré / riz paddy */
+            --bg: #f3f0e8;
+            --bg-card: #fffef9;
+            --border: #ddd8c5;
+            --text-dark: #1a1810;
+            --text-light: #7a7462;
+            --gold: #8c7a45;
+        }
+        .header { background-color: #fffef9; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #c4b07a; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #fffef9; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #3d3820; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e0d8c0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e2dcc8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f0ecd8; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #ede8d8; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #c4b07a; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e2dcc8; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Sublime Comporta · 5 Star · Comporta, Alentejo Coast · Eco-Luxury · Portugal's Wildest Shoreline</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">SUBLIME COMPORTA</div>
+            <div class="subtitle">AI Concierge · Comporta, Portugal · International Eco-Luxury Clientele</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Horse riding on the beach -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Hugo & Camille Vandenberghe</div>
+                        <div class="email-date">Today, 09:30</div>
+                    </div>
+                    <div class="email-subject">Horse riding on the beach + private seafood dinner — 4 nights August</div>
+                    <div class="email-preview">Hello, we are Dutch and arriving for 4 nights in August. We've read about horse riding on the Comporta beach at sunrise and we'd absolutely love to experience this. We'd also like to arrange a private seafood dinner with local fishermen — something very authentic. Can you make this happen?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 27 sec</div>
+                        Dear Hugo & Camille,<br><br>
+                        Both experiences are among the most extraordinary things you can do in Comporta — and we are thrilled to arrange them.<br><br>
+                        <b>Sunrise horse riding, Comporta beach:</b><br>
+                        • Departure from Sublime Comporta stables: 06:15 (to catch the golden hour)<br>
+                        • Route: through the rice paddies and pine forest to the 30km Atlantic beach — riding at the water's edge as the sun rises over the dunes<br>
+                        • Duration: 2h · All levels welcome · Private guide (English-speaking)<br>
+                        • Cost: €95 per person · We recommend Day 2 of your stay<br><br>
+                        <b>Private seafood dinner with local fishermen:</b><br>
+                        • We work with the Ferreira family (Comporta fishermen for 4 generations) — they invite a maximum of 6 guests to their table<br>
+                        • Menu: what they caught that morning — typically sea bass, cuttlefish, barnacles, clams — cooked on a wood fire, Alentejo white wine<br>
+                        • Setting: their boathouse, 10 minutes from the hotel, start at 19:30<br>
+                        • Cost: €90 per person (all inclusive)<br><br>
+                        Shall I reserve both experiences for your stay?<br><br>
+                        With warmth,<br>
+                        Sublime Comporta · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Boat trip to Troia -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">James & Fiona Hartley</div>
+                        <div class="email-date">Today, 07:55</div>
+                    </div>
+                    <div class="email-subject">Boat trip to Troia Peninsula + dolphin watching — 5 nights July</div>
+                    <div class="email-preview">Hi, we are arriving for 5 nights next week. We'd love to do a boat trip to the Troia Peninsula with some dolphin watching on the way — we heard the Sado estuary is exceptional for this. Could you also recommend the best beach to visit on Troia? Thank you.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear James & Fiona,<br><br>
+                        The Sado estuary is one of Europe's most important dolphin habitats — you are in for something truly special.<br><br>
+                        <b>Private boat trip: Comporta → Sado Estuary → Troia Peninsula:</b><br>
+                        • Departure: Carrasqueira fishing port (20 min from hotel, our transfer included) · 09:00<br>
+                        • Sado Estuary dolphin watching: the resident pod of 30+ bottlenose dolphins — your marine guide will explain their behaviour and history with the local fishermen<br>
+                        • Troia Peninsula (11:30): Roman ruins of Cetóbriga (1st century AD), wild pine forest, the 12km deserted Atlantic beach<br>
+                        • Picnic lunch on board: prepared by our kitchen — Alentejo bread, local cheese, smoked swordfish, wine<br>
+                        • Return to Comporta: 16:00<br>
+                        • Cost: €280 for two (private boat, guide, picnic)<br><br>
+                        <b>Best beach on Troia:</b> Praia de Troia-Galé (north end of the peninsula — completely deserted, Atlantic swell, white sand).<br><br>
+                        Shall I book this for your first full day?<br><br>
+                        Warmly,<br>
+                        Sublime Comporta · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Yoga + spa -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Charlotte & Pieter de Vries</div>
+                        <div class="email-date">Yesterday, 20:10</div>
+                    </div>
+                    <div class="email-subject">Yoga retreat + spa programme — 6 nights September</div>
+                    <div class="email-preview">Hello, we are coming for a digital detox and wellness retreat in September — 6 nights. We'd like a structured daily programme combining morning yoga, spa treatments and evening meditation. We eat plant-based. Can you build a bespoke programme for us?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Charlotte & Pieter,<br><br>
+                        Comporta in September is the ideal setting for a true digital detox — the light is golden, the beaches empty, the pace unhurried. Here is a bespoke 6-day programme for you:<br><br>
+                        <b>Daily structure (all sessions private):</b><br>
+                        • <b>07:00</b> — Sunrise yoga on the wooden deck above the rice paddies (our resident teacher Ana, trained in Mysore)<br>
+                        • <b>09:00</b> — Plant-based breakfast curated by our chef (almond granola with Alentejo honey, açaí bowls, fresh-pressed green juices)<br>
+                        • <b>Morning</b> — Free time: beach walks, pool, reading in the cork oak garden<br>
+                        • <b>Afternoon</b> — Rotating spa treatments (see below)<br>
+                        • <b>18:30</b> — Evening meditation and breathwork (30 min, outdoor pavilion)<br>
+                        • <b>Plant-based dinner</b> each evening at our restaurant (separate tasting menu)<br><br>
+                        <b>Spa treatments across 6 days:</b> Dune scrub & sea mineral wrap · Hot stone massage · Facial with Comporta sea algae · Ayurvedic abhyanga · Reflexology · Closing ceremony body ritual<br><br>
+                        Total spa programme: €680 for two · Yoga sessions: €360 for the week<br><br>
+                        Shall I confirm the full programme and send a detailed day-by-day schedule?<br><br>
+                        With warmth,<br>
+                        Sublime Comporta · Wellness & Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Sublime Comporta</div>
+                <div class="roi-subtitle">Comporta, Alentejo Coast · 34 Rooms & Villas · 5 Stars · Eco-Luxury</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">34</div>
+                        <div class="roi-label">Rooms & Villas</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~408</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">82h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€2,040</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>34 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium — €800 setup + €120/month</span><br>
+                    Multilingual (EN, FR, NL, PT) auto-responses + weekly auto-improvement + monthly report on guest patterns.<br>
+                    Return on investment: <b>17× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste a guest email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Sublime Comporta tone within 30 seconds. Works in English, French, Dutch, Portuguese and more..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Hugo & Camille Vandenberghe</td>
+                            <td>Horse riding + seafood dinner with fishermen</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>James & Fiona Hartley</td>
+                            <td>Boat trip to Troia + dolphin watching</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>27 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 17, 2026</td>
+                            <td>Charlotte & Pieter de Vries</td>
+                            <td>Yoga retreat + spa programme 6 nights</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>30 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Sublime Comporta · Comporta, Alentejo Coast, Portugal</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

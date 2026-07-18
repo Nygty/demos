@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — Nafplia Palace Hotel & Villas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #eef0f4; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Nafplia Palace : bleu Argolique profond, or méditerranéen, blanc palace, ardoise */
+        :root {
+            --primary: #1c3050;      /* bleu Argolique profond */
+            --accent: #c5973d;       /* or méditerranéen */
+            --bg: #eef0f4;
+            --bg-card: #ffffff;
+            --border: #d8dce5;
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --gold: #c5973d;
+        }
+        .header { background-color: #ffffff; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #a0bcd8; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #ffffff; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--gold); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #274068; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #dce3ef; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e2e6ee; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f4f6fa; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f0f4f9; border-left: 3px solid var(--gold); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--gold); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #a0bcd8; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--gold); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e2e6ee; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Nafplia Palace Hotel & Villas · 5 Star · Nafplio, Peloponnese · Above the Palamidi Fortress & Argolic Gulf</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">NAFPLIA PALACE HOTEL & VILLAS</div>
+            <div class="subtitle">AI Concierge · Nafplio, Peloponnese · Luxury International Clientele</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Epidaurus + Mycenae private tour -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Richard & Catherine Moore</div>
+                        <div class="email-date">Today, 10:05</div>
+                    </div>
+                    <div class="email-subject">Private archaeology tour — Epidaurus + Mycenae — 6 nights July</div>
+                    <div class="email-preview">Hello, we are arriving for 6 nights in July and are very keen archaeologists. We'd like a private guide to take us to Epidaurus and Mycenae — ideally a specialist in Bronze Age and Ancient Greek history who can open up the experience beyond the standard tour. Can you arrange this, and also a nice lunch in between the two sites?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 26 sec</div>
+                        Dear Richard & Catherine,<br><br>
+                        We are delighted to arrange a specialist private archaeology day — this is one of our most-requested and most rewarding excursions from Nafplio.<br><br>
+                        <b>Private Mycenae & Epidaurus Tour — Full Day:</b><br>
+                        • Guide: Dr. Anastasia Papageorgiou (Classical Archaeology, University of Athens — Bronze Age Mycenae and Epidaurus specialist, fluent English)<br>
+                        • Departure from Nafplia Palace: 08:30 · Hotel Mercedes V-class<br><br>
+                        <b>Mycenae (09:00–11:30):</b><br>
+                        • Lion Gate, Treasury of Atreus (Tomb of Agamemnon), acropolis — private access with archaeologist commentary beyond the standard visitor circuit<br><br>
+                        <b>Lunch (12:00):</b><br>
+                        • Taverna Klytaimnistras, Mykines village — exceptional grilled lamb, local wine, terrace overlooking the valley · Reserved exclusively in your name<br><br>
+                        <b>Epidaurus (14:30–17:00):</b><br>
+                        • The theatre (acoustics demonstration), Sanctuary of Asklepios, the museum's Epidaurian tablets<br>
+                        • Return to hotel: 18:30<br><br>
+                        Total cost: €380 for two (guide + private transport + lunch). Which date during your stay would you prefer?<br><br>
+                        With warm regards,<br>
+                        Nafplia Palace Hotel · Concierge, Nafplio
+                    </div>
+                </div>
+
+                <!-- Email 2 : Boat trip to Hydra -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Isabelle & Thomas Garnier</div>
+                        <div class="email-date">Today, 08:30</div>
+                    </div>
+                    <div class="email-subject">Excursion en bateau à Hydra — 4 nuits en août</div>
+                    <div class="email-preview">Bonjour, nous arrivons pour 4 nuits début août et nous adorerions passer une journée à Hydra en bateau privé depuis Nafplio. Nous avons entendu dire que c'est magnifique. Pouvez-vous organiser cela avec un déjeuner de fruits de mer sur l'île ?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chers Isabelle et Thomas,<br><br>
+                        Hydra est en effet l'une des plus belles journées possibles depuis Nafplio — l'île sans voitures, les calèches et les ânes, les ruelles blanches et la mer cristalline. Nous avons organisé tout cela pour vous :<br><br>
+                        <b>Bateau privé Nafplio → Hydra :</b><br>
+                        • Départ du port de Nafplio à 08:30 · Arrivée à Hydra 10:15 (traversée ~1h45)<br>
+                        • Bateau privé avec capitaine — 8 personnes max, climatisé, pont extérieur<br>
+                        • Navigation via la côte de l'Argolide et les îles du golfe Saronique<br><br>
+                        <b>Journée à Hydra (10:15–15:30) :</b><br>
+                        • Flânerie libre dans le port et le village — nos recommandations vous seront remises<br>
+                        • Déjeuner de fruits de mer réservé en votre nom : <b>Taverna Sunset</b>, port de Hydra — thon local, poulpe grillé, vins de Crète<br><br>
+                        <b>Retour à Nafplio :</b> 17:00<br>
+                        Coût : €350 pour deux (bateau privé + déjeuner)<br><br>
+                        À quelle date souhaitez-vous partir ?<br><br>
+                        Chaleureusement,<br>
+                        Nafplia Palace Hotel · Conciergerie, Nafplio
+                    </div>
+                </div>
+
+                <!-- Email 3 : Villa booking -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">The Henderson Family</div>
+                        <div class="email-date">Yesterday, 15:45</div>
+                    </div>
+                    <div class="email-subject">Family villa enquiry — 7 nights August — 2 adults 3 children</div>
+                    <div class="email-preview">Hi, we are a family of 5 (2 adults and 3 children aged 8, 11 and 14) looking for a villa or large suite for 7 nights in August. The kids are very active — they love swimming, watersports and history. What do you recommend and what activities can you organise for them?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Henderson Family,<br><br>
+                        Nafplia Palace is one of the finest family destinations in the Peloponnese — and your children's ages are perfect for everything we can offer.<br><br>
+                        <b>Accommodation:</b> We recommend our <b>Presidential Villa</b> (private terrace, direct Argolic Gulf view, private pool, 2 bedrooms + living area — ideal for 5). Availability for your August dates will be confirmed within 24h.<br><br>
+                        <b>Activities for the children:</b><br>
+                        • <b>Ages 8–14 — Sailing & kayaking</b> (Nafplio Bay, guided, half-day) — €60 per child<br>
+                        • <b>Palamidi Fortress treasure hunt</b> (interactive history walk designed for families — our own programme, 2.5h) — the 999 steps become an adventure!<br>
+                        • <b>Ancient Tiryns</b> (Cyclopean walls — the children can touch 3,500-year-old megalithic stone) — 20 min from hotel<br>
+                        • <b>Snorkelling in the Argolic Gulf</b> with our marine guide (equipment provided)<br><br>
+                        Shall I check villa availability and send a full 7-day programme proposal?<br><br>
+                        Warmly,<br>
+                        Nafplia Palace Hotel · Concierge, Nafplio
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Nafplia Palace Hotel & Villas</div>
+                <div class="roi-subtitle">Nafplio, Peloponnese · 51 Rooms & Villas · 5 Stars</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">51</div>
+                        <div class="roi-label">Rooms & Villas</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~612</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">122h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€3,050</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>51 rooms & villas</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium — €800 setup + €120/month</span><br>
+                    Multilingual (EN, FR, DE, GR) auto-responses + weekly auto-improvement + monthly report on guest request patterns.<br>
+                    Return on investment: <b>25× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste a guest email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Nafplia Palace tone within 30 seconds. Works in English, French, German, Greek and more..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Richard & Catherine Moore</td>
+                            <td>Private archaeology tour Epidaurus + Mycenae</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Isabelle & Thomas Garnier</td>
+                            <td>Excursion bateau à Hydra</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>26 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 17, 2026</td>
+                            <td>Henderson Family</td>
+                            <td>Family villa enquiry — 7 nights August</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Nafplia Palace Hotel & Villas · Nafplio, Peloponnese, Greece</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

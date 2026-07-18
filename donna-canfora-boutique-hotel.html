@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — Donna Canfora Boutique Hotel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0eff8; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Donna Canfora : turquoise Tyrrhénienne, blanc de falaise, terracotta Calabre, ardoise marine */
+        :root {
+            --primary: #1a2840;      /* bleu nuit méditerranéen */
+            --accent: #2d8fa5;       /* turquoise Tyrrhénienne */
+            --bg: #f0eff8;
+            --bg-card: #ffffff;
+            --border: #d5d8e5;
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --teal: #2d8fa5;
+        }
+        .header { background-color: #ffffff; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #90aac8; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--teal); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #ffffff; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--teal); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #263858; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #dde0f0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #dde0e8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f5f5fc; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #edf4f7; border-left: 3px solid var(--teal); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--teal); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #90aac8; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--teal); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #dde0e8; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Donna Canfora Boutique Hotel · 4 Star · Tropea, Calabria · Clifftop above the Tyrrhenian Sea</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★</div>
+            <div class="hotel-name">DONNA CANFORA</div>
+            <div class="subtitle">AI Concierge · Tropea, Calabria · International Boutique Guests</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Boat trip Santa Maria dell'Isola -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Marco & Valeria Santini</div>
+                        <div class="email-date">Today, 10:20</div>
+                    </div>
+                    <div class="email-subject">Escursione in barca a Santa Maria dell'Isola + Aeolian Islands — 5 notti agosto</div>
+                    <div class="email-preview">Ciao, arriviamo per 5 notti ad agosto. Vorremmo fare un'escursione in barca privata a Santa Maria dell'Isola al tramonto, e se possibile un giorno alle Isole Eolie — soprattutto Stromboli. Riuscite a organizzare entrambe le cose?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ Risposta IA suggerita — redatta in 28 sec</div>
+                        Cari Marco e Valeria,<br><br>
+                        Siete capitati nel posto giusto — dal belvedere di Donna Canfora si vede già Santa Maria dell'Isola da vicino, e le Eolie sono a portata di barca. Ecco cosa organizziamo per voi:<br><br>
+                        <b>Giro in barca privata a Santa Maria dell'Isola (tramonto):</b><br>
+                        • Partenza dal porto di Tropea: 19:00 · Barca privata con skipper · 2 ore<br>
+                        • Navigazione attorno alla roccia con la chiesa di Santa Maria illuminata dal sole al tramonto — uno spettacolo unico<br>
+                        • Aperitivo a bordo: 'Nduja, pecorino di Tropea, cipolla rossa in agrodolce, Cirò bianco fresco<br>
+                        • Rientro: 21:00 · Costo: €120 per due<br><br>
+                        <b>Giornata alle Isole Eolie — Stromboli:</b><br>
+                        • Partenza 07:30 da Tropea · Catamarano veloce (2h30 di traversata)<br>
+                        • Stromboli: sbarco, visita del paese, pranzo di pesce al ristorante Osservatorio<br>
+                        • Escursione notturna al vulcano attivo (guida alpina certificata) — opzionale, +€35pp<br>
+                        • Rientro a Tropea: 22:30 · Costo base: €95pp (traghetto + guida diurna)<br><br>
+                        Per quale sera volete il giro del tramonto e quale giorno le Eolie?<br><br>
+                        A presto,<br>
+                        Donna Canfora · Concierge, Tropea
+                    </div>
+                </div>
+
+                <!-- Email 2 : Diving Capo Vaticano -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Lukas & Anna Müller</div>
+                        <div class="email-date">Today, 08:40</div>
+                    </div>
+                    <div class="email-subject">Scuba diving at Capo Vaticano — 4 nights July</div>
+                    <div class="email-preview">Hi, we are experienced scuba divers (PADI Advanced) and are coming for 4 nights in July specifically to dive the Capo Vaticano coast. Can you organise 2 or 3 dives with a good local dive centre, and recommend the best dive sites? We are also interested in the sea caves if accessible.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Lukas & Anna,<br><br>
+                        Capo Vaticano is one of the finest diving destinations in the central Mediterranean — crystal visibility, volcanic rock formations and abundant Posidonia meadows. Here is what we have arranged:<br><br>
+                        <b>Dive partner:</b> Centro Sub Capo Vaticano (10 min from Donna Canfora) — our preferred partner, English-speaking instructors, full equipment available<br><br>
+                        <b>Recommended 3-dive programme (2 days):</b><br>
+                        • <b>Dive 1 — La Grotta delle Fate (Fairies' Cave):</b> sea cave at 8–22m · octopus, moray eels, lobster colonies · beautiful light effects at the cave entrance<br>
+                        • <b>Dive 2 — I Faraglioni di Capo Vaticano:</b> volcanic pinnacles at 5–30m · groupers, amberjack schools, Mediterranean barracuda · your most photogenic dive<br>
+                        • <b>Dive 3 — La Secca dei Polipi:</b> octopus reef at 15–25m · extraordinary density of marine life · best in morning light<br><br>
+                        Package (3 dives, 2 tanks per dive, full equipment): €195 per person · Pickup from hotel included<br><br>
+                        Which 2 days during your stay would you prefer?<br><br>
+                        Warmly,<br>
+                        Donna Canfora · Concierge, Tropea
+                    </div>
+                </div>
+
+                <!-- Email 3 : Red onion experience -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Sophie & Edouard Bonnet</div>
+                        <div class="email-date">Yesterday, 19:00</div>
+                    </div>
+                    <div class="email-subject">Expérience gastronomique — oignon rouge de Tropea + restaurant — 3 nuits</div>
+                    <div class="email-preview">Bonjour, nous arrivons pour 3 nuits et nous sommes de grands amateurs de cuisine régionale. Nous avons beaucoup lu sur le célèbre oignon rouge de Tropea — y a-t-il une expérience de dégustation ou de cuisine locale possible ? Et quel est le meilleur restaurant de poisson de Tropea selon vous ?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chers Sophie et Édouard,<br><br>
+                        Vous avez choisi le bon hôtel pour explorer la gastronomie de Tropea — notre chef est un passionné de la cuisine calabraise traditionnelle.<br><br>
+                        <b>Expérience oignon rouge de Tropea IGP :</b><br>
+                        • Visite du producteur Saverio (15 min de l'hôtel, famille cultivatrice depuis 4 générations) — dégustation directement dans le champ, récolte à la main, explication des méthodes traditionnelles<br>
+                        • Notre chef prépare ensuite le soir une <b>table calabraise</b> en votre honneur : soupe à l'oignon rouge de Tropea, tarte à l'oignon et 'Nduja, confiture d'oignon rouge au Cirò rosso · Inclus dans votre séjour sur demande<br><br>
+                        <b>Meilleur restaurant de poisson de Tropea :</b><br>
+                        • <b>La Cantina del Duca</b> (Viale Stazione, Tropea) — notre recommandation absolue : totani fritti, pesce spada en croûte de pistaches, ricciola grillée, vins blancs de Calabre<br>
+                        • Réservation effectuée en votre nom — précisez le soir de votre choix parmi vos 3 nuits<br><br>
+                        Bonne arrivée !<br><br>
+                        Chaleureusement,<br>
+                        Donna Canfora · Conciergerie, Tropea
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Donna Canfora Boutique Hotel</div>
+                <div class="roi-subtitle">Tropea, Calabria · 20 Rooms · 4 Stars · Clifftop Boutique</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">20</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~240</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">48h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,200</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>20 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Standard — €800 setup + €80/month</span><br>
+                    Multilingual (IT, EN, DE, FR) auto-responses — letting your small team focus on the warm Calabrian welcome.<br>
+                    Return on investment: <b>15× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste a guest email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Donna Canfora tone within 30 seconds. Works in Italian, English, German, French and more..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Marco & Valeria Santini</td>
+                            <td>Barca Santa Maria + Isole Eolie</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Lukas & Anna Müller</td>
+                            <td>Scuba diving Capo Vaticano — 3 dives</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>28 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 17, 2026</td>
+                            <td>Sophie & Édouard Bonnet</td>
+                            <td>Expérience oignon rouge + restaurant poisson</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>30 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Donna Canfora Boutique Hotel · Tropea, Calabria, Italy</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

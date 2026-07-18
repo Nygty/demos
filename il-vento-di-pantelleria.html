@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — Il Vento di Pantelleria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #ece8e0; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Il Vento : lave noire Pantelleria, blanc dammuso, bleu méditerranée tunis, caramel cappero */
+        :root {
+            --primary: #1a1410;      /* lave volcanique noire */
+            --accent: #8c6a30;       /* or câpre / caramel méditerranéen */
+            --blue: #2d6e8c;         /* bleu méditerranée entre Sicile et Tunisie */
+            --bg: #ece8e0;
+            --bg-card: #faf8f4;
+            --border: #d5cec0;
+            --text-dark: #120f08;
+            --text-light: #7a7060;
+            --gold: #8c6a30;
+        }
+        .header { background-color: #faf8f4; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #c0a870; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #faf8f4; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #2d2520; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #ddd5c5; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e0d8cc; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f0ece4; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #ede8dc; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #c0a870; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e0d8cc; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Il Vento di Pantelleria · 4 Star · Pantelleria · Volcanic Island Dammuso · Mediterranean between Sicily & Tunisia</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★</div>
+            <div class="hotel-name">IL VENTO DI PANTELLERIA</div>
+            <div class="subtitle">AI Concierge · Pantelleria Island · Exclusive Connoisseur Clientele</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Private boat Arco Elefante + caper tasting -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Federico & Margherita Albanese</div>
+                        <div class="email-date">Today, 10:40</div>
+                    </div>
+                    <div class="email-subject">Gita in barca Arco dell'Elefante + degustazione capperi — 5 notti luglio</div>
+                    <div class="email-preview">Ciao, arriviamo per 5 notti a luglio. Vorremmo fare una gita in barca privata all'Arco dell'Elefante e magari nuotare nel Lago di Venere. E abbiamo sentito che i capperi di Pantelleria sono i migliori al mondo — c'è una visita a qualche produttore locale con degustazione? Siamo foodie convinti.</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ Risposta IA suggerita — redatta in 29 sec</div>
+                        Cari Federico e Margherita,<br><br>
+                        Avete scelto le due esperienze più iconiche e più autentiche di Pantelleria — siamo felici di organizzarle entrambe.<br><br>
+                        <b>Gita in barca privata — Arco dell'Elefante + Lago di Venere (mezza giornata):</b><br>
+                        • Partenza dall'approdo di Scauri: 09:00 · Lancia privata con skipper pantesco<br>
+                        • <b>Arco dell'Elefante:</b> il simbolo dell'isola — arco lavico che si tuffa nel mare cristallino · nuoto nelle piscine naturali di roccia lavica nera<br>
+                        • <b>Cala Levante:</b> acque smeraldo, fondo di sabbia vulcanica — la più bella caletta di Pantelleria<br>
+                        • <b>Lago di Venere (Specchio di Venere):</b> lago craterico naturale a 57°C di acque sulfuree termali — bagno di fango vulcanico (rituale tradizionale dell'isola)<br>
+                        • Frutta e vino Zibibbo fresco a bordo · Rientro: 13:00 · Costo: €180 per due<br><br>
+                        <b>Degustazione capperi IGP di Pantelleria con il produttore:</b><br>
+                        • Visita all'azienda <b>Bonomo & Giglio</b> (Scauri) — capperi a fiore selvatico raccolti a mano da luglio, sotto sale di Trapani, maturazione 3 mesi<br>
+                        • Degustazione guidata: capperi in fiore, semi-essiccati, capperi di roccia (rarissimi) + abbinamento con pane integrale pantesco, tonno alalunga locale e Zibibbo Passito di Pantelleria DOC<br>
+                        • Durata: 1h · Costo: €45 per due (degustazione completa) · Noi confirmiamo la data<br><br>
+                        Per quale giorno vogliamo prenotare le due esperienze?<br><br>
+                        A presto,<br>
+                        Il Vento di Pantelleria · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Snorkelling Specchio di Venere -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Alexis & Sophie Moreau</div>
+                        <div class="email-date">Today, 08:00</div>
+                    </div>
+                    <div class="email-subject">Snorkelling + flight arrival logistics — 4 nights August</div>
+                    <div class="email-preview">Hello, we are arriving on the direct flight from Rome (Fiumicino) in August. We are keen snorkellers and have heard Pantelleria has exceptional visibility and marine life. Can you recommend the best snorkelling spots and is there a guide available? Also what is the taxi situation from the airport?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Alexis & Sophie,<br><br>
+                        Welcome to the most exclusive island in the central Mediterranean — Pantelleria's waters are extraordinary for snorkelling, with visibility frequently exceeding 30 metres.<br><br>
+                        <b>Airport arrival (Pantelleria Airport):</b><br>
+                        • The island is small (15km across) — taxi to Il Vento di Pantelleria: 10–20 min, approximately €15–20 fixed rate<br>
+                        • We can arrange a driver at the airport exit with your name — please send us your flight number and arrival time. Transfer cost: €20 · Our driver speaks English.<br><br>
+                        <b>Best snorkelling spots on Pantelleria:</b><br>
+                        • <b>Cala Levante</b> (our top recommendation) — volcanic black rock formations, sea urchin gardens, moray eels in the crevices, Posidonia meadows, 25–30m visibility<br>
+                        • <b>Balata dei Turchi</b> (south coast) — unique volcanic rock cathedral descending to the sea, shoals of sea bream and large damselfish colonies<br>
+                        • <b>Punta Fram</b> (west coast) — wild, exposed, deep visibility — for confident swimmers · groupers and large saddled seabream<br><br>
+                        <b>Guided snorkelling:</b><br>
+                        • Matteo (our recommended guide, PADI divemaster) — half-day guided snorkelling by inflatable boat including Cala Levante + Balata dei Turchi: €75 for two, equipment provided<br><br>
+                        We look forward to welcoming you.<br><br>
+                        Warmly,<br>
+                        Il Vento di Pantelleria · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Passito wine experience -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Ralf & Ursula Zimmermann</div>
+                        <div class="email-date">Yesterday, 20:00</div>
+                    </div>
+                    <div class="email-subject">Passito di Pantelleria Weinprobe + private Abendessen im Dammuso — 6 Nächte</div>
+                    <div class="email-preview">Guten Abend, wir kommen für 6 Nächte und sind leidenschaftliche Weinliebhaber. Der Passito di Pantelleria ist einer unserer Lieblinge — gibt es eine Möglichkeit, direkt bei einem Produzenten zu verkosten und vielleicht ein privates Abendessen im Dammuso zu arrangieren? Wir möchten die Insel wirklich authentisch erleben.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Sehr geehrte Frau Zimmermann, sehr geehrter Herr Zimmermann,<br><br>
+                        Sie kommen zur perfekten Zeit — die Zibibbo-Trauben (aus denen der Passito entsteht) sind im August in ihrer Hochsaison, und wir kennen die besten Produzenten persönlich.<br><br>
+                        <b>Passito di Pantelleria DOC — Besuch beim Erzeuger:</b><br>
+                        • <b>Azienda Pellegrino</b> (Pantelleria) — einer der bedeutendsten Passito-Produzenten der Insel · Private Führung durch die Weinberge mit Blick aufs Meer, dann Kellerführung (die Trauben werden traditionell auf Lavastein-Terrassen an der Sonne getrocknet) · Verkostung von 4 Weinen: Bianco Solare, Rosé Pantesco, Passito di Pantelleria DOC, Passito Riserva<br>
+                        • Dauer: 2h · Auf Englisch oder Italienisch (leider kein Deutsch — wir entschuldigen uns) · Kosten: €60 für zwei<br><br>
+                        <b>Privates Abendessen im Dammuso:</b><br>
+                        • Unsere Köchin Rosa (Pantellerin, 3. Generation) kocht ein traditionelles 5-Gänge-Abendessen exklusiv für Sie in einem unserer privaten Dammuso-Innenhöfe:<br>
+                        • Antipasto: Kapern-Tomaten-Bruschetta auf Pantelleria-Brot · Primo: Pasta al pesto di capperi e tonno · Secondo: Grigliata di pesce locale (Schwertfisch, Thunfisch) · Formaggi: Ricotta pantesca con miele · Dolce: Mustazzoli (traditionelle Mandelkekse) mit einem Glas Passito<br>
+                        • 3 Gänge Wein-Begleitung inbegriffen · Abend Ihrer Wahl · Preis: €95 pro Person<br><br>
+                        Für welchen Abend wünschen Sie das Dammuso-Dinner und für welchen Tag die Weinguts-Führung?<br><br>
+                        Mit freundlichen Grüßen,<br>
+                        Il Vento di Pantelleria · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Il Vento di Pantelleria</div>
+                <div class="roi-subtitle">Pantelleria Island, Sicily Channel · 12 Dammuso Rooms · 4 Stars · Exclusive Connoisseur Boutique</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">12</div>
+                        <div class="roi-label">Dammuso Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~144</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">29h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€720</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>12 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    On a fly-only island, <b>every guest communicates exclusively by email</b> before arrival — quality of response defines first impression.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Standard — €800 setup + €80/month</span><br>
+                    Multilingual (IT, EN, DE, FR) auto-responses — for a property where every guest is a connoisseur expecting flawless communication.<br>
+                    Return on investment: <b>9× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste a guest email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Il Vento di Pantelleria tone within 30 seconds. Works in Italian, English, German, French and more..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Federico & Margherita Albanese</td>
+                            <td>Barca Arco Elefante + capperi degustazione</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Alexis & Sophie Moreau</td>
+                            <td>Snorkelling + flight arrival logistics</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 17, 2026</td>
+                            <td>Ralf & Ursula Zimmermann</td>
+                            <td>Passito Weinprobe + Dammuso-Abendessen</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>30 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Il Vento di Pantelleria · Pantelleria Island, Sicily Channel, Italy</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

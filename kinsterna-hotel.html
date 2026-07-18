@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — Kinsterna Hotel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f0ede8; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Kinsterna : Byzantine stone, warm terracotta, Aegean deep blue, antique gold */
+        :root {
+            --primary: #2c2416;      /* pierre byzantine sombre */
+            --accent: #9b6b35;       /* terre cuite / or antique */
+            --bg: #f0ede8;
+            --bg-card: #faf8f5;
+            --border: #ddd8cf;
+            --text-dark: #1a1510;
+            --text-light: #7a7068;
+            --gold: #9b6b35;
+        }
+        .header { background-color: #faf8f5; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #b8a07a; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; border-bottom: 1px solid var(--border); }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #faf8f5; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--gold); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #3d3220; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e0d9cf; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e5e0d8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f5f0ea; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f5f0e8; border-left: 3px solid var(--gold); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--gold); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #9080a0; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #b8a07a; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--gold); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e5e0d8; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Kinsterna Hotel · 5 Star · Monemvasia, Greece · 11th-Century Byzantine Estate · UNESCO Village</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">KINSTERNA HOTEL</div>
+            <div class="subtitle">AI Concierge · Monemvasia, Laconia · International Heritage Guests</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Boat transfer + wine cellar -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">James & Eleanor Whitfield</div>
+                        <div class="email-date">Today, 09:14</div>
+                    </div>
+                    <div class="email-subject">Arrival by sea + private wine cellar dinner — 5 nights August</div>
+                    <div class="email-preview">Good morning, we are arriving from Athens by private sailing yacht and need to arrange a mooring close to Monemvasia, then a boat transfer to the rock. We'd also love to book a private candlelit dinner in your famous medieval wine cellar for our last evening. Could you organise both?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 28 sec</div>
+                        Dear James & Eleanor,<br><br>
+                        What a wonderful arrival — we love welcoming guests who sail to Monemvasia. Here is everything arranged:<br><br>
+                        <b>Yacht mooring & boat transfer to the Rock:</b><br>
+                        • Nearest marina: Gefyra Harbour (5-min walk from the causeway) — we will contact the harbour master on your behalf to reserve a berth for your dates<br>
+                        • Private water taxi from Gefyra to the Old Town gate: 8 minutes, €25 one way — we coordinate all arrivals for our guests<br>
+                        • Your luggage will be transported by our staff from the gate to Kinsterna (no vehicles permitted inside the medieval walls)<br><br>
+                        <b>Private candlelit dinner, Kinsterna Wine Cellar:</b><br>
+                        • The 12th-century vaulted cellar accommodates up to 8 guests in full exclusivity<br>
+                        • Menu: 6-course degustation of Laconian produce — local Monemvasia Malvasia wine pairing available<br>
+                        • Duration: approx. 3 hours from 20:00<br>
+                        • Please confirm the date and any dietary requirements — we will reserve the cellar exclusively for you<br><br>
+                        We look forward to your arrival.<br><br>
+                        Warmly,<br>
+                        Kinsterna Hotel · Concierge, Monemvasia
+                    </div>
+                </div>
+
+                <!-- Email 2 : Byzantine walking tour -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Dr. Stefan Brandt</div>
+                        <div class="email-date">Today, 07:40</div>
+                    </div>
+                    <div class="email-subject">Private Byzantine history tour — 3 nights September</div>
+                    <div class="email-preview">Guten Morgen, ich bin Archäologe und interessiere mich sehr für die byzantinische Geschichte von Monemvasia. Können Sie eine private Führung mit einem lokalen Historiker organisieren, der auch über die mittelalterlichen Kirchen und Festungswerke Bescheid weiß? Auf Englisch oder Deutsch, bitte.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Dr. Brandt,<br><br>
+                        We are delighted to host a fellow scholar of Byzantine heritage — Monemvasia is one of the most intact medieval fortified towns in the Eastern Mediterranean, and we have the perfect guide for you.<br><br>
+                        <b>Private Byzantine History Tour — Monemvasia Rock:</b><br>
+                        • Guide: Dr. Nikos Petrakis (University of Peloponnese, Byzantine archaeology specialist — speaks fluent English and German)<br>
+                        • Duration: 3 hours, morning departure 08:30 to avoid crowds<br>
+                        • Route: Lower Town (Agios Nikolaos, Christos Elkomenos, the medieval cisterns) → Upper Fortress (panoramic views, the ruins of Agia Sofia perched at 100m)<br>
+                        • Private access to areas normally closed to general visitors — arranged through our hotel partnership with the local archaeological authority<br>
+                        • Cost: €180 for the private session (2–4 persons)<br><br>
+                        Which morning during your stay would you prefer? We recommend Day 2 to allow a full day on the rock at your leisure afterward.<br><br>
+                        With kind regards,<br>
+                        Kinsterna Hotel · Concierge, Monemvasia
+                    </div>
+                </div>
+
+                <!-- Email 3 : Room upgrade + anniversary -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Sophie & Marc Lefevre</div>
+                        <div class="email-date">Yesterday, 18:22</div>
+                    </div>
+                    <div class="email-subject">Anniversaire de mariage — chambre avec vue sur la mer ?</div>
+                    <div class="email-preview">Bonsoir, nous fêtons nos 10 ans de mariage à Kinsterna en juillet. Nous avons réservé une chambre standard mais nous rêvons d'une chambre avec vue sur la mer Égée et la Roche de Monemvasia. Est-il possible d'upgrader ? Et pourriez-vous préparer quelque chose de spécial à notre arrivée ?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chers Sophie et Marc,<br><br>
+                        Félicitations pour vos 10 ans — quel endroit plus beau que Monemvasia pour célébrer ? Nous ferons en sorte que votre séjour soit inoubliable.<br><br>
+                        <b>Upgrade chambre :</b> Nous avons noté votre demande pour une suite avec vue directe sur la Roche et la mer Égée. Sous réserve de disponibilité à votre date d'arrivée, notre équipe confirmera l'upgrade 48h avant. Nous faisons notre possible.<br><br>
+                        <b>Accueil anniversaire préparé par notre équipe :</b><br>
+                        • Pétales de roses et bougies dans la chambre à votre arrivée<br>
+                        • Bouteille de Malvasia de Monemvasia millésimée (notre vin emblématique, produit sur l'estate depuis le XIe siècle) avec carte personnalisée<br>
+                        • Plateau de loukoumades et fruits frais de saison<br><br>
+                        Pouvez-vous confirmer votre heure d'arrivée approximative afin que tout soit parfait à votre entrée dans la chambre ?<br><br>
+                        À très bientôt,<br>
+                        Kinsterna Hotel · Conciergerie, Monemvasia
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Kinsterna Hotel</div>
+                <div class="roi-subtitle">Monemvasia, Greece · 40 Rooms · 5 Stars · Byzantine Heritage Estate</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">40</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~480</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">96h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€2,400</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>40 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium — €800 setup + €120/month</span><br>
+                    Multilingual (EN, DE, FR, GR) auto-responses + weekly auto-improvement + monthly report on guest request patterns.<br>
+                    Return on investment: <b>20× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste a guest email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Kinsterna tone within 30 seconds. Works in English, German, French, Greek and more..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>James & Eleanor Whitfield</td>
+                            <td>Arrival by sea + wine cellar dinner</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Dr. Stefan Brandt</td>
+                            <td>Private Byzantine history tour</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>28 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 17, 2026</td>
+                            <td>Sophie & Marc Lefevre</td>
+                            <td>Anniversaire de mariage — upgrade chambre</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>30 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Kinsterna Hotel · Monemvasia, Laconia, Greece</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

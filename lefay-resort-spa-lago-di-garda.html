@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — Lefay Resort & SPA Lago di Garda</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #eaf0ee; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Lefay Resort : vert Garda profond, blanc alpin, or wellness, ardoise lacustre */
+        :root {
+            --primary: #1a3530;      /* vert Garda foncé / philosophie nature */
+            --accent: #4e9478;       /* vert wellness Lefay */
+            --bg: #eaf0ee;
+            --bg-card: #ffffff;
+            --border: #c8d8d0;
+            --text-dark: #0e2020;
+            --text-light: #6b7280;
+            --green: #4e9478;
+        }
+        .header { background-color: #ffffff; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #7abfaa; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--green); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #ffffff; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--green); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #254a43; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #c8d8d0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #d0ddd5; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f0f5f3; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #e4f0ec; border-left: 3px solid var(--green); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--green); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #7abfaa; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--green); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #d0ddd5; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Lefay Resort & SPA Lago di Garda · 5 Star · Gargnano · International Wellness Destination · Lake Garda</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">LEFAY RESORT & SPA LAGO DI GARDA</div>
+            <div class="subtitle">AI Concierge · Gargnano, Lake Garda · International Wellness & Luxury Clientele</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Spa programme + sailing -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Klaus & Sabine Richter</div>
+                        <div class="email-date">Today, 09:55</div>
+                    </div>
+                    <div class="email-subject">Spa-Programm für 7 Nächte + Segelregatta auf dem Gardasee</div>
+                    <div class="email-preview">Guten Morgen, wir kommen für 7 Nächte zur Erholung und sind begeisterte Segler. Können Sie uns erstens ein umfassendes Spa-Programm für die Woche zusammenstellen, und zweitens schauen, ob es die Möglichkeit gibt, an einer Segelregatta auf dem Gardasee teilzunehmen oder ein privates Segelboot zu chartern?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 30 sec</div>
+                        Sehr geehrte Frau Richter, sehr geehrter Herr Richter,<br><br>
+                        Sieben Nächte im Lefay sind perfekt für eine echte Tiefenentspannung — und der Gardasee ist einer der schönsten Segelreviere Europas. Hier ist unser Vorschlag:<br><br>
+                        <b>Spa-Programm — 7 Nächte (Lefay SPA, 3.800m²):</b><br>
+                        • <b>Tag 1–2:</b> Körperbilanz-Ritual (90 min) + Lefay Vital-Massage (60 min) — Einstimmung und Diagnose<br>
+                        • <b>Tag 3:</b> Prestige-Gesichtsbehandlung mit Schiaccianoci (Gardasee-Olivenöl) + Grotto Salata (Salzgrotte, 45 min)<br>
+                        • <b>Tag 4–5:</b> Thalasso-Ritual mit Gardasee-Algen (ganzkörper, 2h) + Aqua Wellness im Infinity-Pool über dem See<br>
+                        • <b>Tag 6:</b> Hot-Stone-Massage (90 min) + Signature-Körperpackung mit Zitronenblüte aus Gargnano<br>
+                        • <b>Tag 7:</b> Abschluss-Ritual "Garda Detox" (Körperpeeling + Entspannungsmassage, 60 min)<br>
+                        Gesamtpreis Spa-Paket: €1,280 für zwei<br><br>
+                        <b>Segeln auf dem Gardasee:</b><br>
+                        • <b>Regatta:</b> Die Gardasee-Regatten finden hauptsächlich von September bis Oktober statt — je nach Ihren genauen Daten prüfen wir die aktuelle Regattakalender<br>
+                        • <b>Privater Charter:</b> 35-Fuß-Segelyacht mit lokalem Skipper · Halbtagestörn (5h) ab Gargnano: €280 für zwei · Ganztag (Riva del Garda und zurück): €490<br><br>
+                        Für welche Daten buchen Sie, damit wir alles reservieren?<br><br>
+                        Mit freundlichen Grüßen,<br>
+                        Lefay Resort & SPA · Concierge, Gargnano
+                    </div>
+                </div>
+
+                <!-- Email 2 : Verona Opera + Michelin -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Jonathan & Victoria Hargreaves</div>
+                        <div class="email-date">Today, 08:25</div>
+                    </div>
+                    <div class="email-subject">Verona Arena Opera + Michelin dinner — 5 nights August</div>
+                    <div class="email-preview">Hello, we are arriving for 5 nights and are passionate opera lovers. We'd like to attend a performance at the Verona Arena — ideally Aida or Nabucco. We'd also love a dinner recommendation at a Michelin restaurant near the lake on one of our other evenings. Can you help?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Jonathan & Victoria,<br><br>
+                        The Verona Arena Opera season in August is one of the most magnificent experiences in Europe — and our private transfer makes the evening seamless from Gargnano.<br><br>
+                        <b>Verona Arena Opera — August programme:</b><br>
+                        • <b>Aida</b> (Verdi) — performances on 1, 8, 15 Aug · <b>Nabucco</b> (Verdi) — 22, 29 Aug<br>
+                        • We recommend <b>Arena Platinum</b> seats (Platea Numerata, central, excellent acoustics) — €180pp<br>
+                        • Tickets allocated immediately: please confirm your preferred date so we can reserve before they sell out<br>
+                        • <b>Private transfer Gargnano → Verona</b> (60 min): €120 return · Departure 19:00, return after the performance (~24:00)<br>
+                        • <b>Pre-opera dinner in Verona:</b> <b>Il Desco</b> (1 Michelin star, Via della Dietro Sant'Anastasia) — 30-min walk from the Arena · Booking confirmed in your name for 19:30<br><br>
+                        <b>Michelin dinner near Lago di Garda:</b><br>
+                        • <b>Lido 84</b>, Gardone Riviera (1 Michelin star + Michelin Special Prize) — 30 min from Lefay · The most acclaimed restaurant on the lake · Risotto alla pilota, tortelli with smoked lake fish · <b>Very difficult to book without a hotel concierge</b> · We will request a table in your name — please give us 2–3 date options.<br><br>
+                        Which evening for Verona and which for Lido 84?<br><br>
+                        Warmly,<br>
+                        Lefay Resort & SPA · Concierge, Gargnano
+                    </div>
+                </div>
+
+                <!-- Email 3 : Sirmione day trip -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Pierre & Isabelle Moreau</div>
+                        <div class="email-date">Yesterday, 19:15</div>
+                    </div>
+                    <div class="email-subject">Excursion à Sirmione + thermes romains — 4 nuits septembre</div>
+                    <div class="email-preview">Bonsoir, nous arrivons pour 4 nuits en septembre. Nous aimerions passer une journée à Sirmione — visiter le château Scaligero, les grottes de Catulle et les thermes. Est-ce loin en bateau ? Pouvez-vous organiser le transport et nous recommander un bon restaurant sur le lac ?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chers Pierre et Isabelle,<br><br>
+                        Sirmione est l'une des plus belles excursions depuis Gargnano — et le trajet en bateau sur le Lac de Garde est en lui-même spectaculaire.<br><br>
+                        <b>Excursion Gargnano → Sirmione en bateau :</b><br>
+                        • Ferry régulier depuis l'embarcadère de Gargnano (5 min du Lefay, à pied) → Sirmione · Durée : 1h35 · €16 aller-retour par personne<br>
+                        • Départ recommandé : 09:00 (pour être à Sirmione avant les groupes de touristes)<br><br>
+                        <b>Programme à Sirmione (arrivée ~10:35) :</b><br>
+                        • <b>Château Scaligero</b> (13e siècle, seul château lacustre d'Italie encore intact — vue depuis les remparts sur le lac à 360°) · 45 min<br>
+                        • <b>Grottes de Catulle</b> (Grotte di Catullo — villa romaine du 1er siècle av. J.-C. du poète Catulle, péninsule de rochers calcaires surplombant le lac) · 1h<br>
+                        • <b>Thermes de Sirmione</b> (Terme di Catullo — eaux thermales sulfureuses naturelles du lac à 37°C) · bain thermal 2h : €25pp · réservation conseillée — nous l'effectuons pour vous<br><br>
+                        <b>Déjeuner sur le lac à Sirmione :</b><br>
+                        • <b>Ristorante Grifone</b> (terrasse sur les remparts, vue directe sur le château et le lac) — risotto al lago, carpaccio di persico, Lugana blanc · Réservé en votre nom pour 13:00<br><br>
+                        Retour Sirmione → Gargnano : ferry de 17:15 · Arrivée ~18:50<br><br>
+                        À très bientôt,<br>
+                        Lefay Resort & SPA · Conciergerie, Gargnano
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Lefay Resort & SPA Lago di Garda</div>
+                <div class="roi-subtitle">Gargnano, Lake Garda · 93 Rooms & Suites · 5 Stars · International Wellness Resort</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">93</div>
+                        <div class="roi-label">Rooms & Suites</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~1,116</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">223h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€5,580</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>93 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium+ — €1,200 setup + €150/month</span><br>
+                    Multilingual (IT, EN, DE, FR) auto-responses + weekly auto-improvement + monthly report + training on real guest exchanges.<br>
+                    Return on investment: <b>37× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste a guest email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Lefay tone within 30 seconds. Works in Italian, English, German, French and more..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Klaus & Sabine Richter</td>
+                            <td>Spa-Programm 7 Nächte + Segelregatta</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Jonathan & Victoria Hargreaves</td>
+                            <td>Verona Arena Opera + Michelin dinner Lido 84</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>30 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 17, 2026</td>
+                            <td>Pierre & Isabelle Moreau</td>
+                            <td>Excursion Sirmione + thermes romains</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>28 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Lefay Resort & SPA Lago di Garda · Gargnano, Lake Garda, Italy</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

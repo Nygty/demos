@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge — Spetses Hotel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #edf1f0; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Spetses Hotel : bleu Saronique, blanc néoclassique, or pin parasol, vert pin */
+        :root {
+            --primary: #1e3840;      /* bleu Saronique profond / vert nuit Spetses */
+            --accent: #b5963a;       /* or pin parasol méditerranéen */
+            --bg: #edf1f0;
+            --bg-card: #ffffff;
+            --border: #cdd5d0;
+            --text-dark: #0e2028;
+            --text-light: #6b7280;
+            --gold: #b5963a;
+        }
+        .header { background-color: #ffffff; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 9px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #80b0a8; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #ffffff; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--gold); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #2c5060; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #cdd8d5; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #d5ddd8; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f0f5f3; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #edf3f0; border-left: 3px solid var(--gold); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--gold); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; color: #80b0a8; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--gold); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #d5ddd8; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Spetses Hotel · 4 Star · Spetses Island, Saronic Gulf · Car-Free Island · Waterfront Boutique</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★</div>
+            <div class="hotel-name">SPETSES HOTEL</div>
+            <div class="subtitle">AI Concierge · Spetses Island, Saronic Gulf · 100% Email & Phone Communication</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Water taxi to Hydra + carriage -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">George & Amanda Papadopoulos</div>
+                        <div class="email-date">Today, 10:15</div>
+                    </div>
+                    <div class="email-subject">Water taxi to Hydra + horse-drawn carriage tour of Spetses — 4 nights August</div>
+                    <div class="email-preview">Good morning, we are arriving for 4 nights. We love that Spetses has no cars — we'd like to try one of the famous horse-drawn carriages for a tour of the island, and also arrange a water taxi to Hydra for a day trip. Could you organise both, and recommend the best place for fresh grilled fish on Hydra?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 25 sec</div>
+                        Dear George & Amanda,<br><br>
+                        Both experiences are quintessentially Spetses — we are delighted to arrange them.<br><br>
+                        <b>Horse-drawn carriage tour of Spetses island:</b><br>
+                        • Departure from the hotel's seafront: 09:30 · Duration: 1h30 · Our recommended coachman: Nikos (third generation on the island, excellent English)<br>
+                        • Route: Old Harbour → Poseidonia neighbourhood (neoclassical mansions of the island's 19th-century sea captains) → Zogeria Bay (private cove view) → Anargyros and Korgialenios School (Fowles' 'The Magus' was set here) → return seafront<br>
+                        • Cost: €55 for two · Cash to driver<br><br>
+                        <b>Water taxi Spetses → Hydra (day trip):</b><br>
+                        • Departure: 09:00 from Old Harbour · 45-minute crossing · Private water taxi or scheduled Flying Dolphin (€20pp return)<br>
+                        • We recommend the private water taxi (€80 return for two) for flexibility — leave and return at your own time<br><br>
+                        <b>Best grilled fish on Hydra:</b><br>
+                        • <b>Taverna Gitoniko (Christina's)</b>, Hydra town — the island's oldest family taverna, open since 1948, grilled sea bream, local wine, terrace above the port · Book by calling when you arrive (we provide the number)<br><br>
+                        Which day for Hydra and which morning for the carriage tour?<br><br>
+                        With warmth,<br>
+                        Spetses Hotel · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Private boat Peloponnese coves -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Ben & Tara Fitzgerald</div>
+                        <div class="email-date">Today, 08:05</div>
+                    </div>
+                    <div class="email-subject">Private boat to Peloponnese hidden coves — 5 nights July</div>
+                    <div class="email-preview">Hi! We are arriving for 5 nights and really want to explore the hidden coves on the Peloponnese coast opposite Spetses — we've heard there are extraordinary beaches accessible only by boat. Can you arrange a private boat charter for a day of swimming and snorkelling?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Ben & Tara,<br><br>
+                        You are absolutely right — the Peloponnese coastline opposite Spetses is one of the Aegean's best-kept secrets, with coves that have no road access and crystal water that changes colour from turquoise to cobalt.<br><br>
+                        <b>Private boat charter — Spetses → Peloponnese coves (full day):</b><br>
+                        • Captain: Stavros · Traditional Spetsiote caique (wooden boat) · Departure: 09:00<br>
+                        • Stop 1: <b>Skala beach</b> (Ermioni peninsula) — wild pebble beach, turquoise water, zero crowds<br>
+                        • Stop 2: <b>Porto Heli bay</b> — snorkelling above ancient submerged ruins (Bronze Age harbour walls at 2–5m depth)<br>
+                        • Stop 3: <b>Kilada cave</b> — dramatic sea cave with prehistoric stalactites descending to the waterline<br>
+                        • Picnic on board: Greek mezze, fresh fruit, cold Mythos beer, sea-chilled watermelon<br>
+                        • Swim from the boat in open water above a Posidonia meadow — exceptional snorkelling, sea turtles occasional<br>
+                        • Return: 17:30 · Cost: €240 for two (all inclusive)<br><br>
+                        Which day would you prefer? We can also add a sunset return if you prefer arriving back at dusk.<br><br>
+                        Best,<br>
+                        Spetses Hotel · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Arrival by Flying Dolphin -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Martin & Claudia Becker</div>
+                        <div class="email-date">Yesterday, 18:30</div>
+                    </div>
+                    <div class="email-subject">Anreise mit Flying Dolphin + Gepäcktransport — 3 Nächte August</div>
+                    <div class="email-preview">Guten Abend, wir kommen mit dem Flying Dolphin von Piräus an. Da es auf Spetses keine Autos gibt — wie funktioniert der Transport unseres Gepäcks vom Hafen zum Hotel? Wir haben 4 große Koffer. Und gibt es auf dem Weg zum Hotel etwas Besonderes zu sehen?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Sehr geehrte Frau Becker, sehr geehrter Herr Becker,<br><br>
+                        Herzlich willkommen — Spetses ohne Autos ist eine der schönsten Erfahrungen Griechenlands, und wir machen Ihre Ankunft so reibungslos wie möglich.<br><br>
+                        <b>Gepäcktransport vom Hafen:</b><br>
+                        • Teilen Sie uns Ihre Ankunftszeit mit — unser Hotelportier erwartet Sie am Dapia-Hafen (Haupthafen) mit einem Handkarren und begleitet Sie zum Hotel (7 Minuten zu Fuß am Meer entlang)<br>
+                        • Gepäcktransport: kostenlos für Hotelgäste · Bitte schicken Sie Ihre Flying Dolphin-Buchungsnummer mit<br><br>
+                        <b>Auf dem Weg zum Hotel (Dapia → Spetses Hotel):</b><br>
+                        • <b>Dapia Harbour:</b> das Herz des Insellebens — Fischerboote, Kafeneion-Terrassen, Blick auf die Peloponnese-Küste<br>
+                        • <b>Bouboulina-Denkmal</b> (2 Min vom Hafen): Denkmal der griechischen Nationalheldin, die aus Spetses stammte und im Unabhängigkeitskrieg 1821 die Flotte der Insel kommandierte<br>
+                        • <b>Seafront Promenade:</b> Pferdefuhrwerke, Fahrräder, Kanonenkugeln aus der Seeschlacht von 1822 noch in der alten Stadtmauer eingebettet<br><br>
+                        Wir freuen uns auf Ihre Ankunft!<br><br>
+                        Mit freundlichen Grüßen,<br>
+                        Spetses Hotel · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Spetses Hotel</div>
+                <div class="roi-subtitle">Spetses Island, Saronic Gulf · 36 Rooms · 4 Stars · Car-Free Island Waterfront</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">36</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~432</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">86h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€2,160</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>36 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    On a car-free island, <b>all guest communication happens by email or phone</b> — no walk-in enquiries.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium — €800 setup + €120/month</span><br>
+                    Multilingual (EN, DE, FR, GR) auto-responses + weekly auto-improvement + monthly report.<br>
+                    Return on investment: <b>18× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste a guest email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Spetses Hotel tone within 30 seconds. Works in English, German, French, Greek and more..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>George & Amanda Papadopoulos</td>
+                            <td>Carriage tour + water taxi to Hydra</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 18, 2026</td>
+                            <td>Ben & Tara Fitzgerald</td>
+                            <td>Private boat — Peloponnese hidden coves</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>25 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 17, 2026</td>
+                            <td>Martin & Claudia Becker</td>
+                            <td>Flying Dolphin arrival + Gepäcktransport</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Spetses Hotel · Spetses Island, Saronic Gulf, Greece</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
