@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hotel Tartessós</title>
+  <style>
+    :root {
+      --atlantic: #1a4a6a;
+      --atl-lt:   #4a7aa0;
+      --sand:     #d4a848;
+      --sand-lt:  #e8c870;
+      --cream:    #faf9f6;
+      --white:    #f5f2ec;
+      --dark:     #0e2030;
+      --text:     #1a2c3a;
+      --muted:    #607080;
+      --border:   #c4d4e0;
+      --teal:     #1a5a5a;
+      --teal-lt:  #e4f2f2;
+      --shadow:   0 2px 16px rgba(14,32,48,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--atl-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--atlantic); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--atl-lt); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--teal); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #0e2030 0%, #162840 50%, #0e2030 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--atlantic); }
+    .hero h1 { color: var(--atl-lt); font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p   { color: #7898b0; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--atlantic); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab  { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--atlantic); border-bottom-color: var(--atlantic); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: var(--white); padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from    { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-kite   { background: #dbeafe; color: #1e40af; }
+    .tag-whale  { background: #d1fae5; color: #065f46; }
+    .tag-maroc  { background: #fef3c7; color: #92400e; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--teal-lt); border-top: 2px solid #a0d0d0; padding: 16px 20px; }
+    .ai-header  { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon    { width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; font-family: sans-serif; }
+    .ai-label   { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft   { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn         { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--teal); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--teal); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--atl-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #162840; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name  { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--atl-lt); }
+    .plan-price { font-size: 12px; color: #5880a0; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #406080; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec   { background: var(--atlantic); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--atl-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .about-text a { color: var(--atlantic); }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #304858; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--atl-lt); text-decoration: none; }
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">T</div>
+    <div>
+      <div class="hotel-name">Hotel Tartessós</div>
+      <div class="hotel-sub">Tarifa · Costa de la Luz · Cádiz · Spain</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>Europe's southernmost town, world capital of kite and windsurfing, with Africa visible across the Strait of Gibraltar. Every multilingual guest email about kite lessons, whale watching and Morocco day trips becomes a perfect personalised draft in 30 seconds.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-number">27</div><div class="stat-label">Rooms</div></div>
+  <div class="stat"><div class="stat-number">~22</div><div class="stat-label">Emails / day</div></div>
+  <div class="stat"><div class="stat-number">30s</div><div class="stat-label">AI draft time</div></div>
+  <div class="stat"><div class="stat-number">~6h</div><div class="stat-label">Saved / week</div></div>
+  <div class="stat"><div class="stat-number">Live</div><div class="stat-label">At IBB Palazzo Bettina, Malta</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Tom Bradley &lt;tom.bradley@kitesurfworld.com&gt; <span class="tag tag-kite">Kitesurfing</span></div>
+          <div class="email-subject">"Complete beginner kitesurf lessons — 5 days, equipment rental"</div>
+        </div>
+        <div class="email-time">Today · 08:55</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, I'm booking a week in Tarifa specifically to learn to kitesurf. Complete beginner, reasonably athletic. I'd like 5 days of lessons — is there a school you recommend near the hotel? Also what equipment should I bring or can I rent everything? And what's the best season — I'm thinking September. Thanks, Tom
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Tom,
+
+You could not have chosen a better place to learn — Tarifa's Levante wind, consistent thermal breeze and flat water beaches make it the world's most established kitesurf destination.
+
+September is an excellent choice: warm water (23°C), reliable wind (Levante or Poniente most days) and fewer crowds than July-August.
+
+For 5-day beginner courses, we work with ION CLUB Tarifa (IKO certified, 5-star rated, 3 min from the hotel by foot). A complete beginner course typically follows this progression:
+· Day 1–2: Body dragging and kite control (in water, no board)
+· Day 3–4: Board work and first rides
+· Day 5: Independent riding + first session alone
+
+Everything is provided: kite, bar, lines, harness, wetsuit, board. Bring: swimwear, reef shoes (optional), sunscreen.
+
+5-day group course: approx. €350–400 per person. Private lessons also available at a premium.
+
+Shall I put you in contact with ION CLUB to confirm your week?
+
+Warm regards,
+Team Tartessós</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Beatriz Lara &lt;b.lara@bbva.es&gt; <span class="tag tag-whale">Whale Watching</span></div>
+          <div class="email-subject">"Avistamiento de ballenas — excursión familiar con niños de 8 y 11 años"</div>
+        </div>
+        <div class="email-time">Today · 10:40</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hola, venimos en familia (2 adultos y 2 niños de 8 y 11 años) a finales de agosto. Queremos hacer una excursión de avistamiento de cetáceos en el Estrecho — hemos visto que hay orcas, delfines y ballenas. ¿Cuánto dura? ¿Es apto para niños? ¿Nos pueden recomendar una empresa? Gracias, Beatriz
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Beatriz,
+
+The Strait of Gibraltar is one of the most important cetacean habitats in Europe — your children are going to be amazed.
+
+In late August, the resident species in the Strait include:
+🐬 Common and striped dolphins (almost guaranteed)
+🐋 Fin whales (frequent in summer)
+🐳 Sperm whales (occasional)
+🦈 Orca (July–August: the famous bluefin tuna-following population — a very special sight)
+
+We recommend FIRMM (Foundation for Information and Research on Marine Mammals), a non-profit based 5 minutes from the hotel. Their trips are accompanied by marine biologists who explain everything. Perfect for children aged 8+.
+
+Duration: 2–3 hours.
+Price: approx. €30/adult, €15/child.
+Departure: morning (best sightings) from Tarifa port.
+
+Both children will cope well — it is a stable research vessel and the strait is usually calm in late August.
+
+Shall I share the FIRMM booking link directly?
+
+Con un cordial saludo,
+Equipo Hotel Tartessós</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Jakob Müller &lt;j.muller@lufthansa.com&gt; <span class="tag tag-maroc">Morocco Day Trip</span></div>
+          <div class="email-subject">"Day trip to Tangier — ferry + guided tour, 2 people"</div>
+        </div>
+        <div class="email-time">Yesterday · 15:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, my wife and I are fascinated by the idea of visiting Africa for the day from Tarifa — the ferry to Tangier looks incredible. Can you help us organise a day trip? We'd need the ferry tickets and ideally a guide on the other side. We are two adults and not experienced travellers in Morocco. Thank you, Jakob
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 31s</div>
+          <div class="ai-time">⏱ 31 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Jakob,
+
+The Tarifa–Tangier crossing is one of the great short journeys in the world — 35 minutes across the Strait, and you step into a completely different continent, language and culture. Highly recommended for first-time visitors to Morocco.
+
+Here is a suggested day plan for two:
+
+⛴️ FERRY
+FRS or Inter Shipping operate several crossings daily (from €38 return per person). First departure 08:00; recommended return around 18:00. Passport required.
+
+🇲🇦 TANGIER WITH GUIDE
+We strongly recommend booking a private English-speaking guide for your first visit — Tangier's medina is wonderful but can feel disorienting without local knowledge. Our partner guide Hassan will meet you at the port.
+
+A full day with Hassan includes:
+· Medina walk (kasbah, Place du Grand Socco, the Jewish quarter)
+· Lunch in a rooftop restaurant with Strait views
+· Grand Socco market and spice souk
+· Return to the port with time for tea and mint tea at the iconic Café de Paris
+
+Private guide fee: approx. €80 for the full day (both of you). Ferry tickets we can book on your behalf.
+
+Would you like me to arrange everything — ferry + guide — for a specific date?
+
+Warm regards,
+Team Tartessós</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Tartessós</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">27</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~22</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~6 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. cost saved</span><span class="roi-val roi-highlight">~€240/month</span></div>
+      <p class="roi-note">Tarifa attracts international guests with very specific, detailed questions — kite lessons, whale watching, Morocco trips. Each email takes time. The AI handles it in 30s, in English, Spanish or any language.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI email drafts in 30s, multilingual, full integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your actual guest exchanges.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Built for <strong>Hotel Tartessós</strong> by <strong>Enzo Cosnard</strong>, currently live at <strong>IBB Palazzo Bettina</strong> (Malta). Family-run boutique = fast decision. One week setup.<br><br><a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#4a7aa0">Hotel Tartessós · Tarifa, Costa de la Luz, Spain</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

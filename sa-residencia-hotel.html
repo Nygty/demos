@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Belmond La Residencia</title>
+  <style>
+    :root {
+      --terracotta: #8b4e2f;
+      --terra-lt:   #c4855a;
+      --cream:      #faf7f3;
+      --stone:      #f4ede0;
+      --dark:       #1e1610;
+      --text:       #362a1e;
+      --muted:      #7a6a58;
+      --border:     #e5d8c8;
+      --olive:      #5a6e32;
+      --olive-lt:   #edf2e4;
+      --shadow:     0 2px 16px rgba(30,22,16,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--terra-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--terracotta); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--terra-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-belmond { background: #1a1000; border: 1px solid var(--terra-lt); color: var(--terra-lt); font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #1e1610 0%, #2c1e10 50%, #1e1610 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--terracotta); }
+    .hero h1 { color: var(--terra-lt); font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p   { color: #c0aa90; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--terracotta); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab  { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--terracotta); border-bottom-color: var(--terracotta); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: var(--stone); padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from    { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-art  { background: #fce7f3; color: #9d174d; }
+    .tag-hike { background: #d1fae5; color: #065f46; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--olive-lt); border-top: 2px solid #c4d4a8; padding: 16px 20px; }
+    .ai-header  { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon    { width: 28px; height: 28px; background: var(--olive); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; font-family: sans-serif; }
+    .ai-label   { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--olive); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft   { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn         { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--olive); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--olive); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--terra-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #2a1e14; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name  { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--terra-lt); }
+    .plan-price { font-size: 12px; color: #b09880; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #8a7060; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec   { background: var(--terracotta); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--terracotta); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .about-text a { color: var(--terracotta); }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #6a5a48; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--terra-lt); text-decoration: none; }
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">LR</div>
+    <div>
+      <div class="hotel-name">Belmond La Residencia</div>
+      <div class="hotel-sub">Deià · Serra de Tramuntana · Mallorca</div>
+    </div>
+  </div>
+  <div class="badge-belmond">✦ Belmond · AI Concierge Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>La Residencia's 50 rooms across two 16th-century manor houses attract the world's most discerning travellers. See how every international guest email — Sóller train trips, private hikes through the Tramuntana, Michelin dinner reservations — becomes a flawless draft in 30 seconds.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-number">50</div><div class="stat-label">Rooms & Villas</div></div>
+  <div class="stat"><div class="stat-number">~40</div><div class="stat-label">Emails / day</div></div>
+  <div class="stat"><div class="stat-number">30s</div><div class="stat-label">AI draft time</div></div>
+  <div class="stat"><div class="stat-number">~10h</div><div class="stat-label">Saved / week</div></div>
+  <div class="stat"><div class="stat-number">Live</div><div class="stat-label">At IBB Palazzo Bettina, Malta</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Charlotte Reed &lt;c.reed@reedcapital.com&gt; <span class="tag tag-hike">Hiking</span></div>
+          <div class="email-subject">"Guided Tramuntana hike from Deià — GR221 to Sóller, private guide"</div>
+        </div>
+        <div class="email-time">Today · 08:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we will be arriving on the 10th and would love to do a guided hike from Deià to Sóller along the old mule path — we've heard the views are incredible. We are two fit walkers, looking for a private English-speaking guide. We'd also love to have a light lunch somewhere along the way or in Sóller itself. Can you organise this for the 12th? Thanks, Charlotte & David
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Charlotte and David,
+
+The Deià–Sóller mule path (part of the GR221 Dry Stone Route) is one of the finest walks in Mallorca — you are in for a spectacular morning.
+
+For the 12th, we can arrange:
+· Private English-speaking mountain guide, departure 08:30 from La Residencia (2.5–3 hours walking)
+· The route passes through ancient terraced olive groves with views over the Tramuntana to the sea
+· Lunch: we recommend Sa Fàbrica de Gelats in Sóller — a beautiful terrace in the former ice-cream factory — or a table at the Grand Hotel Sóller for a more elegant meal
+
+After lunch, you can return via the vintage electric tram from Sóller to Port de Sóller and a short taxi back to Deià, or our driver can collect you at an agreed time.
+
+Shall I confirm the guide for the 12th?
+
+Warm regards,
+Concierge Team — Belmond La Residencia</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Prof. Alberto Ruiz &lt;a.ruiz@unav.es&gt; <span class="tag tag-art">Art & Culture</span></div>
+          <div class="email-subject">"Visita a la Casa de Robert Graves en Deià + exposición en Palma"</div>
+        </div>
+        <div class="email-time">Today · 11:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Buenos días, soy un gran admirador de Robert Graves y me gustaría visitar su casa-museo en Deià — ¿pueden gestionar una visita privada? También me interesa visitar la colección de arte contemporáneo en Es Baluard en Palma durante mi estancia del 15 al 18. Muchas gracias, Alberto
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Professor Ruiz,
+
+What a wonderful itinerary you have in mind — Deià's literary history and Mallorca's art scene are both exceptional.
+
+For the Casa de Robert Graves (Ca n'Alluny), just a 5-minute walk from La Residencia, we can arrange a private guided visit with one of the foundation's specialist curators — a far more intimate experience than the standard tour. Please let us know your preferred morning or afternoon.
+
+For Es Baluard in Palma (approximately 30 minutes by car), we recommend visiting on the 16th or 17th — the current programme features Mallorcan modernisme alongside the permanent collection. Our driver can take you directly from the hotel.
+
+If you have time, we also suggest a visit to the Fundació Pilar i Joan Miró in Cala Major, another exceptional collection rarely known to visitors.
+
+Shall I confirm both bookings for you?
+
+Con un cordial saludo,
+Concierge Team — Belmond La Residencia</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Sarah Thornton &lt;s.thornton@theguardian.com&gt; <span class="tag tag-res">Reservation</span></div>
+          <div class="email-subject">"Private boat to Sa Foradada peninsula — sunset aperitivo"</div>
+        </div>
+        <div class="email-time">Yesterday · 15:40</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, I'm a journalist staying with you next month and I'd love to organise a private boat trip to the Sa Foradada rock — that iconic pierced cliff on the Mallorca west coast. If possible, a sunset departure with some local wine and cheese on board. Just for two people. Is that something you can arrange? Many thanks, Sarah
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 24s</div>
+          <div class="ai-time">⏱ 24 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Sarah,
+
+Sa Foradada at sunset is one of Mallorca's most extraordinary sights — you have chosen perfectly.
+
+We can arrange a private wooden boat for two, departing from Port de Valldemossa (15 minutes from La Residencia). The captain will anchor just off Sa Foradada's famous pierced rock as the sun drops over the horizon.
+
+On board: a selection of Mallorcan wines (we suggest a chilled Blanc de Blancs from Bodegas Ribas, one of the island's oldest wineries) paired with local cheese, charcuterie and seasonal produce from our kitchen.
+
+Approximate duration: 2.5 hours. Suggested departure: 18:30 for optimal light.
+
+Could you share your preferred date once you have your arrival confirmed? We will arrange everything and have it ready to go.
+
+Warm regards,
+Concierge Team — Belmond La Residencia</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — La Residencia</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">50</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~40</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-key">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~10 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€450/month</span></div>
+      <p class="roi-note">Conservative estimate: 40 emails/day × 11.5 min saved. At 50 rooms and Belmond service standards, concierge response quality directly impacts guest reviews and repeat bookings.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Built for <strong>Belmond La Residencia</strong> by <strong>Enzo Cosnard</strong>, currently deploying this system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a similarly historic Mediterranean boutique property.<br><br>The General Manager at property level can trial this independently. Setup takes one week.<br><br><a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#c4855a">Belmond La Residencia · Deià, Mallorca</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

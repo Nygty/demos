@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Palazzo Avino</title>
+  <style>
+    :root {
+      --gold:    #9a7d4e;
+      --gold-lt: #c4a96d;
+      --cream:   #faf7f2;
+      --dark:    #1a1410;
+      --text:    #3d3228;
+      --muted:   #7a6a58;
+      --border:  #e5ddd0;
+      --green:   #2e6b48;
+      --green-lt:#e8f2ec;
+      --blue:    #2c4a7a;
+      --blue-lt: #eef2f9;
+      --shadow:  0 2px 16px rgba(26,20,16,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ─────────────────────────────────── */
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--gold);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--dark);
+      font-family: 'Georgia', serif;
+      letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--gold-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live {
+      background: var(--green);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-family: sans-serif;
+      letter-spacing: 1px;
+    }
+
+    /* ── HERO BANNER ─────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #1a1410 0%, #2c2016 50%, #1a1410 100%);
+      padding: 48px 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--gold);
+    }
+    .hero h1 {
+      color: var(--gold-lt);
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .hero p { color: #c8b89a; font-size: 16px; max-width: 620px; margin: 0 auto; line-height: 1.7; }
+
+    /* ── STATS ROW ───────────────────────────────── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat {
+      flex: 1;
+      max-width: 200px;
+      padding: 24px 20px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--gold); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    /* ── TABS ────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 2px solid var(--border);
+      padding: 0 40px;
+      gap: 0;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 14px 24px;
+      font-family: sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+    }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 600; }
+
+    /* ── MAIN LAYOUT ─────────────────────────────── */
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    /* ── EMAIL CARD ──────────────────────────────── */
+    .section-title {
+      font-family: sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .email-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .email-header {
+      background: #f5f0e8;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag {
+      display: inline-block;
+      font-family: sans-serif;
+      font-size: 10px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; background: #fff; }
+    .email-body blockquote {
+      border-left: 3px solid var(--border);
+      margin: 0;
+      padding-left: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .ai-section {
+      background: var(--green-lt);
+      border-top: 2px solid #b6d9c4;
+      padding: 16px 20px;
+    }
+    .ai-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .ai-icon {
+      width: 28px; height: 28px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-family: sans-serif;
+      font-weight: bold;
+    }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .btn {
+      font-family: sans-serif;
+      font-size: 12px;
+      padding: 7px 18px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── SIDEBAR ─────────────────────────────────── */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-lt); margin-bottom: 16px; }
+    .plan {
+      padding: 12px 0;
+      border-bottom: 1px solid #2c2016;
+    }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--gold-lt); }
+    .plan-price { font-size: 12px; color: #c8b89a; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #a09080; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--gold); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: var(--dark); font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--gold); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      background: var(--dark);
+      color: #7a6a58;
+      font-family: sans-serif;
+      font-size: 12px;
+      margin-top: 48px;
+      letter-spacing: 1px;
+    }
+    footer a { color: var(--gold-lt); text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">PA</div>
+    <div>
+      <div class="hotel-name">Palazzo Avino</div>
+      <div class="hotel-sub">Ravello · Amalfi Coast · Italy</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Palazzo Avino's concierge team could handle every guest email in under 30 seconds — helicopter transfers, Capri charters, Ravello Festival bookings and more — with a personalised draft, ready to send.</p>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">43</div>
+    <div class="stat-label">Rooms & Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~35</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~9h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">James Whitfield &lt;j.whitfield@privateclient.com&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Helicopter transfer from Naples + Capri day trip for our anniversary"</div>
+        </div>
+        <div class="email-time">Today · 09:14</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, we are arriving from London on the 24th and would like to organise a helicopter transfer from Naples airport directly to Ravello if possible. We are also celebrating our 25th wedding anniversary and would love to arrange a private boat charter to Capri for the 26th — sunset return. Could you also recommend a table at a good restaurant in Capri for that evening? Many thanks, James & Caroline
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear James and Caroline,
+
+What a wonderful way to celebrate your 25th anniversary — we would be delighted to make it unforgettable.
+
+For your arrival on the 24th, we can arrange a private helicopter transfer from Naples International directly to Ravello's helipad (approx. 12 minutes). I will need your exact flight details to confirm the slot — could you share your arrival time at Naples?
+
+For the 26th, we recommend a private wooden gozzo charter with Captain Aniello — sunset departure from Maiori (10 minutes from Palazzo Avino), arriving Capri by 19:30. For dinner in Capri, we suggest Da Paolino (under the lemon grove) or Il Riccio for a seafront table — both can be reserved on your behalf. Which would you prefer?
+
+We will handle all logistics from here. Warmest congratulations in advance.
+
+Sincerely,
+Concierge Team — Palazzo Avino</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Dr. Sophia Meier &lt;s.meier@meierhaus.de&gt; <span class="tag tag-res">Reservation</span></div>
+          <div class="email-subject">"Tickets — Ravello Festival concert 28 July, Belvedere stage"</div>
+        </div>
+        <div class="email-time">Today · 11:32</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, I am staying at your hotel from the 27th to the 30th of July with my husband. We are very keen to attend a Ravello Festival concert — ideally something orchestral on the Belvedere di Villa Rufolo stage. Could you help us get two tickets and perhaps also arrange a private tour of the gardens before the concert? Thank you, Sophia
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 31s</div>
+          <div class="ai-time">⏱ 31 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Dr. Meier,
+
+We are thrilled you will be joining us during Ravello Festival — the atmosphere on the Belvedere stage at sunset is truly unlike anywhere else in the world.
+
+On 28 July, the programme features the RAI National Symphony Orchestra — an exceptional evening. We can secure two reserved seats in the central stalls section (€95 per person) and will arrange pre-concert access for a private guided walk through Villa Rufolo's gardens at 18:30, before the general public enters.
+
+Shall I confirm both for you? If you have a seating preference (front/central/side), please let me know and I will do my best to accommodate.
+
+Looking forward to welcoming you to Palazzo Avino.
+
+Warm regards,
+Concierge Team — Palazzo Avino</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Marco Gentilini &lt;m.gentilini@studiog.it&gt; <span class="tag tag-spec">Wedding Inquiry</span></div>
+          <div class="email-subject">"Wedding reception — rooftop terrace & Michelin dinner for 22 guests"</div>
+        </div>
+        <div class="email-time">Yesterday · 16:48</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Buongiorno, stiamo pianificando il nostro matrimonio per settembre prossimo e vorremmo celebrare il ricevimento a Palazzo Avino con una cena privata per 22 persone sul roof terrace, con menù del ristorante stellato. Potete inviarci una proposta con disponibilità e prezzi? Grazie mille, Marco e Valentina
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Marco and Valentina,
+
+Congratulations on your upcoming wedding — what a privilege to be considered for such a special occasion.
+
+Our Michelin-starred rooftop terrace overlooking the Amalfi Coast accommodates intimate private dining for up to 26 guests and would be exclusively yours for the evening. Executive Chef Raffaele Bosco would be delighted to create a bespoke tasting menu celebrating Campania's finest produce.
+
+For September, we have availability across most weekends. Could you confirm your preferred date range? Our Events Director will then prepare a full tailored proposal including the dinner menu, floral arrangements, accommodation options for your guests and ceremony logistics.
+
+We would love to make your wedding day extraordinary.
+
+With warm congratulations,
+Events & Concierge — Palazzo Avino</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left-col -->
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- ROI CARD -->
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Palazzo Avino</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">43</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~35</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~9 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€400/month</span></div>
+      <p class="roi-note">Conservative estimate based on 35 emails/day × 11.5 min saved per email. At Palazzo Avino's service level, concierge time is among your most valuable resources.</p>
+    </div>
+
+    <!-- PRICING -->
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Palazzo Avino</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a 12th-century palazzo boutique, just like yours.<br><br>The AI drafts above are realistic examples based on the types of requests your concierge team handles daily.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+
+  </div><!-- /sidebar -->
+</div><!-- /main -->
+
+<footer>
+  <p>Demo prepared for <strong style="color:#c4a96d">Palazzo Avino · Ravello, Amalfi Coast</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

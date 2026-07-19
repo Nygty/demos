@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hostal Spa Empúries</title>
+  <style>
+    :root {
+      --blue:    #2a5a8a;
+      --blue-lt: #5a8abC;
+      --sand:    #c4a870;
+      --sand-lt: #e0c898;
+      --cream:   #faf9f6;
+      --stone:   #f2efe8;
+      --dark:    #14202e;
+      --text:    #1e2c3a;
+      --muted:   #627080;
+      --border:  #c8d4de;
+      --green:   #2a5a2a;
+      --green-lt:#eaf2ea;
+      --shadow:  0 2px 16px rgba(20,32,46,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--blue-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--blue); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: #fff; font-family: sans-serif; letter-spacing: 0.5px; }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--blue-lt); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #14202e 0%, #1e2c3a 50%, #14202e 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--blue); }
+    .hero h1 { color: var(--blue-lt); font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p   { color: #8098b0; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--blue); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab  { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: var(--stone); padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from    { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-arch { background: #fef3c7; color: #92400e; }
+    .tag-kayak{ background: #dbeafe; color: #1e40af; }
+    .tag-dali { background: #f3e8ff; color: #6b21a8; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #a8c8a8; padding: 16px 20px; }
+    .ai-header  { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon    { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; font-family: sans-serif; }
+    .ai-label   { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft   { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn         { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--blue); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #1e2c3a; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name  { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--blue-lt); }
+    .plan-price { font-size: 12px; color: #6080a0; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #506070; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec   { background: var(--blue); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--blue-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .about-text a { color: var(--blue); }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #405060; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--blue-lt); text-decoration: none; }
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">HE</div>
+    <div>
+      <div class="hotel-name">Hostal Spa Empúries</div>
+      <div class="hotel-sub">L'Escala · Costa Brava Nord · Catalonia</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>The only hotel in the world overlooking a Greco-Roman archaeological site — 56 rooms facing the ruins of ancient Empúries on the wild north Costa Brava. Every international guest email about guided ruins tours, kayaking the coves and the Dalí route becomes a perfect draft in 30 seconds.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-number">56</div><div class="stat-label">Rooms</div></div>
+  <div class="stat"><div class="stat-number">~45</div><div class="stat-label">Emails / day</div></div>
+  <div class="stat"><div class="stat-number">30s</div><div class="stat-label">AI draft time</div></div>
+  <div class="stat"><div class="stat-number">~11h</div><div class="stat-label">Saved / week</div></div>
+  <div class="stat"><div class="stat-number">Live</div><div class="stat-label">At IBB Palazzo Bettina, Malta</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Prof. James Morrison &lt;j.morrison@oxford.ac.uk&gt; <span class="tag tag-arch">Archaeology</span></div>
+          <div class="email-subject">"Private guided tour of Empúries ruins — archaeological focus, 4 adults"</div>
+        </div>
+        <div class="email-time">Today · 08:45</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, I am a classical historian staying with 3 colleagues from Oxford from 12–15 July. We would love an in-depth private guided tour of the Empúries ruins — both the Greek and Roman sections — with someone who can go beyond the standard visitor explanation. Preferably a local archaeologist. Also, is there early morning access before the public opening? Thank you, James
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Professor Morrison,
+
+What a privilege to welcome four Oxford classicists — and what better base than a hotel that literally overlooks the subject of your expertise.
+
+We can arrange exactly what you are looking for:
+
+🏛️ PRIVATE ARCHAEOLOGICAL TOUR — EMPÚRIES
+Our preferred guide is Dr. Montserrat Roig, who has led archaeological excavations at Empúries for 12 seasons and holds a doctorate in Greco-Roman colonial settlements in Hispania. She specialises in the transition between the Greek Emporion and the Roman Emporiae — exactly the period most visitors miss.
+
+Early access: yes, we can arrange entry at 08:00, one hour before public opening. The site in morning light, without visitors, is extraordinary.
+
+Duration: approximately 3 hours for both sectors (Greek neápolis + Roman city).
+Languages: English, Catalan, Castellano, French.
+
+Suggested date: morning of the 13th.
+
+Shall I confirm Dr. Roig and the early access permit for the 13th?
+
+Warm regards,
+Concierge Team — Hostal Spa Empúries</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Lena Schuster &lt;l.schuster@spiegel.de&gt; <span class="tag tag-kayak">Kayaking</span></div>
+          <div class="email-subject">"Kayaking Costa Brava coves — guided, half day, beginner level"</div>
+        </div>
+        <div class="email-time">Today · 11:20</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, I'm arriving solo for 3 nights. I would love to explore the Costa Brava coastline by kayak — I have never done sea kayaking before. Is there a guided excursion that explores the hidden coves near L'Escala? I have seen photos of the Cap de Creus area. Thank you, Lena
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 30s</div>
+          <div class="ai-time">⏱ 30 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Lena,
+
+You will love the Costa Brava from the water — the coves here are among the most beautiful in the Mediterranean and most are completely inaccessible by land.
+
+For a complete beginner, we recommend the half-day guided sea kayak tour departing from L'Escala beach:
+
+🚣 COSTA BRAVA KAYAK — HALF DAY (09:00–13:00)
+· Full introduction and paddling technique lesson (30 min on the beach — no prior experience needed)
+· Guided paddle north along the rocky coastline, entering 4–5 hidden coves and snorkelling stops in crystal clear water
+· The tour stops at a secluded pebble beach accessible only by sea for a swim and rest
+· Maximum 8 participants in the group; guide/kayak ratio is excellent for beginners
+
+Cap de Creus (the easternmost point of the Iberian Peninsula) is a full-day trip — we can arrange this as a second activity if you'd like to extend.
+
+Available most mornings, weather permitting. Shall I book Tuesday morning for you?
+
+Warm regards,
+Concierge Team — Hostal Spa Empúries</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Marie-Claire Dupont &lt;mc.dupont@paris8.fr&gt; <span class="tag tag-dali">Dalí Route</span></div>
+          <div class="email-subject">"Dalí triangle — Figueres + Cadaqués + Púbol — 2-day excursion plan?"</div>
+        </div>
+        <div class="email-time">Yesterday · 14:50</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Bonjour, je séjourne 4 nuits chez vous en août avec mon mari. Nous souhaiterions faire le triangle Dalí sur 2 jours — le musée de Figueres, la maison de Cadaqués et le château de Púbol. Est-ce possible de tout organiser depuis chez vous? Avez-vous un chauffeur ou une option de visite privée? Merci, Marie-Claire
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Marie-Claire,
+
+The Dalí Triangle in two days is perfectly manageable from L'Escala — you are very well placed for all three sites.
+
+Here is a suggested plan:
+
+DAY 1 — FIGUERES + PÚBOL
+· 09:30 — Dalí Theatre-Museum in Figueres (40 min from Hostal Empúries). The most visited museum in Spain after the Prado — book timed entry in advance, which we can handle.
+· Lunch in Figueres: El Motel (historic restaurant, exceptional Catalan cuisine).
+· 15:30 — Château Gala-Dalí de Púbol (30 min south). The castle Dalí gave to his wife Gala, deeply intimate and rarely crowded.
+
+DAY 2 — CADAQUÉS + CAP DE CREUS
+· 10:00 — Drive to Cadaqués (45 min along the coast road — spectacular).
+· Casa-Museu Salvador Dalí at Portlligat: advance booking essential (we will arrange). The most personal of all three sites.
+· Afternoon: walk in Cap de Creus Natural Park (the surrealist landscape that inspired Dalí's paintings).
+
+We can arrange private transfers for both days (our driver Pere speaks French and is excellent company). Shall I prepare the full booking — museum tickets included?
+
+Chaleureusement,
+Equipe Conciergerie — Hostal Spa Empúries</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Hostal Empúries</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">56</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~45</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~11 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. cost saved</span><span class="roi-val roi-highlight">~€500/month</span></div>
+      <p class="roi-note">56 rooms with a unique cultural position generate constant, detailed guest inquiries in multiple languages. 45 emails/day × 11.5 min saved = 11+ hours per week for your team.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI email drafts in 30s, multilingual, full integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your actual guest exchanges.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Built for <strong>Hostal Spa Empúries</strong> by <strong>Enzo Cosnard</strong>, currently live at <strong>IBB Palazzo Bettina</strong> (Malta). El Far Hotels is an independent group — fast decisions, one week to deploy.<br><br><a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#5a8abc">Hostal Spa Empúries · L'Escala, Costa Brava</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

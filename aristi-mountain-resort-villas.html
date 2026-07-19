@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Aristi Mountain Resort & Villas</title>
+  <style>
+    :root {
+      --stone:    #5a5248;
+      --stone-lt: #9a8e82;
+      --forest:   #2e4a2a;
+      --forest-lt:#5a7e54;
+      --cream:    #faf9f6;
+      --rock:     #f2ede6;
+      --dark:     #1a1814;
+      --text:     #2e2a24;
+      --muted:    #7a7068;
+      --border:   #ddd8d0;
+      --teal:     #1e5a5a;
+      --teal-lt:  #e4f2f2;
+      --shadow:   0 2px 16px rgba(26,24,20,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--forest-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--forest); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--forest-lt); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--teal); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #1a1814 0%, #242018 50%, #1a1814 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--forest); }
+    .hero h1 { color: var(--forest-lt); font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p   { color: #9a9080; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--forest); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab  { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--forest); border-bottom-color: var(--forest); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: var(--rock); padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from    { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-gorge { background: #d1fae5; color: #065f46; }
+    .tag-raft  { background: #dbeafe; color: #1e40af; }
+    .tag-vip   { background: #fef3c7; color: #92400e; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--teal-lt); border-top: 2px solid #a8d0d0; padding: 16px 20px; }
+    .ai-header  { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon    { width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; font-family: sans-serif; }
+    .ai-label   { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft   { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn         { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--teal); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--teal); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--forest-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #242018; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name  { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--forest-lt); }
+    .plan-price { font-size: 12px; color: #8a9080; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #6a7068; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec   { background: var(--forest); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--forest-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .about-text a { color: var(--teal); }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #4a4840; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--forest-lt); text-decoration: none; }
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">AR</div>
+    <div>
+      <div class="hotel-name">Aristi Mountain Resort</div>
+      <div class="hotel-sub">Aristi · Zagori · Epirus · Greece</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>In the stone villages of Zagori, above the world's deepest gorge, every guest email deserves the care this landscape commands. See how trekking requests, rafting bookings and mule-path village hikes become perfect drafts in 30 seconds.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-number">28</div><div class="stat-label">Rooms & Villas</div></div>
+  <div class="stat"><div class="stat-number">~22</div><div class="stat-label">Emails / day</div></div>
+  <div class="stat"><div class="stat-number">30s</div><div class="stat-label">AI draft time</div></div>
+  <div class="stat"><div class="stat-number">~6h</div><div class="stat-label">Saved / week</div></div>
+  <div class="stat"><div class="stat-number">Live</div><div class="stat-label">At IBB Palazzo Bettina, Malta</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Dr. Oliver Keller &lt;o.keller@naturephoto.de&gt; <span class="tag tag-gorge">Gorge Trek</span></div>
+          <div class="email-subject">"Vikos Gorge full traverse — 2 days, camping or village stays?"</div>
+        </div>
+        <div class="email-time">Today · 08:22</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, I am a nature photographer planning 5 nights at Aristi. My main goal is the full traverse of the Vikos Gorge — I believe the full route is 2 days. Can you organise a local guide who knows the best wildlife and plant photography spots? I would also prefer to sleep in a traditional guesthouses in Papingo if possible rather than camping. Thank you, Oliver
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Oliver,
+
+The Vikos Gorge full traverse is one of the great hiking routes of Europe, and for a nature photographer it is truly extraordinary — golden eagles, Balkan chamois, endemic Zagorian orchids and the crystal-clear Voidomatis river.
+
+Here is a suggested 2-day plan:
+
+DAY 1 (from Aristi)
+· 07:00 — Early departure for best light (we can arrange a packed breakfast)
+· Guide: Kostas, botanist and mountain expert, knows every rare orchid and chamois viewpoint. He is also an accomplished landscape photographer and will time the route for golden hour shots.
+· Descent into the gorge at Kipi, traverse along the Voidomatis river to Vikos village
+· Overnight: Arkontas Guesthouse in Mikro Papingo (traditional stone building, excellent dinner)
+
+DAY 2
+· Morning light photography at the Dragon Lake (Drakolimni) path — optional 2h detour
+· Return via the ancient monopati (mule path) to Aristi
+· Return transfer to Aristi Mountain Resort by 17:00
+
+Would you like me to confirm Kostas and the Papingo accommodation for your preferred dates?
+
+Warm regards,
+Concierge Team — Aristi Mountain Resort & Villas</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Fiona MacLeod &lt;fiona@scottravel.co.uk&gt; <span class="tag tag-raft">River Rafting</span></div>
+          <div class="email-subject">"Voidomatis river rafting — half day, family with 14-year-old"</div>
+        </div>
+        <div class="email-time">Today · 13:15</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, we are a family of 3 (two adults and our 14-year-old son) staying in September. We would love to try rafting on the Voidomatis river — we've seen photos and it looks incredible. Is September a good time? Is it suitable for a teenager with no rafting experience? Many thanks, Fiona
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 25s</div>
+          <div class="ai-time">⏱ 25 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Fiona,
+
+September is an excellent time for the Voidomatis — the river runs clear and the water temperature is very pleasant (16–18°C). The Voidomatis is considered one of the cleanest rivers in Europe, fed entirely by underground springs from the Vikos Gorge.
+
+For a family with a first-time rafter aged 14, we recommend the classic half-day route (grade II–III, suitable from age 12 upwards with a guide):
+
+· 09:30 departure from Aristi by vehicle to the river starting point near Kipi
+· 10:00 — Safety briefing and equipment fitting (buoyancy aids, helmets provided)
+· 10:30–13:00 — Guided raft through the lower gorge section: spectacular limestone walls, transparent water, several small rapids
+· No experience required — the certified guides paddle with you
+
+Price: approximately €40–45 per person. Minimum age: 12. Your son will love it.
+
+Shall I book this for your preferred morning?
+
+Warm regards,
+Concierge Team — Aristi Mountain Resort & Villas</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Yuki Tanaka &lt;yuki.t@japan-travel.jp&gt; <span class="tag tag-vip">Cultural</span></div>
+          <div class="email-subject">"Village-to-village mule path walk + traditional Zagorian dinner"</div>
+        </div>
+        <div class="email-time">Yesterday · 10:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Dear team, my wife and I are visiting from Japan in October. We are not experienced hikers but we would love to walk between two traditional Zagori villages on the old stone paths. Perhaps 3–4 hours maximum. We would also love to try a traditional Zagorian dinner — local recipes, not tourist food. Is there something authentic you can recommend? Thank you very much, Yuki
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 30s</div>
+          <div class="ai-time">⏱ 30 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Yuki and Mrs Tanaka,
+
+Welcome — Zagori in October is exceptional: the chestnuts and oaks turn gold, the light is soft and the villages are wonderfully quiet.
+
+For a gentle village walk, we recommend the ancient cobbled kalderimi (mule path) from Aristi to Dilofo — 3 hours return, almost entirely flat, through oak forest and over a restored stone bridge. One of the most beautiful easy walks in northern Greece. No special footwear required, just comfortable shoes.
+
+For dinner: we strongly recommend you eat at the Aristi Mountain Resort's own restaurant that evening. Our chef Stavroula prepares exclusively traditional Zagorian recipes using ingredients from the surrounding mountains and gardens — trachanas (fermented wheat soup), slow-cooked goat kleftiko, freshwater trout from the Voidomatis, Zagori mountain greens with feta. This is not adapted for tourists — it is the food the families of Zagori have eaten for centuries.
+
+Please let us know your arrival date so we can prepare everything.
+
+With warm regards,
+Concierge Team — Aristi Mountain Resort & Villas</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Aristi Resort</div>
+      <div class="roi-row"><span class="roi-key">Rooms & Villas</span><span class="roi-val">28</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~22</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~6 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. cost saved</span><span class="roi-val roi-highlight">~€240/month</span></div>
+      <p class="roi-note">International guests at Aristi ask detailed, research-intensive questions about gorges, trails and local culture. The AI handles each in 30s. Your team focuses on the experience.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Built for <strong>Aristi Mountain Resort</strong> by <strong>Enzo Cosnard</strong>, currently live at <strong>IBB Palazzo Bettina</strong> (Malta). Independent boutique, fast decision, one week to deploy.<br><br><a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#5a7e54">Aristi Mountain Resort & Villas · Zagori, Epirus, Greece</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

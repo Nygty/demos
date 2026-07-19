@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Jumeirah Port Soller</title>
+  <style>
+    :root {
+      --jblue:   #0a2240;
+      --jblue-lt:#1a4a7a;
+      --gold:    #c4933a;
+      --gold-lt: #e0b868;
+      --cream:   #f8fafc;
+      --stone:   #f0f4f8;
+      --text:    #1a2e40;
+      --muted:   #6a7e92;
+      --border:  #d0dce8;
+      --teal:    #1a7a6e;
+      --teal-lt: #e4f5f3;
+      --shadow:  0 2px 16px rgba(10,34,64,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--jblue); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--gold); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--gold); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; color: var(--jblue); font-family: sans-serif; letter-spacing: 0.5px; }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--gold-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--teal); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #0a2240 0%, #0e3060 50%, #0a2240 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--gold); }
+    .hero h1 { color: var(--gold-lt); font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p   { color: #90a8c0; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--jblue-lt); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab  { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--jblue-lt); border-bottom-color: var(--gold); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: var(--stone); padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from    { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--text); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-tour { background: #d1fae5; color: #065f46; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--teal-lt); border-top: 2px solid #a8d8d4; padding: 16px 20px; }
+    .ai-header  { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon    { width: 28px; height: 28px; background: var(--teal); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; font-family: sans-serif; }
+    .ai-label   { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--teal); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft   { font-size: 13.5px; color: var(--text); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn         { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--teal); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--text); }
+    .roi-highlight { color: var(--teal); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--jblue); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #1a3a5a; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name  { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--gold-lt); }
+    .plan-price { font-size: 12px; color: #90a8c0; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #6a8098; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec   { background: var(--gold); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: var(--jblue); font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--gold); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .about-text a { color: var(--jblue-lt); }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--jblue); color: #4a6a8a; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--gold-lt); text-decoration: none; }
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">JPS</div>
+    <div>
+      <div class="hotel-name">Jumeirah Port Soller</div>
+      <div class="hotel-sub">Puerto de Sóller · Serra de Tramuntana · Mallorca</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>121 rooms, three restaurants, a full spa — and hundreds of international guest emails every week about Tramuntana hikes, Palma excursions, boat tours and transfers. See how an AI concierge handles each one in 30 seconds, without compromising Jumeirah's exceptional service standards.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-number">121</div><div class="stat-label">Rooms & Suites</div></div>
+  <div class="stat"><div class="stat-number">~95</div><div class="stat-label">Emails / day</div></div>
+  <div class="stat"><div class="stat-number">30s</div><div class="stat-label">AI draft time</div></div>
+  <div class="stat"><div class="stat-number">~25h</div><div class="stat-label">Saved / week</div></div>
+  <div class="stat"><div class="stat-number">Live</div><div class="stat-label">At IBB Palazzo Bettina, Malta</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Henrik Larsson &lt;h.larsson@nordea.com&gt; <span class="tag tag-tour">Excursion</span></div>
+          <div class="email-subject">"Full-day Palma city tour + transfer — family of 4"</div>
+        </div>
+        <div class="email-time">Today · 07:58</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we will be staying from 8–12 August with our two teenage children. We would like to spend a full day in Palma — ideally with a private guide who can take us to the Cathedral, the old city and perhaps the Almudaina Palace. We also need a comfortable vehicle transfer there and back. Could you organise this for the 10th? Thank you, Henrik
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Henrik,
+
+A day in Palma with teenagers is a wonderful idea — the city has far more to offer than most visitors expect.
+
+For the 10th August, we can arrange:
+· 09:00 — Private transfer from Jumeirah Port Soller (approx. 45 min via mountain road)
+· 09:45–13:00 — Private English-speaking guide: Palma Cathedral (La Seu), Royal Palace of La Almudaina, Arab Baths, old city (Barri Gòtic). We suggest adding a stop at the Modernisme quarter for the architecture.
+· 13:30 — Lunch at Caballito de Mar on the seafront (excellent paella, very popular with families)
+· Afternoon — Free time for shopping on Passeig des Born or the covered Mercat de l'Olivar
+· 18:30 — Private return transfer to the hotel
+
+Shall I confirm the guide and transfer for the 10th? Please let me know if you'd prefer a later start.
+
+Warm regards,
+Concierge Team — Jumeirah Port Soller</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Amira El-Rashid &lt;amira.elrashid@aramco.com&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Private pool villa upgrade inquiry + halal dining options"</div>
+        </div>
+        <div class="email-time">Today · 09:20</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, I am planning a 7-night stay in August for our family (2 adults, 3 children under 12). We would like a suite or villa with a private pool or at least guaranteed pool privacy, and I need to know about your dining options — specifically whether your chefs can prepare halal meals. Thank you, Amira
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 31s</div>
+          <div class="ai-time">⏱ 31 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Mrs El-Rashid,
+
+Thank you for considering Jumeirah Port Soller — we would be delighted to host your family.
+
+For your stay, we recommend our Panoramic Suite category with dedicated terrace, offering exceptional privacy with uninterrupted views over Puerto de Sóller bay. For complete private pool access, we can also explore our exclusive pool reservation arrangements for your family.
+
+Regarding halal dining: our Executive Chef is very experienced in accommodating halal dietary requirements. We source high-quality halal-certified ingredients for guests upon advance request, and our menu can be fully adapted. Please confirm this need at booking and we will brief the kitchen team before your arrival.
+
+For three children under 12, our dedicated Kids' Club and family pool area would be ideal. We can also arrange a children's welcome gift and early dining times to suit your family schedule.
+
+Could you share your preferred arrival and departure dates so I can check suite availability?
+
+With warm regards,
+Guest Relations — Jumeirah Port Soller Hotel & Spa</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Mike Chen &lt;m.chen@techventures.hk&gt; <span class="tag tag-res">Activity</span></div>
+          <div class="email-subject">"Tramuntana guided cycling — GR221 section, ebike option?"</div>
+        </div>
+        <div class="email-time">Yesterday · 14:05</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, staying next week. I am a keen cyclist but not used to serious mountain climbs. Is there a guided cycling option in the Tramuntana — perhaps on an e-bike? I would love to see the mountain villages. Duration: half day. Thanks, Mike
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 24s</div>
+          <div class="ai-time">⏱ 24 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Mike,
+
+Great choice — the Tramuntana on an e-bike is one of the most rewarding ways to experience the mountain range, and perfect for anyone who wants the scenery without the suffer-fest.
+
+We work with a local cycling guide who offers a half-day e-bike tour starting from Port de Sóller (10 minutes from the hotel):
+
+· Climb through the terraced olive and citrus groves to Fornalutx — regularly voted one of Spain's most beautiful villages
+· Continue to Biniaraix (a medieval stone hamlet) and down through the ravine back to Sóller
+· Total distance: approx. 22km, 3–3.5 hours including stops and photo breaks
+· Premium e-bikes provided, helmet included
+
+Available most mornings, starting at 09:00. Price: approx. €75 per person with guide.
+
+Shall I book this for you? Please let me know which morning suits best.
+
+Warm regards,
+Concierge Team — Jumeirah Port Soller</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Port Soller</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">121</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~95</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~25 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. cost saved</span><span class="roi-val roi-highlight">~€1,100/month</span></div>
+      <p class="roi-note">At 121 rooms, the email volume is substantial. 95 emails/day × 11.5 min saved = 25 hours per week — equivalent to nearly a full-time concierge position. ROI is visible from month one.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real exchanges · Jumeirah tone consistency.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Built for <strong>Jumeirah Port Soller</strong> by <strong>Enzo Cosnard</strong>, currently running this system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta). The GM at property level can trial this independently of group procurement.<br><br>Setup: one week. No long-term commitment.<br><br><a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#e0b868">Jumeirah Port Soller Hotel & Spa · Mallorca</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

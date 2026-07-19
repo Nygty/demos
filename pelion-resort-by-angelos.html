@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Pelion Resort by Angelos</title>
+  <style>
+    :root {
+      --aegean:   #1e4a6a;
+      --aeg-lt:   #4a7ea8;
+      --forest:   #2a4a22;
+      --forest-lt:#5a8050;
+      --cream:    #f8faf9;
+      --mist:     #eef4f0;
+      --dark:     #141e18;
+      --text:     #1e2e24;
+      --muted:    #607068;
+      --border:   #c8d8cc;
+      --amber:    #8a6a20;
+      --amber-lt: #d4a840;
+      --shadow:   0 2px 16px rgba(20,30,24,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--aeg-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--aegean); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--aeg-lt); letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--forest); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #141e18 0%, #1e2e24 50%, #141e18 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--aegean); }
+    .hero h1 { color: var(--aeg-lt); font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p   { color: #8098a0; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--aegean); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab  { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--aegean); border-bottom-color: var(--aegean); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: var(--mist); padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from    { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-sail { background: #dbeafe; color: #1e40af; }
+    .tag-hike { background: #d1fae5; color: #065f46; }
+    .tag-food { background: #fef3c7; color: #92400e; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: #e8f0f8; border-top: 2px solid #a8c4d8; padding: 16px 20px; }
+    .ai-header  { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon    { width: 28px; height: 28px; background: var(--aegean); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: bold; font-family: sans-serif; }
+    .ai-label   { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--aegean); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time    { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft   { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn         { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--aegean); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--aegean); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--aeg-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #1e2e24; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name  { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--aeg-lt); }
+    .plan-price { font-size: 12px; color: #7090a0; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #506070; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec   { background: var(--aegean); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--aeg-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .about-text a { color: var(--aegean); }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #405848; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--aeg-lt); text-decoration: none; }
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">PR</div>
+    <div>
+      <div class="hotel-name">Pelion Resort by Angelos</div>
+      <div class="hotel-sub">Tsagarada · Mount Pelion · Thessaly · Greece</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>22 suites beneath a 700-year-old plane tree, where forest meets the Aegean. Every international guest email about sailing from Damouchari, hiking to Milopotamos or discovering Pelion's village gastronomy becomes a perfect personalised draft in 30 seconds.</p>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-number">22</div><div class="stat-label">Suites</div></div>
+  <div class="stat"><div class="stat-number">~18</div><div class="stat-label">Emails / day</div></div>
+  <div class="stat"><div class="stat-number">30s</div><div class="stat-label">AI draft time</div></div>
+  <div class="stat"><div class="stat-number">~5h</div><div class="stat-label">Saved / week</div></div>
+  <div class="stat"><div class="stat-number">Live</div><div class="stat-label">At IBB Palazzo Bettina, Malta</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Lars Eriksen &lt;l.eriksen@maersk.com&gt; <span class="tag tag-sail">Sailing</span></div>
+          <div class="email-subject">"Private sailing from Damouchari — full day, 3 adults, Pelion coastline"</div>
+        </div>
+        <div class="email-time">Today · 09:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are 3 adults arriving on August 20th. I would like to arrange a private sailing day along the Pelion coastline — departing from Damouchari, exploring the hidden coves and beaches accessible only by sea. We also want to swim at Milopotamos — can we reach it by boat? Looking for a full day. Thank you, Lars
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Lars,
+
+What a perfect day you have planned — the Pelion coastline is one of the most spectacular and unspoiled in Greece.
+
+For August 22nd (allowing you a day to settle in), we can arrange:
+
+⛵ PRIVATE SAILING — FULL DAY (09:00–18:00)
+Departure: Damouchari harbour (25 min from Pelion Resort)
+Captain: Stavros, with 15 years on the Pelion coast and intimate knowledge of every hidden cove.
+
+Suggested route:
+· 09:00 — Departure, heading south along the cliffs
+· 10:00 — First stop: secluded sea cave at Fakistra (reachable only by sea)
+· 11:30 — Swim at the pebble cove of Damouchari village (filming location for Mamma Mia)
+· 13:00 — Lunch on board (we prepare a fresh picnic: local cheese, cold cuts, fruit, Greek wine)
+· 15:00 — Milopotamos beach — yes, fully accessible by boat, anchor offshore and swim in
+· 17:30 — Return to Damouchari, sunset from the water
+
+Approximate cost: €380–420 for the vessel (3 people).
+
+Shall I confirm Captain Stavros for the 22nd?
+
+Warm regards,
+Concierge Team — Pelion Resort by Angelos</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Claire Beaumont &lt;c.beaumont@sothebys.com&gt; <span class="tag tag-hike">Hiking</span></div>
+          <div class="email-subject">"Pelion centaur trail — village-to-village walk, guided, not too hard"</div>
+        </div>
+        <div class="email-time">Today · 12:05</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Dear Pelion Resort, I am a solo female traveller staying for 4 nights. I am moderately fit and would love to walk one of the traditional mountain paths — ideally between two historic villages. I have read about Tsagarada and Mouresi, and also the path down to Milopotamos beach. Which do you recommend and can you arrange a guide? Thank you, Claire
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Claire,
+
+Wonderful — the old cobbled kalderimi paths of Pelion are among the most evocative walking routes in Greece. For a moderately fit solo walker, I have two excellent suggestions:
+
+🥾 OPTION 1: Tsagarada → Milopotamos beach (our favourite)
+2 hours downhill through ancient chestnut and beech forest, ending at one of Pelion's most beautiful pebble beaches. Swim, lunch at the taverna, then hotel transfer back. Easy difficulty.
+
+🥾 OPTION 2: Tsagarada → Mouresi → Agios Ioannis
+A 3-hour village-to-village walk through olive groves and traditional stone houses, ending at Agios Ioannis beach. Moderate, very varied scenery.
+
+Our recommended guide is Eleni — a local Tsagarada native who knows every plant, every legend, every view. She is wonderful company and speaks excellent English.
+
+For safety and the richest experience, I suggest Option 1 for your first morning, and Option 2 on your third day.
+
+Shall I confirm Eleni for both walks?
+
+Warm regards,
+Concierge Team — Pelion Resort by Angelos</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Panos Stavrakis &lt;p.stavrakis@atebank.gr&gt; <span class="tag tag-food">Gastronomy</span></div>
+          <div class="email-subject">"Pelion gastronomy — local producers, olive oil tasting, spoon sweets"</div>
+        </div>
+        <div class="email-time">Yesterday · 17:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Γεια σας, θα έρθω με τη γυναίκα μου για ένα σαββατοκύριακο. Είμαστε πολύ foodie και θέλουμε να ανακαλύψουμε την τοπική γαστρονομία του Πηλίου — ελαιόλαδο, μήλα, τα γλυκά του κουταλιού. Υπάρχει κάποιος τοπικός παραγωγός που μπορούμε να επισκεφτούμε; Ευχαριστώ, Πάνος
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 24s</div>
+          <div class="ai-time">⏱ 24 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Panos,
+
+For food lovers, Pelion is one of Greece's most rewarding destinations — the combination of mountain microclimate and Aegean influence produces ingredients of extraordinary quality.
+
+We can arrange a half-day artisan producer tour:
+
+🫒 MORNING: PELION PRODUCERS
+· 09:30 — Visit to Kyria Stavroula's family olive press in Mouresi — still cold-pressing by traditional stone mill. Olive oil tasting with local bread.
+· 10:30 — Spoon sweet workshop with a local producer in Tsagarada: cherry, bergamot, quince, fig — all made from the garden. You can take jars home.
+· 11:30 — Apple orchard visit (Pelion apples are famous throughout Greece — the trees here are 50+ years old).
+
+🍽️ LUNCH
+We recommend Taverna Platanos in Mouresi — no menu, you eat whatever the family cooked that morning. The best meal most guests have in Greece.
+
+Everything can be arranged for Saturday morning. Shall I confirm?
+
+Με εκτίμηση,
+Concierge Team — Pelion Resort by Angelos</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve & Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Pelion Resort</div>
+      <div class="roi-row"><span class="roi-key">Suites</span><span class="roi-val">22</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~18</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~5 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. cost saved</span><span class="roi-val roi-highlight">~€200/month</span></div>
+      <p class="roi-note">At 22 suites, every email matters. Guests at Pelion ask detailed, passionate questions about the landscape and food. The AI handles each in 30s, so your team can focus on the garden and the welcome.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Built for <strong>Pelion Resort by Angelos</strong> by <strong>Enzo Cosnard</strong>, currently live at <strong>IBB Palazzo Bettina</strong> (Malta). Small independent boutique = fast decision, one week setup.<br><br><a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#4a7ea8">Pelion Resort by Angelos · Tsagarada, Mount Pelion, Greece</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>
