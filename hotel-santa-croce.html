@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Agente Concierge IA — Hotel Santa Croce Orvieto</title>
+<style>
+  :root {
+    --primary: #2E1F0E;       /* tufo scuro di Orvieto */
+    --accent:  #B8892A;       /* oro medievale — finestre del Duomo */
+    --light:   #F6F2EA;       /* pietra chiara umbra */
+    --dark:    #1A1008;
+    --text:    #2E2E2E;
+    --muted:   #8A9090;
+    --border:  #DDD3BE;
+    --umbria:  #6B8C5A;       /* verde delle vigne dell'Orvieto Classico */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.2em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(184,137,42,0.09));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF6; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Hotel <em>Santa Croce</em></div>
+  <div class="badge">Demo Riservata</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Demo personalizzata — Hotel Santa Croce · Orvieto, Umbria</div>
+  <h1>Ogni email.<br>Risposta perfetta.</h1>
+  <p>Un palazzo del XV secolo nel centro storico di Orvieto — città UNESCO sulla rupe di tufo. 16 camere boutique con travi a vista e affreschi, clientela internazionale colta in visita al Duomo, alle cantine sotterranee e alle tenute di Orvieto Classico. L'Agente Concierge IA redige ogni risposta in 30 secondi, nella lingua dell'ospite.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">16</div>
+      <div class="lbl">Camere</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~11</div>
+      <div class="lbl">Email / giorno</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~4.5 h</div>
+      <div class="lbl">Risparmiate / sett.</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Tempo bozza</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~11</div>
+    <div class="lbl">Email ospiti al giorno<br><small style="font-size:0.62rem;color:#bbb">(16 camere × 0,7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~4.5 h</div>
+    <div class="lbl">Ore risparmiate / settimana<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s per bozza)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€216</div>
+    <div class="lbl">Tempo staff risparmiato / mese<br><small style="font-size:0.62rem;color:#bbb">(a €12/h — stima conservativa)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">2,7×</div>
+    <div class="lbl">ROI vs. piano Standard<br><small style="font-size:0.62rem;color:#bbb">(€216 risparmiati / €80 mese)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">IA in azione — scenari tipici dell'Hotel Santa Croce</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Visita al Duomo — Cappella di San Brizio</div>
+          <div>From: margaret.t@gmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email ospite ricevuta</div>
+        <p>Hello, we're arriving Thursday evening (2 adults). We're very keen to visit the Duomo and especially the Cappella di San Brizio with the Signorelli frescoes. Do we need to book in advance? And is there a guided art tour you'd recommend?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Bozza IA — 30 secondi <span>Pronta all'invio</span></div>
+        <p>Dear Margaret,<br><br>
+        Welcome to Orvieto — you have impeccable taste: the Cappella di San Brizio is one of the great masterpieces of Italian Renaissance painting, and Signorelli's frescoes were a direct inspiration for Michelangelo's Sistine Chapel.<br><br>
+        Advance booking is strongly recommended, especially for weekends — timed entries sell out. We can book your tickets directly from here before your arrival on Thursday. The Duomo is a short 5-minute walk from the hotel through the medieval centre.<br><br>
+        For a guided art tour, we work with Dr. Giulia Rossi, a local art historian who leads intimate private tours of the cathedral and its underground with exceptional depth and passion. Would you like me to check her availability for Friday morning?<br><br>
+        See you Thursday,<br>
+        The Concierge · Hotel Santa Croce, Orvieto</p>
+      </div>
+      <div class="card-footer">
+        <div>Ospite anglofono, arte rinascimentale — risposta colta, prenotazione proposta</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Degustazione Orvieto Classico</div>
+          <div>From: h.dupont@orange.fr</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email ospite ricevuta</div>
+        <p>Bonjour, nous arrivons vendredi. Nous aimerions visiter une cave viticole pour déguster l'Orvieto Classico — idéalement quelque chose d'authentique, dans un domaine familial. Est-ce possible d'organiser ça depuis l'hôtel ?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Bozza IA — 30 secondi <span>Pronta all'invio</span></div>
+        <p>Cher Henri,<br><br>
+        Excellent choix — l'Orvieto Classico est l'un des grands blancs d'Italie centrale, et les vignobles sur les collines argileuses autour d'Orvieto produisent des vins d'une minéralité remarquable.<br><br>
+        Nous travaillons avec deux domaines familiaux que nous recommandons chaleureusement : Barberani, dans les collines de Baschi avec une cave souterraine taillée dans le tuf, et Decugnano dei Barbi, dont la cave est l'une des plus anciennes d'Ombrie (fondée en 1212). Les deux proposent des dégustations privées sur réservation.<br><br>
+        Je peux organiser un transfert aller-retour depuis l'hôtel et réserver votre dégustation pour samedi ou dimanche selon vos préférences. Quel jour vous convient ?<br><br>
+        À bientôt,<br>
+        La Conciergerie · Hotel Santa Croce</p>
+      </div>
+      <div class="card-footer">
+        <div>Ospite francese → risposta in francese, selezione cantine locali autentiche</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Orvieto Sotterranea — Cantine nel Tufo</div>
+          <div>From: k.tanaka@gmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email ospite ricevuta</div>
+        <p>こんにちは、来週月曜日に到着します。オルヴィエートの地下都市（Orvieto Sotterranea）に非常に興味があります。見学は予約が必要ですか？また、英語のガイドはありますか？よろしくお願いします。</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Bozza IA — 30 secondi <span>Pronta all'invio</span></div>
+        <p>田中様、<br><br>
+        オルヴィエートへようこそ！オルヴィエート・ソッテラーネアは、エトルリア人が掘り始めた地下都市で、洞窟、井戸、古代のオリーブオイル工場など全長300メートルの回廊が続く素晴らしい場所です。<br><br>
+        見学はオルヴィエートの広場（Piazza del Duomo）から出発しており、英語ガイドによるツアーは毎日11時と16時15分に定期的に行われています。予約は推奨されますが、月曜日であれば混雑も少なく、当日の参加も可能な場合があります。ホテルからチケットを事前に予約することもできます。<br><br>
+        月曜日のご到着を楽しみにお待ちしております！<br><br>
+        コンシェルジュより · ホテル・サンタ・クローチェ、オルヴィエート</p>
+      </div>
+      <div class="card-footer">
+        <div>Ospite giapponese → risposta in giapponese — impatto immediato</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Prezzi — pensati per hotel boutique</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/mese</sub></div>
+      <div class="setup">+ €800 setup una tantum</div>
+      <ul>
+        <li>Analisi email & bozze IA</li>
+        <li>Dashboard (5 schede)</li>
+        <li>Volume email illimitato</li>
+        <li>Bozze multilingua</li>
+        <li>Integrazione PMS Mews</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Consigliato</span></div>
+      <div class="price">€120<sub>/mese</sub></div>
+      <div class="setup">+ €800 setup una tantum</div>
+      <ul>
+        <li>Tutto di Standard</li>
+        <li>Auto-miglioramento IA settimanale</li>
+        <li>Report mensile prestazioni</li>
+        <li>Tono calibrato per Hotel Santa Croce</li>
+        <li>Supporto prioritario</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/mese</sub></div>
+      <div class="setup">+ €1.200 setup una tantum</div>
+      <ul>
+        <li>Tutto di Premium</li>
+        <li>Formazione su scambi reali</li>
+        <li>Calibrazione voce brand profonda</li>
+        <li>Sessione onboarding in loco</li>
+        <li>Call di revisione trimestrale</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Già attivo a IBB Palazzo Bettina (Birgu, Malta) — boutique 5 stelle, profilo storico mediterraneo analogo</div>
+  <div>Per Hotel Santa Croce · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

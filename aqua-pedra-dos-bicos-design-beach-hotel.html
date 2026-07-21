@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Aqua Pedra dos Bicos Design Beach Hotel</title>
+  <style>
+    :root {
+      --primary:   #1A5C7A;   /* Atlantic deep teal */
+      --accent:    #E8873A;   /* Algarve sunset orange */
+      --bg:        #F4F8FA;
+      --surface:   #FFFFFF;
+      --text:      #0F2A38;
+      --text-muted:#627080;
+      --border:    #D0E0E8;
+      --badge-ok:  #1A5C7A;
+      --badge-bg:  #E0EEF5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Helvetica Neue', 'Arial', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .topbar { background: var(--primary); color: #fff; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-brand { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { width: 40px; height: 40px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: #fff; letter-spacing: -1px; }
+    .topbar-name { font-size: 16px; font-weight: 700; letter-spacing: 0.2px; }
+    .topbar-sub { font-size: 11px; opacity: 0.75; margin-top: 2px; letter-spacing: 0.5px; }
+    .topbar-badge { background: var(--accent); color: #fff; font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase; }
+
+    .tabs { background: var(--surface); border-bottom: 2px solid var(--border); display: flex; padding: 0 32px; gap: 4px; }
+    .tab { padding: 14px 20px; font-size: 13px; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; font-weight: 500; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+    .layout { display: grid; grid-template-columns: 330px 1fr; gap: 24px; padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+    .inbox-panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 700; }
+    .count-badge { background: var(--badge-bg); color: var(--badge-ok); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; }
+
+    .email-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+    .email-item:hover { background: var(--bg); }
+    .email-item.selected { background: var(--badge-bg); border-left: 3px solid var(--primary); }
+    .email-item:last-child { border-bottom: none; }
+    .email-from { font-size: 13px; font-weight: 700; }
+    .email-subject { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .email-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+    .email-time { font-size: 11px; color: var(--text-muted); }
+    .email-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; }
+    .tag-kayak { background: #E0EEF5; color: #1A5C7A; }
+    .tag-dolphin { background: #E0F5EE; color: #0A5C40; }
+    .tag-golf { background: #F0EDE0; color: #5A4A10; }
+
+    .main-panel { display: flex; flex-direction: column; gap: 20px; }
+    .email-selector { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .selector-label { font-size: 13px; font-weight: 700; flex-shrink: 0; }
+    .sel-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; border: 1px solid var(--border); background: var(--bg); cursor: pointer; font-weight: 500; }
+    .sel-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+
+    .email-reader { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px 28px; }
+    .reader-from { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+    .reader-subject { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .reader-body { font-size: 14px; line-height: 1.75; border-top: 1px solid var(--border); padding-top: 16px; }
+
+    .ai-draft { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .ai-header { background: var(--badge-bg); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #B8D0E0; }
+    .ai-title { font-size: 13px; font-weight: 700; color: var(--primary); }
+    .ai-time { font-size: 11px; color: var(--text-muted); }
+    .ai-body { padding: 20px 24px; font-size: 14px; line-height: 1.8; }
+    .ai-actions { padding: 14px 24px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-accent { background: var(--accent); color: #fff; }
+
+    .email-section { display: none; }
+    .email-section.active { display: contents; }
+
+    .roi-banner { background: linear-gradient(135deg, var(--primary) 0%, #0D3A4A 100%); color: #fff; border-radius: 12px; padding: 28px 32px; }
+    .roi-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+    .roi-card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 16px; text-align: center; }
+    .roi-num { font-size: 28px; font-weight: 700; color: var(--accent); }
+    .roi-label { font-size: 11px; opacity: 0.85; margin-top: 4px; }
+    .roi-note { font-size: 12px; opacity: 0.7; font-style: italic; }
+
+    .pricing-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .price-card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px; text-align: center; }
+    .price-card.featured { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+    .price-name { font-size: 13px; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .price-setup { font-size: 12px; color: var(--text-muted); }
+    .price-monthly { font-size: 26px; font-weight: 700; color: var(--primary); margin: 8px 0; }
+    .price-monthly span { font-size: 13px; font-weight: 400; }
+    .price-features { font-size: 11px; color: var(--text-muted); line-height: 1.6; }
+    .price-badge { background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; display: inline-block; margin-bottom: 10px; }
+
+    .footer { text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-muted); border-top: 1px solid var(--border); background: var(--surface); margin-top: 32px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">A</div>
+    <div>
+      <div class="topbar-name">Aqua Pedra dos Bicos Design Beach Hotel</div>
+      <div class="topbar-sub">Albufeira · Algarve · Atlantic · AI Concierge Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-badge">🤖 AI Concierge — Live Demo</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyze</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🛎️ Reservations</div>
+  <div class="tab">🧾 Invoices</div>
+</div>
+
+<div class="layout">
+  <div class="inbox-panel">
+    <div class="panel-header">
+      <span class="panel-title">📥 Today's Inbox</span>
+      <span class="count-badge">19 emails</span>
+    </div>
+    <div class="email-item selected" onclick="showEmail(0)">
+      <div class="email-from">Emma & Josh Bradley — Bristol</div>
+      <div class="email-subject">Sea kayaking cliff tour — beginner friendly?</div>
+      <div class="email-meta"><span class="email-time">07:44</span><span class="email-tag tag-kayak">Kayak</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(1)">
+      <div class="email-from">Claudine Mertens — Brussels</div>
+      <div class="email-subject">Dolphin watching trip — with children (6 & 9)</div>
+      <div class="email-meta"><span class="email-time">08:56</span><span class="email-tag tag-dolphin">Dolphin</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(2)">
+      <div class="email-from">Richard Forsyth — Edinburgh</div>
+      <div class="email-subject">Golf tee time — Salgados or Pine Cliffs?</div>
+      <div class="email-meta"><span class="email-time">10:30</span><span class="email-tag tag-golf">Golf</span></div>
+    </div>
+    <div class="email-item" style="opacity:0.4">
+      <div class="email-from">Booking.com</div>
+      <div class="email-subject">Availability request — last minute Aug 2</div>
+      <div class="email-meta"><span class="email-time">11:15</span><span class="email-tag tag-kayak">Booking</span></div>
+    </div>
+    <div style="padding: 12px 20px; font-size: 11px; color: var(--text-muted); text-align: center; border-top: 1px solid var(--border); font-style: italic;">+ 15 more — all processed by AI</div>
+  </div>
+
+  <div class="main-panel">
+    <div class="email-selector">
+      <span class="selector-label">View demo email:</span>
+      <button class="sel-btn active" onclick="showEmail(0); highlightBtn(this)">🚣 Sea Kayaking</button>
+      <button class="sel-btn" onclick="showEmail(1); highlightBtn(this)">🐬 Dolphin Watching</button>
+      <button class="sel-btn" onclick="showEmail(2); highlightBtn(this)">⛳ Golf</button>
+    </div>
+
+    <!-- EMAIL 1 -->
+    <div id="email-0" class="email-section active">
+      <div class="email-reader">
+        <div class="reader-from">From: emma.j.bradley@gmail.com — Mon 20 Jul 2026, 07:44</div>
+        <div class="reader-subject">Sea kayaking along the Albufeira cliffs — beginner friendly?</div>
+        <div class="reader-body">
+          Hello Aqua Pedra dos Bicos,<br><br>
+          We arrive on July 28 for 5 nights — absolutely cannot wait, the hotel looks stunning from the photos.<br><br>
+          Neither of us has done sea kayaking before but we're reasonably fit and love the idea of exploring the cliffs from the water. A few questions:<br><br>
+          • Is there a guided beginner kayak tour from near the hotel?<br>
+          • How long is a typical session?<br>
+          • Can we see the famous Algarve caves from a kayak?<br>
+          • Is there anything to worry about in terms of safety/conditions in late July?<br><br>
+          Thanks so much!<br>
+          Emma & Josh
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 26 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 07:44 → 07:45</div>
+        </div>
+        <div class="ai-body">
+          Dear Emma and Josh,<br><br>
+          What an excellent choice — exploring the Algarve cliffs by kayak is genuinely unforgettable, and late July conditions are perfect for beginners. We are so excited to welcome you on the 28th!<br><br>
+          <strong>Guided beginner tours:</strong> We partner with Algarve Kayak Tours, whose guides lead small groups from the beach directly below our hotel (Praia dos Inglesinhos, 2 minutes from reception). No prior experience required — you get a 15-minute briefing before setting off.<br><br>
+          <strong>Duration:</strong> The standard guided session is 2 hours, covering approximately 4km of coastline. The "Caves & Arches" option (€35/person) extends to 3 hours and enters the famous golden-stone cave systems — including the Gruta da Diabo (Devil's Grotto).<br><br>
+          <strong>Seeing the caves:</strong> Absolutely yes — the sea caves around Olhos de Água and Albufeira are the highlight of the tour and only accessible from the water. Truly spectacular.<br><br>
+          <strong>Safety in late July:</strong> Conditions are excellent — Atlantic swells are minimal in this area in July, visibility underwater is superb and the guides monitor sea state daily. The tour is cancelled only in rare storm conditions (which almost never occur in July).<br><br>
+          Shall I pre-book the "Caves & Arches" tour for you on a morning of your choice?<br><br>
+          Warm regards,<br>
+          Concierge — Aqua Pedra dos Bicos, Albufeira
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div id="email-1" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: c.mertens.brux@gmail.com — Mon 20 Jul 2026, 08:56</div>
+        <div class="reader-subject">Dolphin watching — children aged 6 and 9, August 4</div>
+        <div class="reader-body">
+          Bonjour / Hello,<br><br>
+          We are a Belgian family staying at your hotel August 2–7. Our children are 6 and 9 years old and they are absolutely passionate about dolphins.<br><br>
+          Please could you advise:<br>
+          1. What dolphin watching trips are available from Albufeira?<br>
+          2. Are they suitable for young children (seasickness, safety)?<br>
+          3. Do they guarantee dolphin sightings?<br>
+          4. How far in advance should we book?<br><br>
+          Thank you very much,<br>
+          Claudine Mertens
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 28 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 08:56 → 08:57</div>
+        </div>
+        <div class="ai-body">
+          Dear Claudine,<br><br>
+          Your children are going to have the best day of their lives — dolphin watching in the Algarve is truly magical and the area around Albufeira is one of the most reliable spots in all of Europe for common dolphin sightings.<br><br>
+          <strong>Our recommended trip:</strong> We work with Ocean Revival Albufeira, who operate a stable, spacious catamaran (significantly more comfortable than smaller rigid inflatables for young children). Their 2.5-hour dolphin safari departs from Albufeira marina at 10:00 and 15:00. Price: €40/adult, €25/child under 12.<br><br>
+          <strong>Suitable for children aged 6 and 9:</strong> Absolutely — the catamaran has wide decks, safety rails and plenty of seating. The sea in the Albufeira bay area is sheltered, and seasickness risk is very low on this type of vessel. Children often get the best views because they're not afraid to sit at the bow!<br><br>
+          <strong>Dolphin guarantee:</strong> Ocean Revival reports a 95%+ sighting rate in July and August (common dolphins and bottlenose dolphins are resident). If no dolphins are seen, they offer a free return trip.<br><br>
+          <strong>Booking lead time:</strong> We recommend booking at least 3 days in advance in August. We can reserve the August 4 morning departure for your family right now — shall we proceed?<br><br>
+          Warm regards,<br>
+          Concierge — Aqua Pedra dos Bicos, Albufeira
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div id="email-2" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: r.forsyth@btinternet.com — Mon 20 Jul 2026, 10:30</div>
+        <div class="reader-subject">Golf tee time — Salgados or Pine Cliffs, July 30</div>
+        <div class="reader-body">
+          Dear Hotel,<br><br>
+          I'm an enthusiastic golfer (handicap 12) staying July 28–August 1. I'd like to play 18 holes on July 30.<br>
+          Which do you recommend between Salgados Golf and Pine Cliffs Golf — and is there a preference for one in summer conditions?<br>
+          Could you arrange the tee time and is there transport from the hotel?<br><br>
+          Many thanks,<br>
+          Richard Forsyth
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 21 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 10:30 → 10:31</div>
+        </div>
+        <div class="ai-body">
+          Dear Richard,<br><br>
+          Both are excellent courses, but for a handicap-12 player on a summer morning, our recommendation is <strong>Pine Cliffs Golf & Country Resort</strong> — and here's why:<br><br>
+          Pine Cliffs features the famous "Devil's Parlour" — a 9th-hole clifftop par 3 above the ocean that is quite simply one of the most photographed holes in European golf. It plays shorter than Salgados but is more dramatic and better maintained for summer play. Green fee: approximately €95–115 in July (we can confirm the live rate).<br><br>
+          Salgados is a flatter, links-style course — excellent, but the views don't compare. Worth considering for a second round later in your trip.<br><br>
+          <strong>Tee time:</strong> We'll call Pine Cliffs directly and secure you a 08:30 slot on July 30 — early morning gives you the best conditions before peak heat.<br><br>
+          <strong>Transport:</strong> We can arrange a private taxi (€18 one-way, 12 minutes) or join our morning activities shuttle at 08:00. Golf clubs hire is also available on-site if needed.<br><br>
+          Shall I book the 08:30 tee time and arrange transport?<br><br>
+          Warm regards,<br>
+          Concierge — Aqua Pedra dos Bicos, Albufeira
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="roi-banner">
+      <div class="roi-title">📊 Your ROI — Aqua Pedra dos Bicos (41 rooms · Algarve peak season)</div>
+      <div class="roi-grid">
+        <div class="roi-card"><div class="roi-num">~22</div><div class="roi-label">Emails per day<br>(0.55 per room · summer)</div></div>
+        <div class="roi-card"><div class="roi-num">~12h</div><div class="roi-label">Hours saved per week<br>(15 min → 2 min)</div></div>
+        <div class="roi-card"><div class="roi-num">30s</div><div class="roi-label">AI draft time<br>per email</div></div>
+        <div class="roi-card"><div class="roi-num">120€</div><div class="roi-label">Monthly investment<br>Premium plan</div></div>
+      </div>
+      <div class="roi-note">Conservative estimate · Based on live data from IBB Palazzo Bettina, Malta · Peak gains in June–September Atlantic season</div>
+    </div>
+
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="price-name">Standard</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">80€ <span>/month</span></div>
+        <div class="price-features">AI concierge · Draft generation · Email analysis</div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">⭐ RECOMMENDED</div>
+        <div class="price-name">Premium</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">120€ <span>/month</span></div>
+        <div class="price-features">Everything in Standard · Weekly auto-improvement · Monthly report</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Premium+</div>
+        <div class="price-setup">1,200€ one-time setup</div>
+        <div class="price-monthly">150€ <span>/month</span></div>
+        <div class="price-features">Everything in Premium · Training on real exchanges · Dedicated onboarding</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Personalised demo for <strong>Aqua Pedra dos Bicos Design Beach Hotel</strong> · Albufeira, Algarve ·
+  Prepared by Enzo Cosnard · AI Concierge live at IBB Palazzo Bettina, Malta ·
+  <a href="mailto:enzo26cosnard@gmail.com" style="color: var(--primary);">enzo26cosnard@gmail.com</a>
+</div>
+
+<script>
+  function showEmail(n) {
+    document.querySelectorAll('.email-section').forEach(function(el, i) { el.classList.toggle('active', i === n); });
+    document.querySelectorAll('.email-item').forEach(function(el, i) { el.classList.toggle('selected', i === n); });
+  }
+  function highlightBtn(btn) {
+    document.querySelectorAll('.sel-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

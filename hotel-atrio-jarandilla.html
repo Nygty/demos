@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Agente Concierge IA — Hotel Atrio Jarandilla</title>
+<style>
+  :root {
+    --primary: #3A2518;       /* madera oscura siglo XVI — Extremadura */
+    --accent:  #B07840;       /* tierra de Vera — adobe cálido */
+    --light:   #F5F0E8;       /* piedra caliza blanqueada */
+    --dark:    #221509;
+    --text:    #2E2E2E;
+    --muted:   #8A9090;
+    --border:  #DDD4C0;
+    --verde:   #5C7A45;       /* encinas de la Vera */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.2rem; letter-spacing: 0.18em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(176,120,64,0.09));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF5; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Hotel <em>Atrio</em> Jarandilla</div>
+  <div class="badge">Demo Exclusiva</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Demo personalizada — Hotel Atrio Jarandilla · La Vera, Extremadura, España</div>
+  <h1>Cada email.<br>Respondido a la perfección.</h1>
+  <p>Una casa solariega del siglo XVI en el corazón de La Vera, Extremadura — 14 habitaciones boutique, clientela nacional e internacional exigente que escribe a diario para rutas al Monasterio de Yuste, excursiones al Valle del Jerte y experiencias gastronómicas. El Agente Concierge IA redacta la respuesta perfecta en 30 segundos, en cualquier idioma.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">14</div>
+      <div class="lbl">Habitaciones</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~10</div>
+      <div class="lbl">Emails / día</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~4 h</div>
+      <div class="lbl">Ahorradas / sem.</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Tiempo de borrador</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~10</div>
+    <div class="lbl">Emails de huéspedes / día<br><small style="font-size:0.62rem;color:#bbb">(14 habitaciones × 0,7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~4 h</div>
+    <div class="lbl">Horas ahorradas / semana<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s por borrador)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€192</div>
+    <div class="lbl">Tiempo de staff ahorrado / mes<br><small style="font-size:0.62rem;color:#bbb">(a €12/h — estimación conservadora)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">2,4×</div>
+    <div class="lbl">ROI vs. plan Standard<br><small style="font-size:0.62rem;color:#bbb">(€192 ahorrados / €80 mes)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">IA en acción — escenarios típicos del Atrio Jarandilla</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Ruta al Monasterio de Yuste</div>
+          <div>From: peter.w@t-online.de</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email de huésped recibido</div>
+        <p>Guten Tag, wir kommen am Mittwoch an und möchten unbedingt das Kloster Yuste besuchen, wo Kaiser Karl V. seine letzten Jahre verbracht hat. Wie weit ist es vom Hotel entfernt? Brauchen wir einen Mietwagen oder können Sie uns einen Transfer organisieren?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Borrador IA — 30 segundos <span>Listo para enviar</span></div>
+        <p>Sehr geehrter Herr Weber,<br><br>
+        Herzlich willkommen — Sie haben eine der faszinierendsten Destinationen Extremaduras gewählt! Das Kloster Yuste liegt nur 8 km vom Hotel entfernt, durch eine wunderschöne Landschaft aus Edelkastanien und Kiefernwäldern.<br><br>
+        Wir organisieren sehr gerne einen privaten Transfer für Sie — Abholung vom Hotel, freie Zeit im Kloster (wir empfehlen mindestens 2 Stunden für das Appartement Karls V. und den Kreuzgang) und Rückkehr wann Sie möchten. Alternativ können wir Ihnen auch ein lokales Mietfahrzeug für Ihren Aufenthalt arrangieren, falls Sie die Umgebung selbständig erkunden möchten.<br><br>
+        Für welchen Tag soll ich den Transfer vormerken?<br><br>
+        Mit freundlichen Grüßen,<br>
+        Die Concierge · Hotel Atrio Jarandilla</p>
+      </div>
+      <div class="card-footer">
+        <div>Huésped alemán → respuesta en alemán, contexto histórico incluido</div>
+        <div class="time">⚡ 30 seg</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Experiencia Gastronómica Local</div>
+          <div>From: isabelle.m@sfr.fr</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email de huésped recibido</div>
+        <p>Bonjour, nous arrivons vendredi soir. Nous sommes très intéressés par la gastronomie de la région — le pimentón de La Vera, les charcuteries ibériques. Y a-t-il des visites de producteurs ou des marchés artisanaux à faire ? Et peut-on dîner à l'hôtel avec des produits locaux ?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Borrador IA — 30 segundos <span>Listo para enviar</span></div>
+        <p>Chère Isabelle,<br><br>
+        La Vera est un terroir exceptionnel — vous avez très bien choisi !<br><br>
+        Pour le pimentón, nous recommandons une visite à la Cooperativa de Jarandilla, où vous pourrez voir le processus de fumage au bois de chêne et acheter directement à la source. Pour la charcuterie ibérique, la ferme Dehesa de la Vereda à Villanueva de la Vera organise des visites les mardi et jeudi matins. Il y a également un marché artisanal à Jarandilla le samedi.<br><br>
+        À l'hôtel, notre cuisine du soir valorise exclusivement les produits de la région : charcuteries de Montánchez, fromage de La Serena, agneau de l'Extremadure et pimentón de La Vera dans tous nos plats de saison. Une table vous sera réservée pour vendredi soir à l'heure de votre choix.<br><br>
+        À bientôt,<br>
+        La Conciergerie · Hotel Atrio Jarandilla</p>
+      </div>
+      <div class="card-footer">
+        <div>Huésped francés → respuesta en francés, expertise gastronómica local</div>
+        <div class="time">⚡ 30 seg</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Valle del Jerte — Cerezo en Flor</div>
+          <div>From: carlos.r@gmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email de huésped recibido</div>
+        <p>Hola, estamos pensando en venir a finales de marzo para ver el cerezo en flor en el Valle del Jerte. ¿Está lejos del hotel? ¿Nos pueden organizar una excursión de un día? Y una duda: ¿merece la pena ir entre semana para evitar la masificación?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Borrador IA — 30 segundos <span>Listo para enviar</span></div>
+        <p>Hola Carlos,<br><br>
+        ¡Ha acertado en el momento — la floración del cerezo en el Valle del Jerte entre finales de marzo y principios de abril es un espectáculo único!<br><br>
+        El Valle del Jerte está a unos 35 km del hotel, aproximadamente 45 minutos en coche por una carretera preciosa a través de la sierra. Le recomendamos encarecidamente venir entre semana — los fines de semana la afluencia puede ser muy elevada (50.000 visitantes en un solo día). De lunes a jueves el paisaje es suyo casi en exclusiva.<br><br>
+        Podemos organizar una excursión de día completo con chófer privado: ruta por las localidades de Cabezuela del Valle, Piornal y el mirador del Tajo de la Pepina, con almuerzo en una venta local. ¿Tiene ya fecha de visita en mente?<br><br>
+        Un saludo,<br>
+        La Conserjería · Hotel Atrio Jarandilla</p>
+      </div>
+      <div class="card-footer">
+        <div>Huésped español, pregunta estacional — respuesta experta, honesta, práctica</div>
+        <div class="time">⚡ 30 seg</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Precios — diseñados para hoteles boutique</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/mes</sub></div>
+      <div class="setup">+ €800 setup único</div>
+      <ul>
+        <li>Análisis de emails & borradores IA</li>
+        <li>Dashboard (5 pestañas)</li>
+        <li>Volumen de emails ilimitado</li>
+        <li>Borradores multilingüe</li>
+        <li>Integración PMS Mews</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recomendado</span></div>
+      <div class="price">€120<sub>/mes</sub></div>
+      <div class="setup">+ €800 setup único</div>
+      <ul>
+        <li>Todo lo de Standard</li>
+        <li>Auto-mejora IA semanal</li>
+        <li>Informe mensual de rendimiento</li>
+        <li>Tono calibrado para el Atrio</li>
+        <li>Soporte prioritario</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/mes</sub></div>
+      <div class="setup">+ €1.200 setup único</div>
+      <ul>
+        <li>Todo lo de Premium</li>
+        <li>Formación en intercambios reales</li>
+        <li>Calibración profunda de voz de marca</li>
+        <li>Sesión de onboarding in situ</li>
+        <li>Llamada de revisión trimestral</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Ya activo en IBB Palazzo Bettina (Birgu, Malta) — boutique 5 estrellas, perfil histórico mediterráneo similar</div>
+  <div>Para Hotel Atrio Jarandilla · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

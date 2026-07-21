@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demo Agente Concierge IA — Hotel Torre di Cala Piccola</title>
+<style>
+  :root {
+    --primary: #1E3040;       /* blu profondo del Tirreno toscano */
+    --accent:  #B87830;       /* bronzo argentario — scogliere e torri */
+    --light:   #F5F2EC;       /* calcare bianco del promontorio */
+    --dark:    #0F1E2C;
+    --text:    #2E2E2E;
+    --muted:   #8A9090;
+    --border:  #DDD6C8;
+    --mare:    #4A8B9A;       /* acqua del Giglio */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.0rem; letter-spacing: 0.15em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(184,120,48,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Torre di <em>Cala Piccola</em></div>
+  <div class="badge">Demo Riservata</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Demo personalizzata — Hotel Torre di Cala Piccola · Monte Argentario, Toscana</div>
+  <h1>Ogni email.<br>Risposta perfetta.</h1>
+  <p>Un resort boutique sull'Argentario toscano, affacciato sul promontorio del Monte Argentario e sull'Isola del Giglio — 50 camere, spiaggia privata, clientela internazionale che scrive ogni giorno per escursioni al Giglio, barche private e cene sul molo. L'Agente Concierge IA gestisce ogni richiesta in 30 secondi, in qualsiasi lingua.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">50</div>
+      <div class="lbl">Camere</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~35</div>
+      <div class="lbl">Email / giorno</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~14 h</div>
+      <div class="lbl">Risparmiate / sett.</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Tempo bozza</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~35</div>
+    <div class="lbl">Email ospiti al giorno<br><small style="font-size:0.62rem;color:#bbb">(50 camere × 0,7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~14 h</div>
+    <div class="lbl">Ore risparmiate / settimana<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s per bozza)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€672</div>
+    <div class="lbl">Tempo staff risparmiato / mese<br><small style="font-size:0.62rem;color:#bbb">(a €12/h — stima conservativa)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">8×</div>
+    <div class="lbl">ROI vs. piano Standard<br><small style="font-size:0.62rem;color:#bbb">(€672 risparmiati / €80 mese)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">IA in azione — scenari tipici di Torre di Cala Piccola</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Escursione all'Isola del Giglio</div>
+          <div>From: james.w@btinternet.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email ospite ricevuta</div>
+        <p>Hello, checking in Saturday (2 couples, 4 adults). We're very keen to visit Giglio island — preferably by private boat rather than the public ferry. Is it possible to arrange this? And what's the best beach on Giglio? We'd like to spend a full day there.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Bozza IA — 30 secondi <span>Pronta all'invio</span></div>
+        <p>Dear James,<br><br>
+        A private boat to Giglio is absolutely the way to go — it's a 30-minute crossing from our private jetty at Cala Piccola, and arriving independently means you can choose your mooring spot rather than docking at the busy Giglio Porto.<br><br>
+        For a group of 4, we recommend a skipper-led motorboat with a small sun deck. A full-day itinerary: morning crossing to the Spiaggia dei Cannelle (the most beautiful beach, fine white sand, crystalline water), lunch at a simple trattoria in Giglio Castello village on the hill, and afternoon snorkelling around the Punta del Fenaio before the return at sunset.<br><br>
+        We can have this arranged before Saturday. Would Sunday be the best day for the excursion, to give you Saturday to settle in?<br><br>
+        Warmly,<br>
+        La Concierge · Torre di Cala Piccola</p>
+      </div>
+      <div class="card-footer">
+        <div>Escursione Giglio privata — itinerario completo proposto, giorno suggerito</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Cena sul Molo — Occasione Speciale</div>
+          <div>From: f.meyer@web.de</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email ospite ricevuta</div>
+        <p>Guten Tag, wir kommen nächsten Freitag an — es ist der Geburtstag meiner Frau (50. Geburtstag!). Gibt es die Möglichkeit, ein romantisches Abendessen direkt am Steg mit Blick auf das Meer zu organisieren? Wir würden gerne etwas sehr Besonderes machen.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Bozza IA — 30 secondi <span>Pronta all'invio</span></div>
+        <p>Lieber Frank,<br><br>
+        Herzlichen Glückwunsch zum 50. Geburtstag Ihrer Frau — was für eine wunderbare Art, ihn zu feiern!<br><br>
+        Ja, wir richten sehr gerne ein privates Abendessen auf unserem Steg ein: ein gedeckter Tisch für zwei, Kerzen, frische Blumen, der Blick auf das offene Meer und die Lichter des Monte Argentario — ein unvergesslicher Moment.<br><br>
+        Unser Küchenchef bereitet ein Menü nach Ihren Wünschen vor: frischer Fisch direkt vom Argentario-Markt, toskanische Meeresfrüchte, und zum Abschluss eine Geburtstagstorte von unserem Konditor. Haben Sie Vorlieben oder Unverträglichkeiten?<br><br>
+        Mit unseren herzlichsten Glückwünschen,<br>
+        Die Concierge · Torre di Cala Piccola</p>
+      </div>
+      <div class="card-footer">
+        <div>Ospite tedesco, 50° compleanno → risposta in tedesco, cena privata molo</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Barca Privata — Noleggio Giornaliero</div>
+          <div>From: anne.l@laposte.net</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Email ospite ricevuta</div>
+        <p>Bonjour, nous arrivons mercredi soir pour 5 nuits. Nous aimerions louer un bateau à moteur sans skipper pour explorer librement les criques de l'Argentario pendant notre séjour. Est-ce possible ? Quelles sont les conditions ? Mon mari a un permis bateau.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">Bozza IA — 30 secondi <span>Pronta all'invio</span></div>
+        <p>Chère Anne,<br><br>
+        Tout à fait possible — c'est la meilleure façon de découvrir les criques de l'Argentario à votre rythme !<br><br>
+        Nous travaillons avec un loueur de confiance basé à Porto Santo Stefano, à 10 minutes de l'hôtel. Avec un permis côtier européen, votre mari pourra piloter un bateau jusqu'à 6 mètres en autonomie complète. Les criques incontournables : Cala Grande, Cala di Levante et — si les conditions le permettent — la traversée vers le Giglio.<br><br>
+        Pour une location de 5 jours, je peux négocier un tarif préférentiel et vous faire réserver l'embarcation avant votre arrivée mercredi. Souhaitez-vous une journée avec et sans skipper selon les jours ?<br><br>
+        À mercredi,<br>
+        La Conciergerie · Torre di Cala Piccola</p>
+      </div>
+      <div class="card-footer">
+        <div>Ospite francese, noleggio autonomo — risposta pratica, tarifa preferenziale proposta</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Prezzi — pensati per hotel boutique</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/mese</sub></div>
+      <div class="setup">+ €800 setup una tantum</div>
+      <ul>
+        <li>Analisi email & bozze IA</li>
+        <li>Dashboard (5 schede)</li>
+        <li>Volume email illimitato</li>
+        <li>Bozze multilingua</li>
+        <li>Integrazione PMS Mews</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Consigliato</span></div>
+      <div class="price">€120<sub>/mese</sub></div>
+      <div class="setup">+ €800 setup una tantum</div>
+      <ul>
+        <li>Tutto di Standard</li>
+        <li>Auto-miglioramento IA settimanale</li>
+        <li>Report mensile prestazioni</li>
+        <li>Tono calibrato per Torre di Cala Piccola</li>
+        <li>Supporto prioritario</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/mese</sub></div>
+      <div class="setup">+ €1.200 setup una tantum</div>
+      <ul>
+        <li>Tutto di Premium</li>
+        <li>Formazione su scambi reali</li>
+        <li>Calibrazione voce brand profonda</li>
+        <li>Sessione onboarding in loco</li>
+        <li>Call di revisione trimestrale</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Già attivo a IBB Palazzo Bettina (Birgu, Malta) — boutique 5 stelle, profilo storico mediterraneo analogo</div>
+  <div>Per Torre di Cala Piccola · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

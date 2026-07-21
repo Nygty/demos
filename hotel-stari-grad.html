@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hotel Stari Grad Dubrovnik</title>
+  <style>
+    :root {
+      --primary:   #8B1A1A;   /* deep Dubrovnik terracotta red */
+      --accent:    #D4A843;   /* old stone gold */
+      --bg:        #F9F6F0;
+      --surface:   #FFFFFF;
+      --text:      #2A1A0E;
+      --text-muted:#7A6B5E;
+      --border:    #E0D5C5;
+      --badge-ok:  #8B1A1A;
+      --badge-bg:  #F5E8E0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .topbar { background: var(--primary); color: #fff; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-brand { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { width: 40px; height: 40px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold; color: var(--primary); }
+    .topbar-name { font-size: 17px; font-weight: 600; }
+    .topbar-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+    .topbar-badge { background: var(--accent); color: var(--primary); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase; font-family: 'Arial', sans-serif; }
+
+    .tabs { background: var(--surface); border-bottom: 2px solid var(--border); display: flex; padding: 0 32px; gap: 4px; }
+    .tab { padding: 14px 20px; font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+    .layout { display: grid; grid-template-columns: 330px 1fr; gap: 24px; padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+    .inbox-panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 700; font-family: 'Arial', sans-serif; }
+    .count-badge { background: var(--badge-bg); color: var(--badge-ok); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; font-family: 'Arial', sans-serif; }
+
+    .email-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+    .email-item:hover { background: var(--bg); }
+    .email-item.selected { background: var(--badge-bg); border-left: 3px solid var(--primary); }
+    .email-item:last-child { border-bottom: none; }
+    .email-from { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; }
+    .email-subject { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-family: 'Arial', sans-serif; }
+    .email-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+    .email-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .email-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; font-family: 'Arial', sans-serif; text-transform: uppercase; }
+    .tag-got  { background: #F5E8E0; color: #8B1A1A; }
+    .tag-boat { background: #E0EAF5; color: #1A4A8B; }
+    .tag-island { background: #E0F0E8; color: #1A6A3A; }
+
+    .main-panel { display: flex; flex-direction: column; gap: 20px; }
+    .email-selector { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .selector-label { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; flex-shrink: 0; }
+    .sel-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-family: 'Arial', sans-serif; border: 1px solid var(--border); background: var(--bg); cursor: pointer; }
+    .sel-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+
+    .email-reader { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px 28px; }
+    .reader-from { font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); margin-bottom: 4px; }
+    .reader-subject { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .reader-body { font-size: 14px; line-height: 1.75; font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); padding-top: 16px; }
+
+    .ai-draft { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .ai-header { background: var(--badge-bg); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #D5C0B0; }
+    .ai-title { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--primary); }
+    .ai-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .ai-body { padding: 20px 24px; font-size: 14px; line-height: 1.8; font-family: 'Arial', sans-serif; }
+    .ai-actions { padding: 14px 24px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'Arial', sans-serif; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-accent { background: var(--accent); color: var(--primary); }
+
+    .email-section { display: none; }
+    .email-section.active { display: contents; }
+
+    /* UNESCO context banner */
+    .context-banner { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 8px; padding: 14px 20px; font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); display: flex; align-items: center; gap: 12px; }
+
+    .roi-banner { background: linear-gradient(135deg, var(--primary) 0%, #4A0808 100%); color: #fff; border-radius: 12px; padding: 28px 32px; }
+    .roi-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; font-family: 'Arial', sans-serif; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+    .roi-card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 16px; text-align: center; }
+    .roi-num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: 'Arial', sans-serif; }
+    .roi-label { font-size: 11px; opacity: 0.85; margin-top: 4px; font-family: 'Arial', sans-serif; }
+    .roi-note { font-size: 12px; opacity: 0.7; font-family: 'Arial', sans-serif; font-style: italic; }
+
+    .pricing-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .price-card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px; text-align: center; }
+    .price-card.featured { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+    .price-name { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; margin-bottom: 8px; text-transform: uppercase; }
+    .price-setup { font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .price-monthly { font-size: 26px; font-weight: 700; color: var(--primary); margin: 8px 0; font-family: 'Arial', sans-serif; }
+    .price-monthly span { font-size: 13px; font-weight: 400; }
+    .price-features { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; line-height: 1.6; }
+    .price-badge { background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; font-family: 'Arial', sans-serif; display: inline-block; margin-bottom: 10px; }
+
+    .footer { text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); background: var(--surface); margin-top: 32px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">SG</div>
+    <div>
+      <div class="topbar-name">Hotel Stari Grad</div>
+      <div class="topbar-sub">Dubrovnik Old Town · UNESCO World Heritage · AI Concierge Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-badge">🤖 AI Concierge — Live Demo</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyze</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🛎️ Reservations</div>
+  <div class="tab">🧾 Invoices</div>
+</div>
+
+<div class="layout">
+  <div class="inbox-panel">
+    <div class="panel-header">
+      <span class="panel-title">📥 Today's Inbox</span>
+      <span class="count-badge">9 emails</span>
+    </div>
+    <div class="email-item selected" onclick="showEmail(0)">
+      <div class="email-from">James & Claire Worthington</div>
+      <div class="email-subject">Game of Thrones filming locations tour</div>
+      <div class="email-meta"><span class="email-time">08:03</span><span class="email-tag tag-got">GOT Tour</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(1)">
+      <div class="email-from">Marco Vidal — Barcelona</div>
+      <div class="email-subject">Private boat charter — Elaphiti Islands</div>
+      <div class="email-meta"><span class="email-time">09:28</span><span class="email-tag tag-boat">Boat</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(2)">
+      <div class="email-from">Yasuko Tanaka — Tokyo</div>
+      <div class="email-subject">Lokrum Island day trip — ferry times</div>
+      <div class="email-meta"><span class="email-time">11:15</span><span class="email-tag tag-island">Island</span></div>
+    </div>
+    <div class="email-item" style="opacity:0.4">
+      <div class="email-from">The Dubrovnik Times</div>
+      <div class="email-subject">Summer tourism figures — press release</div>
+      <div class="email-meta"><span class="email-time">13:00</span><span class="email-tag tag-got">Info</span></div>
+    </div>
+    <div style="padding: 12px 20px; font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; text-align: center; border-top: 1px solid var(--border); font-style: italic;">+ 5 more — all processed by AI</div>
+  </div>
+
+  <div class="main-panel">
+
+    <div class="context-banner">
+      🏛️ <strong>8 rooms · 16th-century building · UNESCO Old Town</strong> — Every guest email carries the full weight of your reputation. Zero room for delayed or generic replies.
+    </div>
+
+    <div class="email-selector">
+      <span class="selector-label">View demo email:</span>
+      <button class="sel-btn active" onclick="showEmail(0); highlightBtn(this)">🎬 GOT Tour</button>
+      <button class="sel-btn" onclick="showEmail(1); highlightBtn(this)">⛵ Private Boat</button>
+      <button class="sel-btn" onclick="showEmail(2); highlightBtn(this)">🏝️ Lokrum Island</button>
+    </div>
+
+    <!-- EMAIL 1 -->
+    <div id="email-0" class="email-section active">
+      <div class="email-reader">
+        <div class="reader-from">From: jworthington@gmail.com — Mon 20 Jul 2026, 08:03</div>
+        <div class="reader-subject">Game of Thrones filming locations — private guided tour</div>
+        <div class="reader-body">
+          Dear Hotel Stari Grad,<br><br>
+          We arrive in Dubrovnik on July 28 for 4 nights and we are massive Game of Thrones fans. We would love to book a private guided tour of all the main filming locations (King's Landing, Cersei's walk, the Red Keep, etc.).<br><br>
+          We've done group tours before and found them too rushed — could you arrange something private for just the two of us, ideally early morning before the crowds arrive?<br><br>
+          Also — is there any "behind the scenes" type experience or access to places the regular tours don't visit?<br><br>
+          Many thanks,<br>
+          James & Claire
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 27 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 08:03 → 08:04</div>
+        </div>
+        <div class="ai-body">
+          Dear James and Claire,<br><br>
+          You have absolutely made the right choice asking for a private early morning experience — the Old Town at 07:00 before the cruise ships arrive is a completely different world.<br><br>
+          <strong>Private GoT tour for two:</strong> We work exclusively with Ana Kovač, a certified Dubrovnik guide and a GoT specialist who has led production-crew visits. Her private 3-hour morning tour (starting at 07:30) covers all the key locations — Fort Lovrijenac (the Red Keep exterior), the Pile Gate, Jesuit Staircase (Cersei's Walk of Shame), Minčeta Tower and the city walls used as King's Landing battlements. Rate: €140 for two, including Old Town entrance.<br><br>
+          <strong>Behind-the-scenes access:</strong> Ana has access to Fort Lovrijenac before standard opening hours — a private 30-minute slot inside the empty fortress at sunrise. This is not available on any public tour and we are happy to arrange it for an additional €30 per couple.<br><br>
+          We suggest combining this with breakfast at our hotel at 06:45 before the tour — we'll have the terrace set up just for you.<br><br>
+          Shall I reserve Ana for July 29? That would give you a day to settle in before the experience.<br><br>
+          Warm regards,<br>
+          Concierge — Hotel Stari Grad, Dubrovnik Old Town
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div id="email-1" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: marco.vidal.bcn@gmail.com — Mon 20 Jul 2026, 09:28</div>
+        <div class="reader-subject">Private boat charter to the Elaphiti Islands — July 31</div>
+        <div class="reader-body">
+          Hello,<br><br>
+          I am staying at Hotel Stari Grad with my family of 4 (2 adults + 2 children aged 8 and 12) from July 29 to August 3.<br><br>
+          We would love to spend a full day exploring the Elaphiti Islands (Šipan, Lopud, Koločep). Can you help arrange a private boat charter for 31 July?<br><br>
+          Our priorities:<br>
+          - Private (no shared charters)<br>
+          - Captain who speaks English or Spanish<br>
+          - Safe and comfortable for children<br>
+          - Swimming stops in clear water<br><br>
+          Approximate budget: €300–400 for the day. Is this realistic?<br><br>
+          Gracias / Thanks,<br>
+          Marco
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 31 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 09:28 → 09:29</div>
+        </div>
+        <div class="ai-body">
+          Dear Marco,<br><br>
+          A private day with the family in the Elaphiti Islands is one of the finest experiences Dubrovnik has to offer — and your budget is realistic. We can make this happen.<br><br>
+          <strong>Our recommendation:</strong> We work with Adriatic Dream Charters — a family-run operation with a well-maintained 10-metre wooden boat and a captain (Ivan) who speaks excellent English. The full-day private charter (07:00–18:00, Šipan + Lopud + Koločep circuit with swimming stops) is €360 for the vessel, all-in.<br><br>
+          <strong>Ideal for children:</strong> The boat has a shaded deck area, a swim ladder and a paddleboard. Ivan is experienced with families and adapts the pace accordingly. The bays at Lopud (Šunj beach) are shallow, sandy and completely calm — perfect for 8-year-olds.<br><br>
+          <strong>Packed lunch:</strong> We can prepare a local Croatian picnic lunch for 4 — prsut, local cheeses, bread, fresh fruit and cold drinks. €15 per person, billed to your room.<br><br>
+          Shall I reserve July 31 with Ivan? He books up quickly in August.<br><br>
+          Warm regards,<br>
+          Concierge — Hotel Stari Grad, Dubrovnik
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div id="email-2" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: tanaka.yasuko@docomo.ne.jp — Mon 20 Jul 2026, 11:15</div>
+        <div class="reader-subject">Lokrum Island day trip — ferry schedule and peacocks?</div>
+        <div class="reader-body">
+          Dear Hotel Stari Grad,<br><br>
+          I am travelling solo and arriving August 5 for 3 nights. I have read about Lokrum Island and the peacocks — it looks wonderful. Could you tell me:<br><br>
+          1. How far is the ferry pier from the hotel?<br>
+          2. What is the ferry schedule and price?<br>
+          3. Is the island suitable for a solo traveller?<br>
+          4. What should I not miss on the island?<br><br>
+          Thank you very much,<br>
+          Yasuko Tanaka
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 23 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 11:15 → 11:16</div>
+        </div>
+        <div class="ai-body">
+          Dear Yasuko,<br><br>
+          Lokrum is truly magical — and yes, the peacocks roam completely free. You will love it.<br><br>
+          <strong>Ferry pier:</strong> The Old Town Harbour (Stara Luka) where the Lokrum ferry departs is a 4-minute walk from our hotel through the Old Town walls — one of the most beautiful short walks imaginable.<br><br>
+          <strong>Ferry schedule & price:</strong> Ferries depart every 30–60 minutes from 09:00 to 19:00 (summer schedule). The round-trip ticket is 150 HRK (approximately €20), purchased at the pier. Journey time: 15 minutes.<br><br>
+          <strong>Solo-friendly:</strong> Completely safe and very welcoming for solo travellers. The island is small (can be walked in 2 hours) with clear marked paths, a botanical garden, a saltwater lake for swimming (Mrtvo More — "Dead Sea"), and a small café.<br><br>
+          <strong>Must-see:</strong> The Benedictine monastery (where Richard the Lionheart was said to have sheltered), the Dead Sea lake for a unique swim, the fort at the highest point for views of Dubrovnik's Old Town, and of course — find the peacocks at the monastery garden in the afternoon.<br><br>
+          We look forward to welcoming you on August 5!<br><br>
+          Warm regards,<br>
+          Hotel Stari Grad — Dubrovnik Old Town
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="roi-banner">
+      <div class="roi-title">📊 Your ROI — Hotel Stari Grad (8 rooms · Dubrovnik Old Town)</div>
+      <div class="roi-grid">
+        <div class="roi-card"><div class="roi-num">~12</div><div class="roi-label">Emails per day<br>(summer peak, 8 rooms)</div></div>
+        <div class="roi-card"><div class="roi-num">~7h</div><div class="roi-label">Hours saved per week<br>(15 min → 2 min)</div></div>
+        <div class="roi-card"><div class="roi-num">30s</div><div class="roi-label">AI draft time<br>per email</div></div>
+        <div class="roi-card"><div class="roi-num">80€</div><div class="roi-label">Monthly investment<br>Standard plan</div></div>
+      </div>
+      <div class="roi-note">Conservative estimate · Based on live production data from IBB Palazzo Bettina, Birgu, Malta (similar intimate historic property)</div>
+    </div>
+
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="price-name">Standard</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">80€ <span>/month</span></div>
+        <div class="price-features">AI concierge · Draft generation · Email analysis</div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">⭐ RECOMMENDED</div>
+        <div class="price-name">Premium</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">120€ <span>/month</span></div>
+        <div class="price-features">Everything in Standard · Weekly auto-improvement · Monthly report</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Premium+</div>
+        <div class="price-setup">1,200€ one-time setup</div>
+        <div class="price-monthly">150€ <span>/month</span></div>
+        <div class="price-features">Everything in Premium · Training on your real exchanges · Dedicated onboarding</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Personalised demo for <strong>Hotel Stari Grad</strong>, Dubrovnik · Prepared by Enzo Cosnard ·
+  AI Concierge live at IBB Palazzo Bettina, Malta ·
+  <a href="mailto:enzo26cosnard@gmail.com" style="color: var(--primary);">enzo26cosnard@gmail.com</a>
+</div>
+
+<script>
+  function showEmail(n) {
+    document.querySelectorAll('.email-section').forEach(function(el, i) { el.classList.toggle('active', i === n); });
+    document.querySelectorAll('.email-item').forEach(function(el, i) { el.classList.toggle('selected', i === n); });
+  }
+  function highlightBtn(btn) {
+    document.querySelectorAll('.sel-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

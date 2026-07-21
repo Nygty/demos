@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Casta Diva Resort — Lago di Como</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Casta Diva Resort : bleu Como profond, blanc villa, or, pierre calcaire */
+        :root {
+            --primary: #14355a;      /* bleu lac de Côme profond */
+            --accent: #2a6496;       /* bleu lago clair */
+            --bg: #f3f4f6;
+            --bg-card: #ffffff;
+            --border: #dde3eb;
+            --text-dark: #0f1e2e;
+            --text-light: #6b7280;
+            --gold: #c8913a;
+        }
+        .header { background-color: #f9fafb; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 8px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #9cc3e0; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #f9fafb; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #d1e3f0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e5eaf1; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #eef3f9; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #ebf2f9; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #7aaac8; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e5eaf1; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ 5 Star · Lenno, Lago di Como · Near Villa del Balbianello · Ultra-Luxury</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">CASTA DIVA RESORT — LAGO DI COMO</div>
+            <div class="subtitle">AI Concierge · Lenno, Como · International Ultra-Premium Clientele</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Villa del Balbianello private tour + boat Bellagio -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Alexandra Novikova</div>
+                        <div class="email-date">Today, 09:55</div>
+                    </div>
+                    <div class="email-subject">Private tour Villa del Balbianello + boat to Bellagio — July stay</div>
+                    <div class="email-preview">Hello, we are a family of 4 arriving July 20th. We would like an exclusive private guided tour of Villa del Balbianello in the morning (we are big James Bond fans), and an afternoon boat charter to Bellagio for shopping and dinner. Could you organise this for Day 1?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 29 sec</div>
+                        Dear Alexandra,<br><br>
+                        What a wonderful way to start your stay — Villa del Balbianello is our nearest landmark and one of the most romantic places on earth. Here is a full itinerary for Day 1:<br><br>
+                        <b>Morning — Villa del Balbianello (exclusive private tour):</b><br>
+                        • Private access arranged with the FAI (Fondo Ambiente Italiano) · 09:30<br>
+                        • Personal English-speaking guide: architecture, film history (Casino Royale), and the Guido Monzino collection<br>
+                        • Boat transfer from our private dock to the Villa jetty · Duration: 2h<br>
+                        • Estimated: €380 for 4 guests (exclusive access + guide)<br><br>
+                        <b>Afternoon — Bellagio by Private Boat (12:30–18:00):</b><br>
+                        • Classic wooden Venetian launch, exclusively yours<br>
+                        • Arrival at Bellagio: free time for shopping on Via Garibaldi<br>
+                        • Dinner reservation at Bilacus (terrace, lake view) · 19:30<br>
+                        • Return transfer after dinner · €520 total<br><br>
+                        Shall I confirm July 21st for this itinerary (one day after arrival, allowing you to settle in)?<br><br>
+                        With warm regards,<br>
+                        Casta Diva Resort · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Silk weaving Como + helicopter -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Hyun-Ji Park</div>
+                        <div class="email-date">Today, 07:12</div>
+                    </div>
+                    <div class="email-subject">Silk weaving experience in Como city + airport helicopter</div>
+                    <div class="email-preview">Dear Concierge, I am a fashion designer and very interested in visiting a silk weaving atelier in Como — ideally a behind-the-scenes visit with a master weaver. Also, is it possible to arrange a helicopter transfer from your hotel to Milan Linate on our last day (July 25th)?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Hyun-Ji,<br><br>
+                        As a fashion designer, you will find Como silk absolutely fascinating — the Comasca district has been the world capital of silk since the 15th century. Here are the arrangements:<br><br>
+                        <b>Silk Atelier — Private Behind-the-Scenes Visit:</b><br>
+                        • We have arranged a private visit to Ratti S.p.A., one of Como's finest historic silk mills<br>
+                        • Tour of the Jacquard looms and printing studios with a master silk craftsman<br>
+                        • Private showroom with current collection (possibility to purchase exclusive fabrics)<br>
+                        • Duration: 2.5h · Our driver will take you and return · Complimentary<br><br>
+                        <b>Helicopter Transfer — Casta Diva → Milan Linate, July 25:</b><br>
+                        • Departure from our waterfront helipad · 07:45 (confirming your flight schedule)<br>
+                        • Transfer time: ~18 minutes · €380 for 2 passengers<br><br>
+                        Please confirm your Linate flight details so I can align the departure time precisely.<br><br>
+                        Kind regards,<br>
+                        Casta Diva Resort · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Honeymoon request -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Thomas & Camille Leclerc</div>
+                        <div class="email-date">Yesterday, 22:15</div>
+                    </div>
+                    <div class="email-subject">Lune de miel — suite avec vue et dîner romantique sur le lac</div>
+                    <div class="email-preview">Bonjour, nous passons notre lune de miel chez vous du 2 au 7 août. Nous souhaiterions une suite avec vue sur le lac, des pétales de rose à l'arrivée, et organiser un dîner romantique sur l'eau un soir. Est-ce possible ?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chers Thomas et Camille,<br><br>
+                        Toutes nos félicitations — le lac de Côme est l'écrin parfait pour votre lune de miel, et nous mettrons tout en œuvre pour que ce séjour soit inoubliable.<br><br>
+                        <b>Votre suite :</b><br>
+                        • Suite Lago di Como (vue panoramique sur le lac, balcon privé, baignoire îlot) · Confirmé du 2 au 7 août<br>
+                        • À votre arrivée : pétales de roses sur le lit, champagne Bellavista Franciacorta rosé, fruits frais et macarons de notre pâtissier<br><br>
+                        <b>Dîner romantique sur le lac (soir au choix) :</b><br>
+                        • Table privée sur notre ponton en bois au bord de l'eau, éclairée aux bougies · Coucher de soleil<br>
+                        • Menu dégustation 5 plats du Chef · Accords mets-vins lombards<br>
+                        • Violoniste en option (+€180)<br>
+                        • Prix : à partir de €280pp tout compris<br><br>
+                        Quel soir préférez-vous pour le dîner romantique ? Le 4 août (mercredi) offre typiquement le plus beau ciel de la semaine.<br><br>
+                        Avec toute notre affection,<br>
+                        Casta Diva Resort · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Casta Diva Resort</div>
+                <div class="roi-subtitle">Lenno, Lago di Como · 42 Rooms · 5 Stars · Ultra-Premium</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">42</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~504</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">101h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€2,520</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>42 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium+ — €1,200 setup + €150/month</span><br>
+                    Includes weekly auto-improvement, monthly report + training on real Casta Diva guest exchanges (multilingual: EN, IT, FR, RU, ZH).<br>
+                    Return on investment: <b>16.8× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Casta Diva Resort tone in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Alexandra Novikova</td>
+                            <td>Villa del Balbianello + boat Bellagio</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Hyun-Ji Park</td>
+                            <td>Silk atelier Como + helicopter Linate</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 15, 2026</td>
+                            <td>Thomas & Camille Leclerc</td>
+                            <td>Lune de miel — suite lac + dîner romantique</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>27 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Casta Diva Resort · Lenno, Lago di Como</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

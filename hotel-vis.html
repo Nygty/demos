@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Hotel Vis</title>
+<style>
+  :root {
+    --primary: #1B3040;       /* deep Adriatic midnight */
+    --accent:  #A67C52;       /* sun-bleached driftwood — Vis island rustic chic */
+    --light:   #F5F2EC;       /* limestone white */
+    --dark:    #0E1E2A;
+    --text:    #2E2E2E;
+    --muted:   #8A9090;
+    --border:  #DDD7CC;
+    --adriatic:#5A8FA0;       /* Adriatic blue */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.4rem; letter-spacing: 0.3em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(166,124,82,0.08));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                  display: flex; justify-content: space-between; }
+  .card-footer .time { color: var(--accent); font-weight: bold; }
+
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 30px 22px; background: #fff; text-align: center; }
+  .plan.featured { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 18px; }
+  .plan .plan-name .rec { background: var(--accent); color: #fff; padding: 2px 8px; border-radius: 2px; font-size: 0.58rem; margin-left: 6px; }
+  .plan .price { font-size: 2rem; font-family: sans-serif; font-weight: 300; margin-bottom: 4px; }
+  .plan .price sub { font-size: 0.85rem; }
+  .plan .setup { font-family: sans-serif; font-size: 0.72rem; color: var(--muted); margin-bottom: 20px; }
+  .plan.featured .setup { color: rgba(255,255,255,0.6); }
+  .plan ul { list-style: none; text-align: left; font-family: sans-serif; font-size: 0.8rem; }
+  .plan ul li { padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .plan.featured ul li { border-bottom-color: rgba(255,255,255,0.12); }
+  .plan ul li::before { content: "— "; color: var(--accent); }
+
+  .page-footer { background: var(--dark); color: rgba(255,255,255,0.5); padding: 28px 52px;
+                  font-family: sans-serif; font-size: 0.75rem; display: flex; justify-content: space-between; align-items: center; }
+  .page-footer a { color: var(--accent); text-decoration: none; }
+
+  @media(max-width: 780px) {
+    .email-grid, .pricing-grid { grid-template-columns: 1fr; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-direction: column; gap: 24px; }
+    .header, .hero, .section, .roi-strip, .page-footer { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Hotel <em>Vis</em></div>
+  <div class="badge">Private Demo</div>
+</header>
+
+<div class="hero">
+  <div class="tag">Personalised demo — Hotel Vis · Vis Island, Croatia</div>
+  <h1>Every email.<br>Perfectly answered.</h1>
+  <p>Croatia's most remote inhabited island — beloved by sailors and travellers seeking raw authenticity. Guests email daily for Blue Cave boat trips, Plavac Mali wine tours in the vineyards, and private transfers from Split. 20 rooms, small team, high expectations. The AI concierge drafts the perfect reply in 30 seconds, in any language.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">20</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~14</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~5.5 h</div>
+      <div class="lbl">Saved / week</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30 s</div>
+      <div class="lbl">Draft time</div>
+    </div>
+  </div>
+</div>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~14</div>
+    <div class="lbl">Guest emails per day<br><small style="font-size:0.62rem;color:#bbb">(20 rooms × 0.7)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~5.5 h</div>
+    <div class="lbl">Hours saved per week<br><small style="font-size:0.62rem;color:#bbb">(3 min → 30 s per draft)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">€264</div>
+    <div class="lbl">Staff time saved / month<br><small style="font-size:0.62rem;color:#bbb">(at €12/h — conservative)</small></div>
+  </div>
+  <div class="roi-item">
+    <div class="num">3.3×</div>
+    <div class="lbl">ROI vs. Standard plan<br><small style="font-size:0.62rem;color:#bbb">(€264 saved / €80 month)</small></div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">AI in action — Hotel Vis guest scenarios</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Blue Cave & Island Hopping</div>
+          <div>From: lars.eriksson@gmail.com</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hi, we're arriving Saturday by catamaran from Split (4 adults). We definitely want to visit the Blue Cave on Biševo — can you organise this? Also heard about the Green Cave on Ravnik. Is it possible to do both in one day? What's the best way to get there from Vis Town?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Lars,<br><br>
+        Welcome to Vis Island — and great timing, the Blue Cave is at its most spectacular in summer when the light enters in the late morning.<br><br>
+        Yes, both caves are doable in a single day trip — in fact most of our guests combine the two. We recommend a private boat rather than the group tours: you get flexible timing, a swim stop at the Green Cave on Ravnik (no crowds), and the Blue Cave entry fits around you rather than a fixed schedule. Departures from Vis harbour at ~09:00, return by early afternoon.<br><br>
+        For a group of 4, a private half-day boat is very good value. Shall I check availability for Saturday or Sunday?<br><br>
+        See you soon,<br>
+        The Concierge · Hotel Vis</p>
+      </div>
+      <div class="card-footer">
+        <div>Multi-cave day trip, group of 4 — specific, logistic, ready to book</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Plavac Mali Wine Tour</div>
+          <div>From: d.richter@gmx.de</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hallo, wir sind großer Weinliebhaber und haben über den Plavac Mali von Vis gelesen — angeblich einer der besten Rotweine Kroatiens. Gibt es Weingüter, die man besuchen kann? Und kann man bei den Winzern direkt kaufen?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Liebe Daniela,<br><br>
+        Der Plavac Mali von Vis ist tatsächlich etwas ganz Besonderes — die Insel gilt als Ursprungsort dieser Rebsorte, und die alten Terrassen an den Südhängen produzieren Weine von beeindruckender Tiefe.<br><br>
+        Wir empfehlen einen Besuch bei Zlatan Otok (Sveti Andrija) und der kleinen Familienweingut Roki's — beide bieten nach Absprache persönliche Führungen und Direktverkauf an. Das Weingut Roki's ist besonders schön: ein rustikaler Innenhof unter Weinreben, Verkostung begleitet von lokalen Spezialitäten wie Viška pogača.<br><br>
+        Darf ich Ihnen eine halbtägige private Tour mit Fahrer und Übersetzer organisieren — Abholung vom Hotel und Rückkehr inklusive?<br><br>
+        Mit freundlichen Grüßen,<br>
+        Die Concierge · Hotel Vis</p>
+      </div>
+      <div class="card-footer">
+        <div>German wine enthusiast → German reply, local expertise, private tour offer</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Ferry Transfer from Split</div>
+          <div>From: a.kowalski@wp.pl</div>
+        </div>
+        <div>📧</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email received</div>
+        <p>Hello, we arrive in Split on Friday afternoon around 4pm (flight from Warsaw). Is there a direct ferry to Vis that evening? If we miss it, is there a way to get to the hotel that night? We have 2 large suitcases.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">AI Draft — 30 seconds <span>Ready to send</span></div>
+        <p>Dear Adam,<br><br>
+        Welcome — great question to sort out in advance, the ferry schedule is key for reaching Vis.<br><br>
+        The Jadrolinija ferry Split–Vis runs twice daily in summer; the afternoon sailing typically departs Split at 17:15, arriving Vis Town at ~19:15. If your flight lands at 16:00 and you clear baggage by 16:30, it is feasible but tight depending on traffic to the Split ferry terminal (around 20 min).<br><br>
+        If you miss the last sailing, the best option is an overnight stay in Split (we can recommend a good hotel near the terminal) and the morning ferry the next day — we'll arrange your airport pick-up and a welcome here on Saturday morning. No need to rush with heavy luggage.<br><br>
+        Can you confirm your exact landing time? We'll map out the best plan for you.<br><br>
+        Best,<br>
+        The Concierge · Hotel Vis</p>
+      </div>
+      <div class="card-footer">
+        <div>Logistics + contingency plan — practical, reassuring, complete</div>
+        <div class="time">⚡ 30 sec</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section" style="background:#fff;">
+  <div class="section-title">Pricing — designed for boutique hotels</div>
+  <div class="pricing-grid">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="price">€80<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>AI email analysis & drafting</li>
+        <li>Dashboard (5 tabs)</li>
+        <li>Unlimited email volume</li>
+        <li>Multilingual drafts</li>
+        <li>Mews PMS integration</li>
+      </ul>
+    </div>
+    <div class="plan featured">
+      <div class="plan-name">Premium <span class="rec">Recommended</span></div>
+      <div class="price">€120<sub>/month</sub></div>
+      <div class="setup">+ €800 one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly AI self-improvement</li>
+        <li>Monthly performance report</li>
+        <li>Tone tuned to Hotel Vis's voice</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="price">€150<sub>/month</sub></div>
+      <div class="setup">+ €1,200 one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on real exchanges</li>
+        <li>Deep brand voice calibration</li>
+        <li>Onboarding session on-site</li>
+        <li>Quarterly review call</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<footer class="page-footer">
+  <div>Already live at IBB Palazzo Bettina (Birgu, Malta) — boutique historic Mediterranean property, similar profile</div>
+  <div>For Hotel Vis · <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a> · Enzo Cosnard, IBB Palazzo Bettina</div>
+</footer>
+
+</body>
+</html>

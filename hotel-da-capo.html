@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hotel da Capo</title>
+  <style>
+    :root {
+      --primary:   #1B4B6B;   /* deep Elba sea blue */
+      --accent:    #F0A500;   /* golden Mediterranean sun */
+      --bg:        #F5F8FA;
+      --surface:   #FFFFFF;
+      --text:      #162235;
+      --text-muted:#6B7D90;
+      --border:    #D5E0E8;
+      --badge-ok:  #1B4B6B;
+      --badge-bg:  #E5EDF5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', 'Times New Roman', serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .topbar {
+      background: var(--primary);
+      color: #fff;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: bold; color: var(--primary);
+    }
+    .topbar-name { font-size: 17px; font-weight: 600; }
+    .topbar-sub  { font-size: 12px; opacity: 0.75; letter-spacing: 0.5px; margin-top: 2px; }
+    .topbar-badge {
+      background: var(--accent); color: var(--primary);
+      font-size: 11px; font-weight: 700; padding: 5px 12px;
+      border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase;
+      font-family: 'Arial', sans-serif;
+    }
+
+    .tabs {
+      background: var(--surface); border-bottom: 2px solid var(--border);
+      display: flex; padding: 0 32px; gap: 4px;
+    }
+    .tab {
+      padding: 14px 20px; font-size: 13px; font-family: 'Arial', sans-serif;
+      color: var(--text-muted); cursor: pointer;
+      border-bottom: 3px solid transparent; margin-bottom: -2px;
+    }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+    .layout { display: grid; grid-template-columns: 330px 1fr; gap: 24px; padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+    .inbox-panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 700; font-family: 'Arial', sans-serif; }
+    .count-badge { background: var(--badge-bg); color: var(--badge-ok); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; font-family: 'Arial', sans-serif; }
+
+    .email-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+    .email-item:hover { background: var(--bg); }
+    .email-item.selected { background: var(--badge-bg); border-left: 3px solid var(--primary); }
+    .email-item:last-child { border-bottom: none; }
+    .email-from { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; }
+    .email-subject { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-family: 'Arial', sans-serif; }
+    .email-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+    .email-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .email-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; font-family: 'Arial', sans-serif; text-transform: uppercase; }
+    .tag-boat   { background: #E5EDF5; color: #1B4B6B; }
+    .tag-scuba  { background: #E0F0F0; color: #0A6060; }
+    .tag-transfer { background: #F5EDD5; color: #7A5A0A; }
+
+    .main-panel { display: flex; flex-direction: column; gap: 20px; }
+
+    .email-selector { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .selector-label { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; flex-shrink: 0; }
+    .sel-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-family: 'Arial', sans-serif; border: 1px solid var(--border); background: var(--bg); cursor: pointer; }
+    .sel-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+
+    .email-reader { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px 28px; }
+    .reader-from { font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); margin-bottom: 4px; }
+    .reader-subject { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .reader-body { font-size: 14px; line-height: 1.75; font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); padding-top: 16px; }
+
+    .ai-draft { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .ai-header { background: var(--badge-bg); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #C0D5E5; }
+    .ai-title { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--primary); }
+    .ai-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .ai-body { padding: 20px 24px; font-size: 14px; line-height: 1.8; font-family: 'Arial', sans-serif; }
+    .ai-actions { padding: 14px 24px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'Arial', sans-serif; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-accent { background: var(--accent); color: var(--primary); }
+
+    .email-section { display: none; }
+    .email-section.active { display: contents; }
+
+    .roi-banner { background: linear-gradient(135deg, var(--primary) 0%, #0F2E45 100%); color: #fff; border-radius: 12px; padding: 28px 32px; }
+    .roi-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; font-family: 'Arial', sans-serif; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+    .roi-card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 16px; text-align: center; }
+    .roi-num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: 'Arial', sans-serif; }
+    .roi-label { font-size: 11px; opacity: 0.85; margin-top: 4px; font-family: 'Arial', sans-serif; }
+    .roi-note { font-size: 12px; opacity: 0.7; font-family: 'Arial', sans-serif; font-style: italic; }
+
+    .pricing-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .price-card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px; text-align: center; }
+    .price-card.featured { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+    .price-name { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .price-setup { font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .price-monthly { font-size: 26px; font-weight: 700; color: var(--primary); margin: 8px 0; font-family: 'Arial', sans-serif; }
+    .price-monthly span { font-size: 13px; font-weight: 400; }
+    .price-features { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; line-height: 1.6; }
+    .price-badge { background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; font-family: 'Arial', sans-serif; display: inline-block; margin-bottom: 10px; }
+
+    .footer { text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); background: var(--surface); margin-top: 32px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">C</div>
+    <div>
+      <div class="topbar-name">Hotel da Capo</div>
+      <div class="topbar-sub">Marciana Marina · Isola d'Elba · AI Concierge Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-badge">🤖 AI Concierge — Live Demo</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyze</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🛎️ Reservations</div>
+  <div class="tab">🧾 Invoices</div>
+</div>
+
+<div class="layout">
+  <div class="inbox-panel">
+    <div class="panel-header">
+      <span class="panel-title">📥 Today's Inbox</span>
+      <span class="count-badge">11 emails</span>
+    </div>
+    <div class="email-item selected" onclick="showEmail(0)">
+      <div class="email-from">Sophie & Liam O'Brien — Dublin</div>
+      <div class="email-subject">Boat rental — day trip to Capraia island</div>
+      <div class="email-meta"><span class="email-time">07:58</span><span class="email-tag tag-boat">Boat</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(1)">
+      <div class="email-from">Thomas Weiss — Frankfurt</div>
+      <div class="email-subject">Scuba diving sites near Marciana — beginner</div>
+      <div class="email-meta"><span class="email-time">09:11</span><span class="email-tag tag-scuba">Scuba</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(2)">
+      <div class="email-from">Anna Romano — Firenze</div>
+      <div class="email-subject">Transfer from Piombino ferry — arrival 15:30</div>
+      <div class="email-meta"><span class="email-time">10:42</span><span class="email-tag tag-transfer">Transfer</span></div>
+    </div>
+    <div class="email-item" style="opacity:0.4">
+      <div class="email-from">Expedia Partner — Rate Alert</div>
+      <div class="email-subject">Competitor rate movement July 25–31</div>
+      <div class="email-meta"><span class="email-time">11:22</span><span class="email-tag tag-boat">Info</span></div>
+    </div>
+    <div style="padding: 12px 20px; font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; text-align: center; border-top: 1px solid var(--border); font-style: italic;">
+      + 7 more emails — all processed by AI
+    </div>
+  </div>
+
+  <div class="main-panel">
+    <div class="email-selector">
+      <span class="selector-label">View demo email:</span>
+      <button class="sel-btn active" onclick="showEmail(0); highlightBtn(this)">⛵ Boat Rental</button>
+      <button class="sel-btn" onclick="showEmail(1); highlightBtn(this)">🤿 Scuba Diving</button>
+      <button class="sel-btn" onclick="showEmail(2); highlightBtn(this)">🚐 Transfer</button>
+    </div>
+
+    <!-- EMAIL 1 -->
+    <div id="email-0" class="email-section active">
+      <div class="email-reader">
+        <div class="reader-from">From: sophieobrientravel@gmail.com — Mon 20 Jul 2026, 07:58</div>
+        <div class="reader-subject">Boat rental — day trip to Capraia island, July 27</div>
+        <div class="reader-body">
+          Hello Hotel da Capo,<br><br>
+          We are staying with you from July 24 to July 29 and we are very excited! We would love to arrange a full-day private boat trip to Capraia island on the 27th.<br><br>
+          Could you help us with:<br>
+          • A recommended local boat charter (2 people — we don't need a large vessel)<br>
+          • Approximate cost for the day<br>
+          • Whether snorkelling gear can be included<br>
+          • Is Capraia island accessible without a permit?<br><br>
+          We love remote, uncrowded spots so the less touristy the better!<br><br>
+          Many thanks,<br>
+          Sophie & Liam
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 29 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 07:58 → 07:59</div>
+        </div>
+        <div class="ai-body">
+          Dear Sophie and Liam,<br><br>
+          What a wonderful choice — Capraia is a hidden gem and the perfect escape for those who love unspoilt nature. We are delighted to help you plan this day.<br><br>
+          <strong>Boat charter for 2:</strong> We work with Fabio at MarElba Charters, who offers a private 6-metre rigid inflatable (RIB) ideal for couples. His full-day rate to Capraia and back is approximately €280–320 including fuel, depending on the exact itinerary. We can introduce you and handle the booking.<br><br>
+          <strong>Snorkelling gear:</strong> Fabio provides masks and fins as standard at no extra cost. He knows the best underwater sites around Capraia's rocky southern coast.<br><br>
+          <strong>Access to Capraia:</strong> No permit is required for day visitors — it is a National Park island but open to all. The waters around it form part of a marine protection area, so anchoring in designated zones is standard practice (which Fabio handles).<br><br>
+          <strong>Our tip:</strong> Ask Fabio to stop at Cala del Faro on the return — a spectacular narrow cove, usually empty in the morning.<br><br>
+          Looking forward to welcoming you on the 24th!<br><br>
+          Warm regards,<br>
+          Reception Team — Hotel da Capo, Marciana Marina
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div id="email-1" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: thomas.weiss84@web.de — Mon 20 Jul 2026, 09:11</div>
+        <div class="reader-subject">Scuba diving near Marciana Marina — absolute beginner</div>
+        <div class="reader-body">
+          Dear Hotel da Capo,<br><br>
+          I will be staying at your hotel from August 3 to August 10 with my partner. I have never tried scuba diving but have always wanted to — Elba seems like the perfect place to start.<br><br>
+          Can you tell me:<br>
+          1. Is there a dive centre near Marciana Marina that offers beginner courses?<br>
+          2. What is the cost of an introductory dive (Baptism of the Sea)?<br>
+          3. How long does the experience last?<br>
+          4. Are the waters around Elba suitable for beginners (calm, clear)?<br><br>
+          Vielen Dank — thank you!<br>
+          Thomas
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 24 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 09:11 → 09:12</div>
+        </div>
+        <div class="ai-body">
+          Dear Thomas,<br><br>
+          Elba is genuinely one of the best places in Italy for a first dive — crystal-clear water, rich marine life and calm protected bays. You've chosen perfectly.<br><br>
+          <strong>Dive centre:</strong> We recommend Elba Diving Center in Marciana Marina, a 5-minute walk from our hotel. They are PADI certified and specialize in first-time divers.<br><br>
+          <strong>Introductory "Baptism of the Sea" experience:</strong> Approximately €65 per person, including all equipment, a 30-minute poolside briefing and a 40-minute guided open-water dive at up to 5 metres depth — completely safe for beginners.<br><br>
+          <strong>Duration:</strong> The full experience (arrival to exit) is around 2.5 hours. Mornings are recommended for calmer water.<br><br>
+          <strong>Water conditions:</strong> The bay at Marciana Marina is sheltered, visibility is typically 10–15 metres in August, and the seabed is rocky with octopus, sea bream and colourful sponges — perfect for a first underwater experience.<br><br>
+          We are happy to pre-book your session for the date of your choice — just let us know which morning suits you best and we'll take care of it.<br><br>
+          Herzliche Grüße / Warm regards,<br>
+          Concierge — Hotel da Capo
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div id="email-2" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: a.romano.travel@gmail.com — Mon 20 Jul 2026, 10:42</div>
+        <div class="reader-subject">Transfer from Piombino ferry — arrival 15:30 on August 1</div>
+        <div class="reader-body">
+          Buongiorno Hotel da Capo,<br><br>
+          Arrivo a Portoferraio con il traghetto delle 15:30 il 1° agosto con due valigie grandi. Potete organizzare un transfer dall'hotel fino al porto di Portoferraio?<br>
+          Quanto costa e quanto tempo ci vuole per arrivare all'hotel?<br>
+          Grazie mille,<br>
+          Anna Romano
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 22 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 10:42 → 10:43</div>
+        </div>
+        <div class="ai-body">
+          Gentile Anna,<br><br>
+          Benvenuta! Siamo lieti di organizzare il suo transfer dal porto di Portoferraio all'Hotel da Capo.<br><br>
+          Il servizio di transfer privato è disponibile al costo di <strong>€35</strong> per la tratta porto–hotel. Il tragitto dura circa 25 minuti lungo la costa nord di Elba, con vedute bellissime sulla baia di Marciana Marina.<br><br>
+          Per il traghetto delle 15:30, il nostro autista sarà ad attenderla in uscita dai varchi del porto con un cartello con il suo nome, indicativamente entro le 16:00 (considerando i tempi di sbarco).<br><br>
+          Per confermare la prenotazione del transfer le chiedo gentilmente:<br>
+          — Il numero del traghetto o il nome della compagnia (Moby, Toremar o Blu Navy)<br>
+          — Un numero di telefono per eventuali comunicazioni il giorno dell'arrivo<br><br>
+          Non vediamo l'ora di accoglierla il 1° agosto!<br><br>
+          Cordiali saluti,<br>
+          Reception — Hotel da Capo, Marciana Marina
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="roi-banner">
+      <div class="roi-title">📊 Your ROI with AI Concierge — Hotel da Capo (31 rooms, waterfront boutique)</div>
+      <div class="roi-grid">
+        <div class="roi-card"><div class="roi-num">~18</div><div class="roi-label">Emails per day<br>(peak season, Elba)</div></div>
+        <div class="roi-card"><div class="roi-num">~10h</div><div class="roi-label">Hours saved per week<br>(15 min → 2 min)</div></div>
+        <div class="roi-card"><div class="roi-num">30s</div><div class="roi-label">AI draft time<br>per email</div></div>
+        <div class="roi-card"><div class="roi-num">80€</div><div class="roi-label">Monthly investment<br>Standard plan</div></div>
+      </div>
+      <div class="roi-note">Conservative estimate · Based on live production data from IBB Palazzo Bettina, Malta · Elba peak season May–September</div>
+    </div>
+
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="price-name">Standard</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">80€ <span>/month</span></div>
+        <div class="price-features">AI concierge agent · Draft generation · Email analysis</div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">⭐ RECOMMENDED</div>
+        <div class="price-name">Premium</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">120€ <span>/month</span></div>
+        <div class="price-features">Everything in Standard · Auto-improvement weekly · Monthly report</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Premium+</div>
+        <div class="price-setup">1,200€ one-time setup</div>
+        <div class="price-monthly">150€ <span>/month</span></div>
+        <div class="price-features">Everything in Premium · Training on your real exchanges · Dedicated onboarding</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Personalised demo for <strong>Hotel da Capo</strong> · Prepared by Enzo Cosnard · AI Concierge live at IBB Palazzo Bettina, Malta ·
+  <a href="mailto:enzo26cosnard@gmail.com" style="color: var(--primary);">enzo26cosnard@gmail.com</a>
+</div>
+
+<script>
+  function showEmail(n) {
+    document.querySelectorAll('.email-section').forEach(function(el, i) { el.classList.toggle('active', i === n); });
+    document.querySelectorAll('.email-item').forEach(function(el, i) { el.classList.toggle('selected', i === n); });
+  }
+  function highlightBtn(btn) {
+    document.querySelectorAll('.sel-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

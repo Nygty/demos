@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hotel Hermitage & Park Terme</title>
+  <style>
+    :root {
+      --primary:   #2C5F4A;   /* deep forest green — thermal spa, nature */
+      --accent:    #C8A96E;   /* warm gold — historic elegance */
+      --bg:        #F7F4EF;
+      --surface:   #FFFFFF;
+      --text:      #1A2B22;
+      --text-muted:#6B7D75;
+      --border:    #DDD5C8;
+      --badge-ok:  #2C5F4A;
+      --badge-bg:  #E8F1EC;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', 'Times New Roman', serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* TOP BAR */
+    .topbar {
+      background: var(--primary);
+      color: #fff;
+      padding: 0 32px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-brand { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo {
+      width: 40px; height: 40px; border-radius: 8px;
+      background: var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: bold; color: var(--primary);
+      letter-spacing: -1px;
+    }
+    .topbar-name { font-size: 17px; font-weight: 600; letter-spacing: 0.3px; }
+    .topbar-sub  { font-size: 12px; opacity: 0.75; letter-spacing: 0.5px; margin-top: 2px; }
+    .topbar-badge {
+      background: var(--accent); color: var(--primary);
+      font-size: 11px; font-weight: 700; padding: 5px 12px;
+      border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase;
+      font-family: 'Arial', sans-serif;
+    }
+
+    /* TABS */
+    .tabs {
+      background: var(--surface);
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      padding: 0 32px;
+      gap: 4px;
+    }
+    .tab {
+      padding: 14px 20px;
+      font-size: 13px;
+      font-family: 'Arial', sans-serif;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      letter-spacing: 0.3px;
+      transition: all 0.2s;
+    }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+    .tab-icon { margin-right: 6px; }
+
+    /* LAYOUT */
+    .layout { display: grid; grid-template-columns: 340px 1fr; gap: 24px; padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+    /* INBOX LIST */
+    .inbox-panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--text); letter-spacing: 0.2px; }
+    .count-badge { background: var(--badge-bg); color: var(--badge-ok); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; font-family: 'Arial', sans-serif; }
+
+    .email-item {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .email-item:hover { background: var(--bg); }
+    .email-item.selected { background: var(--badge-bg); border-left: 3px solid var(--primary); }
+    .email-item:last-child { border-bottom: none; }
+    .email-from { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--text); }
+    .email-subject { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-family: 'Arial', sans-serif; }
+    .email-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+    .email-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .email-tag {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px;
+      font-family: 'Arial', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .tag-spa     { background: #E8F1EC; color: #2C5F4A; }
+    .tag-boat    { background: #E8F0F8; color: #2C5280; }
+    .tag-hike    { background: #F5EDD8; color: #7A5A1E; }
+    .tag-reserve { background: #F0E8F5; color: #5A2C80; }
+
+    /* MAIN PANEL */
+    .main-panel { display: flex; flex-direction: column; gap: 20px; }
+
+    /* EMAIL READER */
+    .email-reader {
+      background: var(--surface); border-radius: 12px; border: 1px solid var(--border);
+      padding: 24px 28px;
+    }
+    .reader-from { font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); margin-bottom: 4px; }
+    .reader-subject { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
+    .reader-body { font-size: 14px; line-height: 1.75; color: var(--text); font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); padding-top: 16px; }
+
+    /* AI DRAFT */
+    .ai-draft {
+      background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden;
+    }
+    .ai-header {
+      background: var(--badge-bg); padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid #C8DDD2;
+    }
+    .ai-title { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+    .ai-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .ai-body { padding: 20px 24px; font-size: 14px; line-height: 1.8; color: var(--text); font-family: 'Arial', sans-serif; }
+    .ai-actions { padding: 14px 24px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .btn {
+      padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 700;
+      font-family: 'Arial', sans-serif; cursor: pointer; border: none; letter-spacing: 0.3px;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-accent { background: var(--accent); color: var(--primary); }
+
+    /* SELECTOR */
+    .email-selector {
+      background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px 24px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .selector-label { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--text); flex-shrink: 0; }
+    .sel-btn {
+      padding: 8px 16px; border-radius: 8px; font-size: 12px; font-family: 'Arial', sans-serif;
+      border: 1px solid var(--border); background: var(--bg); cursor: pointer; transition: all 0.15s;
+    }
+    .sel-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+
+    /* ROI BANNER */
+    .roi-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, #1A3D2B 100%);
+      color: #fff; border-radius: 12px; padding: 28px 32px;
+    }
+    .roi-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; font-family: 'Arial', sans-serif; letter-spacing: 0.2px; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+    .roi-card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 16px; text-align: center; }
+    .roi-num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: 'Arial', sans-serif; }
+    .roi-label { font-size: 11px; opacity: 0.85; margin-top: 4px; font-family: 'Arial', sans-serif; letter-spacing: 0.3px; }
+    .roi-note { font-size: 12px; opacity: 0.7; font-family: 'Arial', sans-serif; font-style: italic; }
+
+    /* PRICING */
+    .pricing-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .price-card {
+      background: var(--surface); border-radius: 12px; border: 1px solid var(--border);
+      padding: 20px; text-align: center;
+    }
+    .price-card.featured { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+    .price-name { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--text); margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .price-setup { font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .price-monthly { font-size: 26px; font-weight: 700; color: var(--primary); margin: 8px 0; font-family: 'Arial', sans-serif; }
+    .price-monthly span { font-size: 13px; font-weight: 400; }
+    .price-features { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; line-height: 1.6; }
+    .price-badge { background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; font-family: 'Arial', sans-serif; display: inline-block; margin-bottom: 10px; letter-spacing: 0.5px; }
+
+    /* FOOTER */
+    .footer { text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); background: var(--surface); margin-top: 32px; }
+
+    /* EMAIL SECTIONS — hidden */
+    .email-section { display: none; }
+    .email-section.active { display: contents; }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">H</div>
+    <div>
+      <div class="topbar-name">Hotel Hermitage & Park Terme</div>
+      <div class="topbar-sub">Portoferraio · Isola d'Elba · AI Concierge Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-badge">🤖 AI Concierge — Live Demo</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active"><span class="tab-icon">📥</span>Inbox</div>
+  <div class="tab"><span class="tab-icon">🔍</span>Analyze</div>
+  <div class="tab"><span class="tab-icon">📋</span>History</div>
+  <div class="tab"><span class="tab-icon">🛎️</span>Reservations</div>
+  <div class="tab"><span class="tab-icon">🧾</span>Invoices</div>
+</div>
+
+<div class="layout">
+
+  <!-- INBOX LIST -->
+  <div class="inbox-panel">
+    <div class="panel-header">
+      <span class="panel-title">📥 Today's Inbox</span>
+      <span class="count-badge">14 emails</span>
+    </div>
+
+    <div class="email-item selected" onclick="showEmail(0)">
+      <div class="email-from">Margaret H. — London</div>
+      <div class="email-subject">Thermal spa package — 5 nights July</div>
+      <div class="email-meta">
+        <span class="email-time">08:12</span>
+        <span class="email-tag tag-spa">Spa</span>
+      </div>
+    </div>
+
+    <div class="email-item" onclick="showEmail(1)">
+      <div class="email-from">Touring Elba Agency</div>
+      <div class="email-subject">Group boat excursion — 12 guests</div>
+      <div class="email-meta">
+        <span class="email-time">09:34</span>
+        <span class="email-tag tag-boat">Boat</span>
+      </div>
+    </div>
+
+    <div class="email-item" onclick="showEmail(2)">
+      <div class="email-from">Klaus & Inge Bauer — Munich</div>
+      <div class="email-subject">Hiking Monte Capanne — guide request</div>
+      <div class="email-meta">
+        <span class="email-time">10:51</span>
+        <span class="email-tag tag-hike">Hiking</span>
+      </div>
+    </div>
+
+    <div class="email-item" onclick="showEmail(3)" style="opacity:0.55">
+      <div class="email-from">Booking.com — Reservation Alert</div>
+      <div class="email-subject">New booking: Deluxe Sea View, 3 nights</div>
+      <div class="email-meta">
+        <span class="email-time">11:07</span>
+        <span class="email-tag tag-reserve">Booking</span>
+      </div>
+    </div>
+
+    <div class="email-item" onclick="showEmail(3)" style="opacity:0.4">
+      <div class="email-from">Giulia Ferretti — Milano</div>
+      <div class="email-subject">Anniversario — cena romantica + spa</div>
+      <div class="email-meta">
+        <span class="email-time">12:23</span>
+        <span class="email-tag tag-spa">Spa</span>
+      </div>
+    </div>
+
+    <div style="padding: 12px 20px; font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; text-align: center; border-top: 1px solid var(--border); font-style: italic;">
+      + 9 more emails — all processed by AI
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-panel">
+
+    <!-- EMAIL SELECTOR -->
+    <div class="email-selector">
+      <span class="selector-label">View demo email:</span>
+      <button class="sel-btn active" onclick="showEmail(0); highlightBtn(this)">📧 Thermal Spa</button>
+      <button class="sel-btn" onclick="showEmail(1); highlightBtn(this)">⛵ Boat Excursion</button>
+      <button class="sel-btn" onclick="showEmail(2); highlightBtn(this)">🥾 Hiking Guide</button>
+    </div>
+
+    <!-- EMAIL 1: THERMAL SPA -->
+    <div id="email-0" class="email-section active">
+      <div class="email-reader">
+        <div class="reader-from">From: margaret.hall@outlook.co.uk — Mon 20 Jul 2026, 08:12</div>
+        <div class="reader-subject">Thermal spa package enquiry — 5 nights, late July</div>
+        <div class="reader-body">
+          Dear Hotel Hermitage,<br><br>
+          My husband and I are planning a 5-night stay at the end of July and we are very interested in your thermal spa packages. Could you please let us know:<br><br>
+          1. Which spa treatments are included in your half-board packages?<br>
+          2. Is it possible to book an exclusive thermal pool session (early morning, before other guests)?<br>
+          3. Do you offer a couple's massage package, and if so, what is the price?<br>
+          4. What is the distance from the hotel to the private beach?<br><br>
+          We stayed at a thermal hotel in Montecatini three years ago and are hoping Elba will offer a similar level of tranquillity.<br><br>
+          Kind regards,<br>
+          Margaret Hall
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 28 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 08:12 → 08:12</div>
+        </div>
+        <div class="ai-body">
+          Dear Margaret,<br><br>
+          Thank you for your enquiry — we would be delighted to welcome you and your husband to Hotel Hermitage & Park Terme at the end of July.<br><br>
+          To answer your questions:<br><br>
+          <strong>1. Spa inclusions with half-board:</strong> Our half-board packages include full access to our thermal pools, steam room and sauna, plus one 50-minute treatment per person per stay (chosen from our thermal menu).<br><br>
+          <strong>2. Exclusive early-morning pool session:</strong> Yes — we offer a private thermal pool slot from 07:00 to 08:30 for a supplement of €45 per couple, per morning. This is subject to availability and we recommend reserving in advance.<br><br>
+          <strong>3. Couple's massage package:</strong> Our "Due Anime" couple's ritual (90 min) is priced at €180 and includes side-by-side massages in our private suite, followed by a thermal herbal tea ceremony.<br><br>
+          <strong>4. Private beach:</strong> Our private beach with sun loungers and watersports facilities is a 3-minute walk through our park — completely flat and accessible.<br><br>
+          I would be happy to prepare a personalised proposal for your July dates. Could you confirm your preferred arrival day?<br><br>
+          Warm regards,<br>
+          Reception Team<br>
+          Hotel Hermitage & Park Terme — Isola d'Elba
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2: BOAT EXCURSION -->
+    <div id="email-1" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: groups@touringelba.it — Mon 20 Jul 2026, 09:34</div>
+        <div class="reader-subject">Group boat excursion coordination — 12 guests, July 28</div>
+        <div class="reader-body">
+          Dear Hermitage Reception,<br><br>
+          We are organising a full-day boat excursion for a group of 12 guests currently staying at your hotel (reservation ref. HIT-2847). The excursion is planned for Monday 28 July.<br><br>
+          Could you please confirm:<br>
+          — Departure time from Porto Azzurro pier (the guests have watersports included in their package)<br>
+          — Whether snorkelling equipment hire is included or extra<br>
+          — Whether the hotel can prepare packed lunches for the group<br>
+          — If there is a shuttle from the hotel to the pier<br><br>
+          We would need a response by tomorrow morning to finalise with the boat operator.<br><br>
+          Best,<br>
+          Touring Elba Agency
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 31 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 09:34 → 09:35</div>
+        </div>
+        <div class="ai-body">
+          Dear Touring Elba team,<br><br>
+          Thank you for coordinating this excursion for our guests under reservation HIT-2847. Please find our confirmations below:<br><br>
+          <strong>Departure:</strong> We recommend a 08:45 departure from Porto Azzurro pier to maximise your full-day itinerary. Our watersports package includes supervised access at designated stops — we'll brief the group captain accordingly.<br><br>
+          <strong>Snorkelling equipment:</strong> Basic mask and fins hire is included in the watersports package. Wetsuits are available at an additional €12/person.<br><br>
+          <strong>Packed lunches:</strong> Yes — our kitchen can prepare 12 packed lunches (local focaccia, charcuterie, fruit, water and a glass of house wine). Please advise of any dietary requirements by the 26th. Cost: €18/person, billed to the group reservation.<br><br>
+          <strong>Shuttle to pier:</strong> We operate a complimentary shuttle departing the hotel at 08:15. Please confirm that 12 guests will use this service so we can arrange the correct vehicle.<br><br>
+          Looking forward to making this a memorable day for your group.<br><br>
+          Warm regards,<br>
+          Concierge Team — Hotel Hermitage & Park Terme
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3: HIKING -->
+    <div id="email-2" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: k.bauer1959@gmx.de — Mon 20 Jul 2026, 10:51</div>
+        <div class="reader-subject">Hiking guide to Monte Capanne — request</div>
+        <div class="reader-body">
+          Guten Morgen / Good morning,<br><br>
+          My wife and I arrive at Hotel Hermitage on 25 July for one week. We are passionate hikers and would love to summit Monte Capanne (1,019m) during our stay.<br><br>
+          Could you please recommend:<br>
+          - A certified mountain guide who speaks German or English<br>
+          - The best trail from the hotel side<br>
+          - What level of fitness is required — my wife has mild knee problems<br>
+          - Whether the cable car (Cabinovia) is an option for part of the route<br><br>
+          We would also appreciate knowing whether the hotel can prepare an early breakfast (6:30am) on the day of the hike.<br><br>
+          Herzliche Grüße / Best wishes,<br>
+          Klaus & Inge Bauer
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 26 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 10:51 → 10:52</div>
+        </div>
+        <div class="ai-body">
+          Dear Klaus and Inge,<br><br>
+          What a wonderful choice — Monte Capanne is the crown of Elba and the views are truly unforgettable. We would love to help you plan the perfect hiking day.<br><br>
+          <strong>Mountain guide:</strong> We work with Marco Ferretti, a certified CAI guide who speaks fluent English and good German. His full-day Monte Capanne itinerary is €65 per person. We can make the introduction and reservation on your behalf.<br><br>
+          <strong>Best trail from our side:</strong> The most scenic approach from the Portoferraio area begins at Poggio village (15 min by taxi), via the Colle Palombaia path — approximately 3.5 hours ascent, moderate difficulty on good terrain.<br><br>
+          <strong>Regarding Inge's knees:</strong> We suggest combining the trail ascent with the Cabinovia di Monte Capanne cable car for the descent — it operates from Marciana to near the summit and is a comfortable 12-minute ride. Marco can adapt the day accordingly.<br><br>
+          <strong>Early breakfast at 06:30:</strong> Absolutely — just let us know the date 48 hours in advance and our kitchen will have a full breakfast ready for you.<br><br>
+          We look forward to welcoming you on 25 July. Shall we reserve Marco for your preferred date?<br><br>
+          Warm regards,<br>
+          Concierge — Hotel Hermitage & Park Terme
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ROI BANNER -->
+    <div class="roi-banner">
+      <div class="roi-title">📊 Your ROI with AI Concierge — Hotel Hermitage & Park Terme (110 rooms)</div>
+      <div class="roi-grid">
+        <div class="roi-card">
+          <div class="roi-num">~55</div>
+          <div class="roi-label">Emails received per day<br>(0.5 per room · peak season)</div>
+        </div>
+        <div class="roi-card">
+          <div class="roi-num">~28h</div>
+          <div class="roi-label">Hours saved per week<br>(avg. 15 min → 2 min per email)</div>
+        </div>
+        <div class="roi-card">
+          <div class="roi-num">30s</div>
+          <div class="roi-label">Average AI draft<br>generation time</div>
+        </div>
+        <div class="roi-card">
+          <div class="roi-num">120€</div>
+          <div class="roi-label">Monthly investment<br>Premium plan</div>
+        </div>
+      </div>
+      <div class="roi-note">Conservative estimate · Based on IBB Palazzo Bettina live production data · Elba peak season May–September</div>
+    </div>
+
+    <!-- PRICING -->
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="price-name">Standard</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">80€ <span>/month</span></div>
+        <div class="price-features">AI concierge agent · Draft generation · Email analysis</div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">⭐ RECOMMENDED</div>
+        <div class="price-name">Premium</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">120€ <span>/month</span></div>
+        <div class="price-features">Everything in Standard · Auto-improvement weekly · Monthly performance report</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Premium+</div>
+        <div class="price-setup">1,200€ one-time setup</div>
+        <div class="price-monthly">150€ <span>/month</span></div>
+        <div class="price-features">Everything in Premium · Training on your real exchanges · Dedicated onboarding</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  This is a personalised demo prepared for <strong>Hotel Hermitage & Park Terme</strong> by Enzo Cosnard · AI Concierge, live at IBB Palazzo Bettina, Malta ·
+  <a href="mailto:enzo26cosnard@gmail.com" style="color: var(--primary);">enzo26cosnard@gmail.com</a>
+</div>
+
+<script>
+  function showEmail(n) {
+    document.querySelectorAll('.email-section').forEach(function(el, i) {
+      el.classList.toggle('active', i === n);
+    });
+    document.querySelectorAll('.email-item').forEach(function(el, i) {
+      el.classList.toggle('selected', i === n);
+    });
+  }
+  function highlightBtn(btn) {
+    document.querySelectorAll('.sel-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

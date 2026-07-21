@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Kempinski Palace Portorož</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f2f4f5; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Kempinski Portorož : or Kempinski signature, blanc palace, marine adriatique, anthracite */
+        :root {
+            --primary: #1a1a2e;      /* anthracite Kempinski */
+            --accent: #b8903a;       /* or Kempinski signature */
+            --bg: #f2f4f5;
+            --bg-card: #ffffff;
+            --border: #dde0e5;
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --gold: #b8903a;
+        }
+        .header { background-color: #f9f9fb; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 8px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #c8a870; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #f9f9fb; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--gold); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: #2d2d4e; }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e0ddd5; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e8e8ee; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f5f5f8; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f7f5f0; border-left: 3px solid var(--gold); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--gold); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #9090b0; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--gold); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e8e8ee; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ Kempinski · 5 Star · Portorož, Slovenian Riviera · The Adriatic's Finest Palace</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">KEMPINSKI PALACE PORTOROŽ</div>
+            <div class="subtitle">AI Concierge · Portorož, Slovenia · Multilingual International Clientele</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Lipica + Venice transfer -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Franz & Hilde Kaufmann</div>
+                        <div class="email-date">Today, 10:30</div>
+                    </div>
+                    <div class="email-subject">Besuch Lipica + Privattransfer nach Venedig — 5 Nächte September</div>
+                    <div class="email-preview">Guten Tag, wir buchen 5 Nächte im September und möchten gerne das Gestüt Lipica besuchen sowie einen privaten Transfer nach Venedig für einen Tagesausflug organisieren. Können Sie beides für uns arrangieren?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 27 sec</div>
+                        Sehr geehrte Frau Kaufmann, sehr geehrter Herr Kaufmann,<br><br>
+                        Herzlich willkommen im Kempinski Palace Portorož — wir freuen uns auf Ihre Ankunft im September. Beide Wünsche können wir gerne für Sie arrangieren:<br><br>
+                        <b>Lipica Staatsgestüt (Privatführung):</b><br>
+                        • Privater Chauffeur ab Hotel · 20 Minuten Fahrt<br>
+                        • Exklusive Führung (auf Deutsch) durch die historischen Stallungen, Reitvorführung der Lipizzaner<br>
+                        • Empfohlener Termin: Dienstag oder Donnerstag (Hauptvorführungen) · 10:00–12:30<br>
+                        • Gesamtkosten: €160 für zwei Personen (Führung + Transfer)<br><br>
+                        <b>Privattransfer Portorož → Venedig (Tagesausflug):</b><br>
+                        • Luxuslimousine, Abfahrt 07:30 · Ankunft Piazzale Roma 09:45<br>
+                        • Rückholung nach Absprache (empfohlen: 18:00)<br>
+                        • Kosten: €320 Hin- und Rückfahrt<br><br>
+                        Für welche Daten soll ich reservieren?<br><br>
+                        Mit freundlichen Grüßen,<br>
+                        Kempinski Palace Portorož · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Piran old town -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Marco & Valentina Rossi</div>
+                        <div class="email-date">Today, 08:55</div>
+                    </div>
+                    <div class="email-subject">Escursione a Pirano + cena di pesce — weekend luglio</div>
+                    <div class="email-preview">Buongiorno, arriviamo venerdì sera e vorremmo visitare il centro storico di Pirano sabato mattina con una guida privata, e prenotare una cena di pesce per sabato sera nel miglior ristorante della zona. Potete aiutarci?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Gentili Marco e Valentina,<br><br>
+                        Benvenuti al Kempinski Palace — siamo felici di organizzare il vostro weekend.<br><br>
+                        <b>Sabato mattina — Pirano, visita guidata privata (10:00–12:30):</b><br>
+                        • Guida privata in italiano (Paolo, storico locale specializzato in architettura veneziana)<br>
+                        • Piazza Tartini, il Battistero di San Giovanni, le mura medievali e la vista sull'Adriatico<br>
+                        • Il Kempinski è convenzionato con la guida: €90 per la coppia, trasporto incluso<br><br>
+                        <b>Sabato sera — Cena di pesce (19:30):</b><br>
+                        • Ristorante Pavel II, Strunjan: il migliore della costa slovena — ricci di mare freschi, branzino dell'Adriatico, vini del Carso<br>
+                        • Prenotazione confermata in vostra nome, tavolo vista mare<br><br>
+                        Appuntamento per sabato — buona vacanza!<br><br>
+                        Cordialmente,<br>
+                        Kempinski Palace Portorož · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Spa + thermal -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Sophie & Oliver Bennett</div>
+                        <div class="email-date">Yesterday, 17:30</div>
+                    </div>
+                    <div class="email-subject">Spa package for 4 nights — what do you recommend?</div>
+                    <div class="email-preview">Hi, we are arriving next Thursday for 4 nights specifically to relax and use the spa. We're big spa enthusiasts and would like a curated programme across our 4 days. What signature treatments do you recommend and can you book them all in advance?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Sophie & Oliver,<br><br>
+                        Our Kempinski The Spa is one of the finest on the Adriatic coast — 3,500m² of sea-facing wellness across two floors. Here is a curated 4-day programme:<br><br>
+                        <b>Day 1 (Thursday):</b> Arrival — Couples' Signature Ritual · 80 min Adriatic Drift massage (warm volcanic stone + sea mineral scrub) · 19:00 · €210pp<br><br>
+                        <b>Day 2 (Friday):</b> Anti-ageing Facial by ESPA · 60 min · Morning 10:00 · €140pp + free access to the heated sea-view pool<br><br>
+                        <b>Day 3 (Saturday):</b> Hammam Ritual (full body · 90 min) · 11:00 · €155pp — followed by unlimited pool & sauna afternoon<br><br>
+                        <b>Day 4 (Sunday):</b> Farewell Foot & Back Ceremony · 60 min · 10:30 · €120pp<br><br>
+                        <b>Total package: €625pp · Saving vs individual booking: €80pp</b><br><br>
+                        Shall I block all slots now? Full payment on arrival.<br><br>
+                        With warm regards,<br>
+                        Kempinski Palace Portorož · Spa & Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Kempinski Palace Portorož</div>
+                <div class="roi-subtitle">Portorož, Slovenian Riviera · 45 Rooms · 5 Stars · Kempinski Group</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">45</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~540</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">108h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€2,700</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>45 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium+ — €1,200 setup + €150/month</span><br>
+                    Multilingual (EN, DE, IT, FR, SI) auto-responses + monthly performance report + training on real Kempinski guest exchanges.<br>
+                    Return on investment: <b>18× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised multilingual response in the Kempinski tone in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Franz & Hilde Kaufmann</td>
+                            <td>Lipica Gestüt + Transfer Venedig</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Marco & Valentina Rossi</td>
+                            <td>Escursione Pirano + cena di pesce</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>27 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 15, 2026</td>
+                            <td>Sophie & Oliver Bennett</td>
+                            <td>4-night spa programme</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>30 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Kempinski Palace Portorož · Slovenian Riviera</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

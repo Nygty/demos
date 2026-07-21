@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Monastero Arx Vivendi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f4f5f7; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Monastero Arx Vivendi : bleu lacustre profond, ivoire monastique, or, pierre ancienne */
+        :root {
+            --primary: #1e3a5f;      /* bleu lac Majeur profond */
+            --accent: #3a6d9e;       /* bleu lac clair */
+            --bg: #f4f5f7;
+            --bg-card: #ffffff;
+            --border: #dde2ea;
+            --text-dark: #111827;
+            --text-light: #6b7280;
+            --gold: #c9983a;
+        }
+        .header { background-color: #f9fafb; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 8px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #a8c4e0; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #f9fafb; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #d9e4f0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e8ecf2; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f0f4f9; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #edf3fa; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #8ab0d0; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e8ecf2; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ 5 Star · Adults-Only Retreat · Arona, Lago Maggiore · 17th-Century Monastery</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">MONASTERO ARX VIVENDI</div>
+            <div class="subtitle">AI Concierge · Adults-Only · Arona, Lago Maggiore</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Private boat Borromean Islands -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Sir Anthony & Lady Claire Pemberton</div>
+                        <div class="email-date">Today, 10:02</div>
+                    </div>
+                    <div class="email-subject">Private boat to Isola Bella + helicopter to Milan — 4 nights August</div>
+                    <div class="email-preview">Good morning, we're arriving August 12th for 4 nights. We would like a private boat available exclusively for us on August 13th to visit the Borromean Islands, and a helicopter transfer to Milan Malpensa on August 16th for our departure. Could you arrange both?</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 26 sec</div>
+                        Dear Sir Anthony & Lady Pemberton,<br><br>
+                        It is a pleasure to welcome you to Monastero Arx Vivendi. Both arrangements are entirely within our reach — here are the details:<br><br>
+                        <b>August 13 — Private Boat, Borromean Islands (exclusive):</b><br>
+                        • Classic Riva Aquarama, exclusively yours, 09:00–15:00<br>
+                        • Route: Isola Bella (Palazzo Borromeo gardens, priority access) → Isola dei Pescatori (private lunch at Ristorante Verbano) → Isola Madre (botanical gardens)<br>
+                        • Experienced skipper included · €680 total<br><br>
+                        <b>August 16 — Helicopter Transfer, Arona → Milan Malpensa:</b><br>
+                        • Helipad at the Monastero · Airlink/Elilario helicopter · ~12 min flight<br>
+                        • Estimated departure 07:30 to allow 3h before international check-in · €420pp<br><br>
+                        Shall I confirm and send full invoicing? I will hold both slots for 48 hours.<br><br>
+                        With warmest regards,<br>
+                        Monastero Arx Vivendi · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Stresa excursion + spa -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Katarina Müller</div>
+                        <div class="email-date">Today, 08:30</div>
+                    </div>
+                    <div class="email-subject">Ausflug nach Stresa + Spa-Reservierung für zwei</div>
+                    <div class="email-preview">Guten Morgen, wir möchten gerne einen Tagesausflug nach Stresa unternehmen und am Abend unseren Spa-Bereich buchen. Für zwei Personen, Ankunft 18. August. Können Sie beides arrangieren?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Sehr geehrte Frau Müller,<br><br>
+                        Herzlich willkommen im Monastero Arx Vivendi — wir freuen uns auf Ihre Ankunft am 18. August.<br><br>
+                        <b>Tagesausflug nach Stresa:</b><br>
+                        • Unser Chauffeur bringt Sie direkt nach Stresa (15 min) · Abfahrt 10:00<br>
+                        • Empfehlung: Promenade am See, Villa Pallavicino (Park & Zootiere), Aperitivo bei Ristorante Il Camin<br>
+                        • Rückholung um 16:30 · Kostenfrei inklusive<br><br>
+                        <b>Spa für zwei Personen, Abend des 18. August:</b><br>
+                        • Signature Monastero Ritual: Aromamassage (60 min) + Hydro-Pool + Dampfbad · 19:00–21:30<br>
+                        • Preis: €160 pro Person, alles inklusive<br><br>
+                        Soll ich beide reservieren? Ich freue mich auf Ihre Bestätigung.<br><br>
+                        Mit freundlichen Grüßen,<br>
+                        Monastero Arx Vivendi · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Wedding anniversary -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">David & Susan Collins</div>
+                        <div class="email-date">Yesterday, 19:45</div>
+                    </div>
+                    <div class="email-subject">25th anniversary — surprise dinner on the lake for my wife</div>
+                    <div class="email-preview">Hi, my wife and I are celebrating our 25th wedding anniversary at your hotel next month. I would love to arrange a surprise romantic dinner — ideally on the terrace overlooking Lake Maggiore with flowers and a special cake. Could you help coordinate this?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear David,<br><br>
+                        What a beautiful occasion — a 25th anniversary on Lake Maggiore deserves something truly memorable, and we would be honoured to help.<br><br>
+                        <b>Surprise Anniversary Dinner — Private Terrace over the Lake:</b><br>
+                        • Exclusive table on our stone monastery terrace · Sunset setting (20:00)<br>
+                        • Floral decoration: white orchids and garden roses · Candlelit table<br>
+                        • 4-course tasting menu by our Chef, paired with Piedmontese wines<br>
+                        • Anniversary cake (flavour of your choice) with personalised inscription<br>
+                        • A bottle of Franciacorta on arrival as our compliment<br>
+                        • Total: from €220pp (exclusive of drinks)<br><br>
+                        I will coordinate everything discreetly so Susan is completely surprised. Could you confirm the date of your anniversary dinner and your arrival day?<br><br>
+                        With sincere congratulations,<br>
+                        Monastero Arx Vivendi · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Monastero Arx Vivendi</div>
+                <div class="roi-subtitle">Arona, Lago Maggiore · 32 Rooms · 5 Stars · Adults-Only</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">32</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~384</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">77h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,920</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>32 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium — €800 setup + €120/month</span><br>
+                    Includes weekly auto-improvement and a monthly report on response performance (multilingual: EN, DE, IT, FR).<br>
+                    Return on investment: <b>16× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Monastero Arx Vivendi tone in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Sir A. & Lady C. Pemberton</td>
+                            <td>Private boat + helicopter to Milan</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Katarina Müller</td>
+                            <td>Ausflug Stresa + Spa für zwei</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>26 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 15, 2026</td>
+                            <td>David & Susan Collins</td>
+                            <td>25th anniversary surprise dinner</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>29 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Monastero Arx Vivendi · Arona, Lago Maggiore</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

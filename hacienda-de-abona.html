@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hacienda de Abona</title>
+  <style>
+    :root {
+      --primary:   #5C3317;   /* Andalusian earth / dark terracotta */
+      --accent:    #C8B060;   /* golden wheat / Costa de la Luz */
+      --bg:        #FAF7F2;
+      --surface:   #FFFFFF;
+      --text:      #2A1A08;
+      --text-muted:#7A6A58;
+      --border:    #E5D8C8;
+      --badge-ok:  #5C3317;
+      --badge-bg:  #F5EDE0;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .topbar { background: var(--primary); color: #fff; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-brand { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { width: 40px; height: 40px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: var(--primary); letter-spacing: -1px; }
+    .topbar-name { font-size: 17px; font-weight: 600; }
+    .topbar-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+    .topbar-badge { background: var(--accent); color: var(--primary); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase; font-family: 'Arial', sans-serif; }
+
+    .tabs { background: var(--surface); border-bottom: 2px solid var(--border); display: flex; padding: 0 32px; gap: 4px; }
+    .tab { padding: 14px 20px; font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+    .layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+    .inbox-panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 700; font-family: 'Arial', sans-serif; }
+    .count-badge { background: var(--badge-bg); color: var(--badge-ok); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; font-family: 'Arial', sans-serif; }
+
+    .email-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+    .email-item:hover { background: var(--bg); }
+    .email-item.selected { background: var(--badge-bg); border-left: 3px solid var(--primary); }
+    .email-item:last-child { border-bottom: none; }
+    .email-from { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; }
+    .email-subject { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-family: 'Arial', sans-serif; }
+    .email-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+    .email-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .email-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; font-family: 'Arial', sans-serif; text-transform: uppercase; }
+    .tag-nature  { background: #E8F0E0; color: #3A5A18; }
+    .tag-surf    { background: #E0EAF5; color: #1A3A6A; }
+    .tag-horse   { background: #F5EDE0; color: #5C3317; }
+
+    .main-panel { display: flex; flex-direction: column; gap: 20px; }
+    .email-selector { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .selector-label { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; flex-shrink: 0; }
+    .sel-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-family: 'Arial', sans-serif; border: 1px solid var(--border); background: var(--bg); cursor: pointer; }
+    .sel-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+
+    .email-reader { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px 28px; }
+    .reader-from { font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); margin-bottom: 4px; }
+    .reader-subject { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .reader-body { font-size: 14px; line-height: 1.75; font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); padding-top: 16px; }
+
+    .ai-draft { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .ai-header { background: var(--badge-bg); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #D5C0A8; }
+    .ai-title { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--primary); }
+    .ai-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .ai-body { padding: 20px 24px; font-size: 14px; line-height: 1.8; font-family: 'Arial', sans-serif; }
+    .ai-actions { padding: 14px 24px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'Arial', sans-serif; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-accent { background: var(--accent); color: var(--primary); }
+
+    .email-section { display: none; }
+    .email-section.active { display: contents; }
+
+    .roi-banner { background: linear-gradient(135deg, var(--primary) 0%, #2A1208 100%); color: #fff; border-radius: 12px; padding: 28px 32px; }
+    .roi-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; font-family: 'Arial', sans-serif; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+    .roi-card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 16px; text-align: center; }
+    .roi-num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: 'Arial', sans-serif; }
+    .roi-label { font-size: 11px; opacity: 0.85; margin-top: 4px; font-family: 'Arial', sans-serif; }
+    .roi-note { font-size: 12px; opacity: 0.7; font-family: 'Arial', sans-serif; font-style: italic; }
+
+    .pricing-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .price-card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px; text-align: center; }
+    .price-card.featured { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+    .price-name { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; margin-bottom: 8px; text-transform: uppercase; }
+    .price-setup { font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .price-monthly { font-size: 26px; font-weight: 700; color: var(--primary); margin: 8px 0; font-family: 'Arial', sans-serif; }
+    .price-monthly span { font-size: 13px; font-weight: 400; }
+    .price-features { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; line-height: 1.6; }
+    .price-badge { background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; font-family: 'Arial', sans-serif; display: inline-block; margin-bottom: 10px; }
+
+    .footer { text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); background: var(--surface); margin-top: 32px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">HA</div>
+    <div>
+      <div class="topbar-name">Hacienda de Abona</div>
+      <div class="topbar-sub">Costa de la Luz · Huelva · Andalucía · AI Concierge Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-badge">🤖 AI Concierge — Live Demo</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyze</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🛎️ Reservations</div>
+  <div class="tab">🧾 Invoices</div>
+</div>
+
+<div class="layout">
+  <div class="inbox-panel">
+    <div class="panel-header">
+      <span class="panel-title">📥 Today's Inbox</span>
+      <span class="count-badge">8 emails</span>
+    </div>
+    <div class="email-item selected" onclick="showEmail(0)">
+      <div class="email-from">Dr Patricia Bourne — Oxford</div>
+      <div class="email-subject">Doñana National Park excursion — private guide</div>
+      <div class="email-meta"><span class="email-time">08:20</span><span class="email-tag tag-nature">Nature</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(1)">
+      <div class="email-from">Finn Larsen — Copenhagen</div>
+      <div class="email-subject">Surfing — flamingo lagoons — July 25</div>
+      <div class="email-meta"><span class="email-time">09:45</span><span class="email-tag tag-surf">Surf</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(2)">
+      <div class="email-from">Beatriz Molina — Madrid</div>
+      <div class="email-subject">Experiencia ecuestre andaluza — 2 personas</div>
+      <div class="email-meta"><span class="email-time">11:00</span><span class="email-tag tag-horse">Horses</span></div>
+    </div>
+    <div class="email-item" style="opacity:0.4">
+      <div class="email-from">TripAdvisor</div>
+      <div class="email-subject">New guest review — ⭐⭐⭐⭐⭐</div>
+      <div class="email-meta"><span class="email-time">12:10</span><span class="email-tag tag-nature">Review</span></div>
+    </div>
+    <div style="padding: 12px 20px; font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; text-align: center; border-top: 1px solid var(--border); font-style: italic;">+ 4 more — all processed by AI</div>
+  </div>
+
+  <div class="main-panel">
+    <div class="email-selector">
+      <span class="selector-label">View demo email:</span>
+      <button class="sel-btn active" onclick="showEmail(0); highlightBtn(this)">🦩 Doñana</button>
+      <button class="sel-btn" onclick="showEmail(1); highlightBtn(this)">🏄 Surf & Lagoons</button>
+      <button class="sel-btn" onclick="showEmail(2); highlightBtn(this)">🐎 Horses</button>
+    </div>
+
+    <!-- EMAIL 1 -->
+    <div id="email-0" class="email-section active">
+      <div class="email-reader">
+        <div class="reader-from">From: p.bourne@biology.ox.ac.uk — Mon 20 Jul 2026, 08:20</div>
+        <div class="reader-subject">Doñana National Park excursion — private guided visit</div>
+        <div class="reader-body">
+          Dear Hacienda de Abona,<br><br>
+          I am an ornithologist and will be staying at the hacienda July 22–27 with my husband. Doñana is one of the main reasons for our visit — it is, of course, one of Europe's greatest wetland reserves.<br><br>
+          Could you help us arrange:<br>
+          • A private guided excursion into the park (not the standard 4x4 group tour)<br>
+          • A guide with genuine ornithological expertise (we are serious birdwatchers)<br>
+          • A focus on flamingos, imperial eagles and other key species<br>
+          • What is the best time of day to enter for wildlife activity?<br><br>
+          Thank you,<br>
+          Dr Patricia Bourne
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 30 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 08:20 → 08:21</div>
+        </div>
+        <div class="ai-body">
+          Dear Dr Bourne,<br><br>
+          What a privilege to welcome a serious ornithologist to Doñana's doorstep — you have chosen the perfect base. July is an extraordinary time in the park, with flamingo colonies at full strength in the marismas.<br><br>
+          <strong>Private guided visit:</strong> We work with Alejandro Ruiz, a licensed Doñana specialist guide with 20 years of experience leading scientific and birdwatching expeditions. He holds a permit for vehicle access to restricted zones of the park not open to the standard group tours — including the Lucio del Palacio lagoon area, one of the most productive bird zones in Europe. His private full-day rate for 2 people is €180, including park entry.<br><br>
+          <strong>Ornithological expertise:</strong> Alejandro is an active contributor to the Spanish Ornithological Society (SEO/Birdlife) and can provide detailed species identification, nest location data and historical comparison at each site — ideal for a scientifically-minded visitor.<br><br>
+          <strong>Key species in late July:</strong> Greater flamingo (large colony at Hato Blanco), Spanish imperial eagle (nesting pairs near the pine corridor), black-winged stilt, purple heron, European roller and — if lucky — the Spanish lynx at dawn near the ecotone zones.<br><br>
+          <strong>Best timing:</strong> Departure from the hacienda at 06:30. Wildlife activity peaks at 07:00–10:00; Alejandro suggests returning for a late lunch and a second 2-hour dusk session from 19:00, when the raptors are most visible.<br><br>
+          Shall I confirm this with Alejandro for July 23?<br><br>
+          Warm regards,<br>
+          Concierge — Hacienda de Abona, Costa de la Luz
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div id="email-1" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: finn.larsen.dk@gmail.com — Mon 20 Jul 2026, 09:45</div>
+        <div class="reader-subject">Surfing + flamingo lagoons — July 25</div>
+        <div class="reader-body">
+          Hello,<br><br>
+          I arrive on July 23 for 5 nights. I'm a surfer (intermediate level) and I've read that the Costa de la Luz has some great Atlantic waves.<br><br>
+          Also — I saw photos of flamingos in the lagoons near Huelva province and it looks incredible. Can I combine a surf session and a flamingo lagoon visit in one day?<br><br>
+          Any recommendations for a surf school or guide near the hacienda?<br><br>
+          Thanks,<br>
+          Finn
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 22 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 09:45 → 09:46</div>
+        </div>
+        <div class="ai-body">
+          Dear Finn,<br><br>
+          Great question — and yes, you can absolutely combine both in one incredible day. This is actually one of our favourite "secret itineraries" for active guests.<br><br>
+          <strong>Suggested day for July 25:</strong><br><br>
+          <strong>Morning surf (08:00–11:00):</strong> We recommend heading to Playa de El Rompido (25 minutes from the hacienda) — a long Atlantic beach with consistent 1–2m swell in July, ideal for intermediate surfers. Costa Surf School operates there and offers a 2-hour guided session (€45/person with equipment) for surfers of your level. We can arrange transport.<br><br>
+          <strong>Afternoon flamingos (16:00–19:00):</strong> The Marismas del Odiel (Huelva's UNESCO biosphere reserve) holds one of the largest flamingo colonies on the Iberian Peninsula — approximately 15,000 birds in peak summer. The lagoon viewpoints are a 15-minute drive, free to access, and the golden late-afternoon light for photography is extraordinary.<br><br>
+          In between, we'll prepare a packed lunch you can enjoy at the beach or the lagoon — your choice.<br><br>
+          This combination would make for an unforgettable day — shall I arrange it all?<br><br>
+          Warm regards,<br>
+          Hacienda de Abona Concierge
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div id="email-2" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: beatriz.molina.mdr@gmail.com — Mon 20 Jul 2026, 11:00</div>
+        <div class="reader-subject">Experiencia ecuestre andaluza — 2 personas, 26 julio</div>
+        <div class="reader-body">
+          Buenos días,<br><br>
+          Llegamos el 24 de julio para 4 noches. Somos apasionados de los caballos andaluces — mi compañero y yo llevamos años queriendo vivir una experiencia ecuestre auténtica en Andalucía.<br><br>
+          ¿Pueden organizar una salida a caballo por el campo? ¿Con un guía local que conozca la zona?<br>
+          Preferimos algo alejado del turismo masivo — algo auténtico, con caballos de raza española si es posible.<br><br>
+          Muchas gracias,<br>
+          Beatriz Molina
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 25 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 11:00 → 11:01</div>
+        </div>
+        <div class="ai-body">
+          Estimada Beatriz,<br><br>
+          ¡Qué alegría recibir su mensaje! La Costa de la Luz y su entorno natural es uno de los últimos rincones de España donde la cultura ecuestre andaluza se vive con total autenticidad.<br><br>
+          <strong>Nuestra recomendación:</strong> Trabajamos con La Yeguada de Doñana — una cuadra familiar a 20 minutos de la hacienda, con caballos Pura Raza Española (PRE). El propietario, Carlos Fernández, lleva tres generaciones ligado a la cría y doma andaluza. Ofrece rutas privadas de 2 a 3 horas por las marismas y pinares del entorno de Doñana, lejos de cualquier circuito turístico.<br><br>
+          <strong>Precio:</strong> Aproximadamente €70 por persona para la ruta de 2 horas; €100 para la ruta larga (3 horas, con parada junto a una laguna flamenca). Se incluye el equipo de montura y el traslado desde la hacienda.<br><br>
+          <strong>Para el 26 de julio:</strong> Le recomendamos salir a las 08:00 — las primeras horas de la mañana son ideales para el paseo (temperatura fresca, fauna activa, luz dorada).<br><br>
+          ¿Confirmo la reserva con Carlos para el día 26?<br><br>
+          Un cordial saludo,<br>
+          Recepción — Hacienda de Abona, Costa de la Luz
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="roi-banner">
+      <div class="roi-title">📊 Your ROI — Hacienda de Abona (18 rooms · Andalusian boutique)</div>
+      <div class="roi-grid">
+        <div class="roi-card"><div class="roi-num">~10</div><div class="roi-label">Emails per day<br>(boutique, 18 rooms)</div></div>
+        <div class="roi-card"><div class="roi-num">~6h</div><div class="roi-label">Hours saved per week<br>(15 min → 2 min)</div></div>
+        <div class="roi-card"><div class="roi-num">30s</div><div class="roi-label">AI draft time<br>per email</div></div>
+        <div class="roi-card"><div class="roi-num">80€</div><div class="roi-label">Monthly investment<br>Standard plan</div></div>
+      </div>
+      <div class="roi-note">Conservative estimate · Based on IBB Palazzo Bettina live data, Malta · Peak season April–October</div>
+    </div>
+
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="price-name">Standard</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">80€ <span>/month</span></div>
+        <div class="price-features">AI concierge · Draft generation · Email analysis</div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">⭐ RECOMMENDED</div>
+        <div class="price-name">Premium</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">120€ <span>/month</span></div>
+        <div class="price-features">Everything in Standard · Weekly auto-improvement · Monthly report</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Premium+</div>
+        <div class="price-setup">1,200€ one-time setup</div>
+        <div class="price-monthly">150€ <span>/month</span></div>
+        <div class="price-features">Everything in Premium · Training on your real exchanges · Dedicated onboarding</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Personalised demo for <strong>Hacienda de Abona</strong> · Costa de la Luz, Huelva ·
+  Prepared by Enzo Cosnard · AI Concierge live at IBB Palazzo Bettina, Malta ·
+  <a href="mailto:enzo26cosnard@gmail.com" style="color: var(--primary);">enzo26cosnard@gmail.com</a>
+</div>
+
+<script>
+  function showEmail(n) {
+    document.querySelectorAll('.email-section').forEach(function(el, i) { el.classList.toggle('active', i === n); });
+    document.querySelectorAll('.email-item').forEach(function(el, i) { el.classList.toggle('selected', i === n); });
+  }
+  function highlightBtn(btn) {
+    document.querySelectorAll('.sel-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

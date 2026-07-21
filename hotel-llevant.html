@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Hotel Llevant — Llafranc, Costa Brava</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f2f5f3; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Hotel Llevant : bleu méditerranéen turquoise, blanc, sable Costa Brava, vert pin */
+        :root {
+            --primary: #1a4a5a;      /* bleu méditerranéen profond */
+            --accent: #2e8b8a;       /* turquoise Costa Brava */
+            --bg: #f2f5f3;
+            --bg-card: #ffffff;
+            --border: #d9e4e2;
+            --text-dark: #0f2028;
+            --text-light: #5a7070;
+            --gold: #c49a3a;
+        }
+        .header { background-color: #f8faf9; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 8px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #90c8d0; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #f8faf9; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #c8dee0; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #e2ecea; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #edf4f4; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #ebf5f5; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #70a8b8; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #e2ecea; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ 4 Star · Family-Run · Llafranc, Costa Brava · Família Farrarons · 3rd Generation</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★</div>
+            <div class="hotel-name">HOTEL LLEVANT</div>
+            <div class="subtitle">AI Concierge · Llafranc, Costa Brava · The Personal Touch, at Scale</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Boat excursion Cap de Creus -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Peter & Sarah Whitfield</div>
+                        <div class="email-date">Today, 09:40</div>
+                    </div>
+                    <div class="email-subject">Boat excursion Cap de Creus coastline — hidden coves, 5 nights August</div>
+                    <div class="email-preview">Dear Hotel Llevant, we are arriving August 3rd for 5 nights. We would love to arrange a private or small-group boat excursion along the Cap de Creus coastline to discover hidden coves. Is this something you can organise? We have 2 adults and 2 teenagers (16 and 14).</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 25 sec</div>
+                        Dear Peter & Sarah,<br><br>
+                        What a perfect choice — the Cap de Creus coastline is one of the most spectacular stretches of the Mediterranean, and we know exactly who to call.<br><br>
+                        <b>Private Boat Excursion — Cap de Creus (family of 4):</b><br>
+                        • Wooden traditional <em>llaüt</em> boat with experienced local skipper, exclusively for your family<br>
+                        • Departure from Llafranc harbour: 09:30<br>
+                        • Route: Cala Estreta (snorkelling stop) → Cala Marquesa (hidden cove, only accessible by boat) → Cala Jòncols lunch anchor · Return 16:00<br>
+                        • Includes: paddleboards, snorkel equipment, cold drinks, and a packed picnic from our kitchen<br>
+                        • Duration: 6.5h · €420 for 4 guests (private)<br><br>
+                        This is a firm favourite with our families — the teenagers will love the snorkelling at Marquesa. I would suggest August 5th (Tuesday) — the sea is typically calm mid-week.<br><br>
+                        Shall I confirm?<br><br>
+                        With warm regards,<br>
+                        Hotel Llevant · Llafranc
+                    </div>
+                </div>
+
+                <!-- Email 2 : Kayak tour -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Chloé Marchand</div>
+                        <div class="email-date">Today, 07:55</div>
+                    </div>
+                    <div class="email-subject">Location kayak de mer et tour des criques — semaine juillet</div>
+                    <div class="email-preview">Bonjour, nous serons là la semaine du 14 juillet. Nous voudrions louer des kayaks de mer pour explorer les criques autour de Llafranc, idéalement avec un guide la première fois. Pouvez-vous organiser ça ?</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chère Chloé,<br><br>
+                        Bienvenue à l'Hotel Llevant — Llafranc est l'un des meilleurs points de départ pour le kayak de mer de toute la Costa Brava.<br><br>
+                        <b>Première sortie guidée (recommandée) :</b><br>
+                        • Guide certifié, départ depuis la plage de Llafranc · Mardi 15 juillet, 09:00<br>
+                        • Circuit 3h : Cala del Golfet → Cala Cabrera (crique sauvage, baignade) → retour par les falaises<br>
+                        • Équipement fourni : kayaks double + gilets + pagaies · €55 par personne<br><br>
+                        <b>Location libre les jours suivants :</b><br>
+                        • Kayaks simples ou doubles disponibles à la journée depuis le beach club (50m de l'hôtel)<br>
+                        • Demi-journée : €25 / Journée complète : €40<br><br>
+                        Je réserve la sortie guidée du 15 juillet pour vous ? Combien êtes-vous ?<br><br>
+                        À très bientôt,<br>
+                        Hotel Llevant · Llafranc
+                    </div>
+                </div>
+
+                <!-- Email 3 : Market Sant Feliu + restaurant -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Tom & Rebecca Holloway</div>
+                        <div class="email-date">Yesterday, 20:15</div>
+                    </div>
+                    <div class="email-subject">Sant Feliu de Guíxols market + best local restaurant recommendation</div>
+                    <div class="email-preview">Hi, we've heard about the Sunday market in Sant Feliu de Guíxols. Is it worth a visit and can you arrange transport? We'd also love a recommendation for the best local restaurant for Saturday night — nothing too touristy, more where the locals go.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Tom & Rebecca,<br><br>
+                        Great questions — both very close to our hearts here at Llevant.<br><br>
+                        <b>Sunday Market — Sant Feliu de Guíxols:</b><br>
+                        • Absolutely worth it — a genuine local market with seasonal produce, artisan cheese, cured meats and flowers<br>
+                        • Our hotel car can drop you off (20 min drive) · Sunday 09:30 · Return 12:00 · Complimentary<br>
+                        • Tip: try the <em>pa amb tomàquet</em> from the bread stall near the medieval arch<br><br>
+                        <b>Saturday Dinner — Where the Locals Go:</b><br>
+                        • <strong>Restaurant La Gavina, Palafrugell</strong> — family-run, no tourists, only locals. Incredible <em>suquet de peix</em> (Catalan fisherman's stew) · €35pp<br>
+                        • I'm calling ahead to reserve in your name: Saturday 20:30, table on the garden terrace<br><br>
+                        All arranged — see you soon!<br><br>
+                        Warm regards,<br>
+                        Hotel Llevant · Llafranc
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Hotel Llevant</div>
+                <div class="roi-subtitle">Llafranc, Costa Brava · 24 Rooms · 4 Stars · Family-Run · 3rd Generation</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">24</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~288</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">58h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€1,440</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>24 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Standard — €800 setup + €80/month</span><br>
+                    The AI learns the Farrarons family voice and Llafranc's unique activities — delivering the personal touch at scale.<br>
+                    Return on investment: <b>18× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a response in the warm, personal Hotel Llevant tone in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Peter & Sarah Whitfield</td>
+                            <td>Private boat Cap de Creus — family of 4</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Chloé Marchand</td>
+                            <td>Location kayak + tour guidé criques</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>25 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 15, 2026</td>
+                            <td>Tom & Rebecca Holloway</td>
+                            <td>Sant Feliu market + local restaurant</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>28 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Hotel Llevant · Llafranc, Costa Brava · Família Farrarons</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

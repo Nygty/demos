@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Parador de Carmona</title>
+  <style>
+    :root {
+      --primary:   #2B3B6B;   /* Moorish deep indigo / azulejo blue */
+      --accent:    #C89A30;   /* Seville gold / orange blossom */
+      --bg:        #F8F6F2;
+      --surface:   #FFFFFF;
+      --text:      #1A1A2E;
+      --text-muted:#6A6A80;
+      --border:    #E0DAD0;
+      --badge-ok:  #2B3B6B;
+      --badge-bg:  #E8ECF5;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    .topbar { background: var(--primary); color: #fff; padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .topbar-brand { display: flex; align-items: center; gap: 14px; }
+    .topbar-logo { width: 40px; height: 40px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: var(--primary); }
+    .topbar-name { font-size: 17px; font-weight: 600; }
+    .topbar-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+    .topbar-badge { background: var(--accent); color: var(--primary); font-size: 11px; font-weight: 700; padding: 5px 12px; border-radius: 20px; letter-spacing: 0.8px; text-transform: uppercase; font-family: 'Arial', sans-serif; }
+
+    .tabs { background: var(--surface); border-bottom: 2px solid var(--border); display: flex; padding: 0 32px; gap: 4px; }
+    .tab { padding: 14px 20px; font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+    .tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 700; }
+
+    .layout { display: grid; grid-template-columns: 340px 1fr; gap: 24px; padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+    .inbox-panel { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .panel-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .panel-title { font-size: 14px; font-weight: 700; font-family: 'Arial', sans-serif; }
+    .count-badge { background: var(--badge-bg); color: var(--badge-ok); font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; font-family: 'Arial', sans-serif; }
+
+    .email-item { padding: 16px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+    .email-item:hover { background: var(--bg); }
+    .email-item.selected { background: var(--badge-bg); border-left: 3px solid var(--primary); }
+    .email-item:last-child { border-bottom: none; }
+    .email-from { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; }
+    .email-subject { font-size: 12px; color: var(--text-muted); margin-top: 3px; font-family: 'Arial', sans-serif; }
+    .email-meta { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+    .email-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .email-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 10px; font-family: 'Arial', sans-serif; text-transform: uppercase; }
+    .tag-seville { background: #E8ECF5; color: #2B3B6B; }
+    .tag-flamenco { background: #F5E8E8; color: #6B1A1A; }
+    .tag-roman { background: #F0ECD8; color: #5A4A10; }
+
+    .main-panel { display: flex; flex-direction: column; gap: 20px; }
+    .email-selector { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px 24px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .selector-label { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; flex-shrink: 0; }
+    .sel-btn { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-family: 'Arial', sans-serif; border: 1px solid var(--border); background: var(--bg); cursor: pointer; }
+    .sel-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 700; }
+
+    .email-reader { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 24px 28px; }
+    .reader-from { font-size: 13px; font-family: 'Arial', sans-serif; color: var(--text-muted); margin-bottom: 4px; }
+    .reader-subject { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
+    .reader-body { font-size: 14px; line-height: 1.75; font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); padding-top: 16px; }
+
+    .ai-draft { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; }
+    .ai-header { background: var(--badge-bg); padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #C8D0E0; }
+    .ai-title { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; color: var(--primary); }
+    .ai-time { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .ai-body { padding: 20px 24px; font-size: 14px; line-height: 1.8; font-family: 'Arial', sans-serif; }
+    .ai-actions { padding: 14px 24px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 10px; }
+    .btn { padding: 9px 20px; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'Arial', sans-serif; cursor: pointer; border: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-secondary { background: var(--surface); color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-accent { background: var(--accent); color: var(--primary); }
+
+    .email-section { display: none; }
+    .email-section.active { display: contents; }
+
+    .roi-banner { background: linear-gradient(135deg, var(--primary) 0%, #131B40 100%); color: #fff; border-radius: 12px; padding: 28px 32px; }
+    .roi-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; font-family: 'Arial', sans-serif; }
+    .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+    .roi-card { background: rgba(255,255,255,0.12); border-radius: 10px; padding: 16px; text-align: center; }
+    .roi-num { font-size: 28px; font-weight: 700; color: var(--accent); font-family: 'Arial', sans-serif; }
+    .roi-label { font-size: 11px; opacity: 0.85; margin-top: 4px; font-family: 'Arial', sans-serif; }
+    .roi-note { font-size: 12px; opacity: 0.7; font-family: 'Arial', sans-serif; font-style: italic; }
+
+    .pricing-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .price-card { background: var(--surface); border-radius: 12px; border: 1px solid var(--border); padding: 20px; text-align: center; }
+    .price-card.featured { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+    .price-name { font-size: 13px; font-weight: 700; font-family: 'Arial', sans-serif; margin-bottom: 8px; text-transform: uppercase; }
+    .price-setup { font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; }
+    .price-monthly { font-size: 26px; font-weight: 700; color: var(--primary); margin: 8px 0; font-family: 'Arial', sans-serif; }
+    .price-monthly span { font-size: 13px; font-weight: 400; }
+    .price-features { font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; line-height: 1.6; }
+    .price-badge { background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; font-family: 'Arial', sans-serif; display: inline-block; margin-bottom: 10px; }
+
+    .footer { text-align: center; padding: 24px 32px; font-size: 12px; color: var(--text-muted); font-family: 'Arial', sans-serif; border-top: 1px solid var(--border); background: var(--surface); margin-top: 32px; }
+  </style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">P</div>
+    <div>
+      <div class="topbar-name">Parador de Carmona</div>
+      <div class="topbar-sub">Carmona · Sevilla · Fortaleza del Siglo XIV · AI Concierge Dashboard</div>
+    </div>
+  </div>
+  <div class="topbar-badge">🤖 AI Concierge — Live Demo</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyze</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">🛎️ Reservations</div>
+  <div class="tab">🧾 Invoices</div>
+</div>
+
+<div class="layout">
+  <div class="inbox-panel">
+    <div class="panel-header">
+      <span class="panel-title">📥 Today's Inbox</span>
+      <span class="count-badge">28 emails</span>
+    </div>
+    <div class="email-item selected" onclick="showEmail(0)">
+      <div class="email-from">The Morrison Family — Toronto</div>
+      <div class="email-subject">Seville day trip — Alcázar & Cathedral</div>
+      <div class="email-meta"><span class="email-time">07:30</span><span class="email-tag tag-seville">Seville</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(1)">
+      <div class="email-from">Pierre & Agnès Leblanc — Lyon</div>
+      <div class="email-subject">Flamenco show — authentique, pas touristique</div>
+      <div class="email-meta"><span class="email-time">08:45</span><span class="email-tag tag-flamenco">Flamenco</span></div>
+    </div>
+    <div class="email-item" onclick="showEmail(2)">
+      <div class="email-from">Professor R. Aldred — Cambridge</div>
+      <div class="email-subject">Roman ruins of Carmona — guided visit</div>
+      <div class="email-meta"><span class="email-time">10:12</span><span class="email-tag tag-roman">Roman</span></div>
+    </div>
+    <div class="email-item" style="opacity:0.4">
+      <div class="email-from">Paradores Central — Admin</div>
+      <div class="email-subject">Internal: July F&B performance</div>
+      <div class="email-meta"><span class="email-time">11:00</span><span class="email-tag tag-seville">Admin</span></div>
+    </div>
+    <div style="padding: 12px 20px; font-size: 11px; color: var(--text-muted); font-family: 'Arial', sans-serif; text-align: center; border-top: 1px solid var(--border); font-style: italic;">+ 24 more — all processed by AI</div>
+  </div>
+
+  <div class="main-panel">
+    <div class="email-selector">
+      <span class="selector-label">View demo email:</span>
+      <button class="sel-btn active" onclick="showEmail(0); highlightBtn(this)">🕌 Seville Day Trip</button>
+      <button class="sel-btn" onclick="showEmail(1); highlightBtn(this)">💃 Flamenco</button>
+      <button class="sel-btn" onclick="showEmail(2); highlightBtn(this)">🏛️ Roman Ruins</button>
+    </div>
+
+    <!-- EMAIL 1 -->
+    <div id="email-0" class="email-section active">
+      <div class="email-reader">
+        <div class="reader-from">From: d.morrison.yvr@outlook.com — Mon 20 Jul 2026, 07:30</div>
+        <div class="reader-subject">Seville day trip — Alcázar, Cathedral and Barrio Santa Cruz</div>
+        <div class="reader-body">
+          Dear Parador de Carmona,<br><br>
+          We are a family of 4 (2 adults, teens aged 14 and 16) arriving July 23 for 3 nights. We'd love to spend a full day in Seville — the Alcázar and Cathedral are top priorities, as well as the Barrio Santa Cruz.<br><br>
+          A few questions:<br>
+          1. Best way to get from the Parador to Seville (we don't have a car)?<br>
+          2. Do we need to pre-book Alcázar tickets?<br>
+          3. Any restaurant recommendation in Seville for a family lunch — nothing touristy?<br>
+          4. What time should we leave to make the most of the day?<br><br>
+          Thank you!<br>
+          The Morrison Family
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 29 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 07:30 → 07:31</div>
+        </div>
+        <div class="ai-body">
+          Dear Morrison family,<br><br>
+          What a wonderful day you have planned — Carmona to Seville is one of the great Andalusian excursions, and at just 35km it could not be easier. Here is everything you need:<br><br>
+          <strong>1. Transport to Seville:</strong> The simplest option is a private taxi from the Parador (€35 one-way, 35 minutes, we arrange on your behalf). For independence during the day, the DAMAS bus service runs from Carmona bus station (a 5-minute taxi from us) to Seville Prado de San Sebastián, every hour, €3.70/person — a great budget option.<br><br>
+          <strong>2. Alcázar tickets:</strong> Absolutely essential to pre-book — especially in July. The Alcázar tickets sell out weeks in advance online (€14.50/adult, free for under-16s). We can check current availability and book on your behalf today if you'd like.<br><br>
+          <strong>3. Family restaurant:</strong> We recommend <em>Bodega Santa Cruz</em> in Barrio Santa Cruz — a standing tapas bar beloved by locals, not in any guidebook, 80 metres from the Cathedral. Alternatively, <em>La Azotea</em> (Calle Jesús del Gran Poder) is a sit-down option with superb modern Sevillana cuisine and very welcoming of teenagers.<br><br>
+          <strong>4. Suggested departure:</strong> Leave the Parador at 08:30 — the Alcázar opens at 09:30 and the morning light in the royal gardens is exceptional. This gives you the cathedral by midday, lunch in the barrio, and a leisurely afternoon before returning by 18:00 for dinner on our fortress terrace.<br><br>
+          Shall I book your Alcázar tickets and arrange the 08:30 taxi for July 24?<br><br>
+          Warm regards,<br>
+          Concierge — Parador de Carmona
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div id="email-1" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: pierre.leblanc.lyon@gmail.com — Mon 20 Jul 2026, 08:45</div>
+        <div class="reader-subject">Soirée flamenco à Séville — authentique, pas touristique svp</div>
+        <div class="reader-body">
+          Bonjour,<br><br>
+          Nous arrivons le 25 juillet pour 2 nuits. Nous avons très envie de voir un vrai spectacle de flamenco à Séville — mais pas le genre de show pour touristes dans un théâtre bondé.<br><br>
+          Avez-vous une recommandation pour quelque chose d'authentique ? Petite salle, vrais artistes locaux, ambiance intime ?<br><br>
+          Merci beaucoup,<br>
+          Pierre & Agnès
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 27 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 08:45 → 08:46</div>
+        </div>
+        <div class="ai-body">
+          Cher Pierre, chère Agnès,<br><br>
+          Excellente question — et rassurez-vous, Séville possède encore de véritables espaces de flamenco intime, loin des salles standardisées pour groupes de 200 personnes.<br><br>
+          <strong>Notre recommandation absolue :</strong> <em>La Casa del Flamenco</em> (Barrio Santa Cruz) — une ancienne demeure andalouse avec salle voûtée de 80 places maximum, acoustique exceptionnelle, artistes locaux de haut niveau. Les spectacles du soir (21h00) durent 1h15 et incluent un cantaor, une bailaora et un guitarriste — aucun compromis touristique. Tarif : €22/personne, réservation indispensable.<br><br>
+          <strong>Alternative encore plus rare :</strong> Certains soirs de semaine, le <em>Tablao Flamenco Álvarez Quintero</em> (non listé dans les guides grand public) organise des soirées privées ouvertes aux connaisseurs sur recommandation — nous pouvons vous y inscrire si le 26 juillet vous convient.<br><br>
+          <strong>Notre conseil pratique :</strong> Réservez pour le 26 juillet au soir. Nous organisons un taxi aller-retour depuis le Parador (€35 par trajet), et la soirée peut se terminer par un dernier verre dans un bar à tapas du quartier Santa Cruz, à 23h, sous les orangers.<br><br>
+          Dois-je confirmer la réservation à La Casa del Flamenco pour le 26 juillet à 21h00 ?<br><br>
+          Cordialement,<br>
+          Conciergerie — Parador de Carmona
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div id="email-2" class="email-section">
+      <div class="email-reader">
+        <div class="reader-from">From: r.aldred@arch.cam.ac.uk — Mon 20 Jul 2026, 10:12</div>
+        <div class="reader-subject">Roman necropolis and ruins of Carmona — guided visit enquiry</div>
+        <div class="reader-body">
+          Dear Parador de Carmona,<br><br>
+          I am a classics professor arriving July 21 for 4 nights. Carmona's Roman ruins — particularly the necropolis — are a primary reason for my visit.<br><br>
+          Could you advise:<br>
+          1. Opening hours and access arrangements for the Roman necropolis<br>
+          2. Whether a specialist guide (ideally an archaeologist) can be arranged<br>
+          3. Is there access to areas not open to the general public?<br>
+          4. What other Roman sites near Carmona should I prioritise?<br><br>
+          Thank you,<br>
+          Professor R. Aldred
+        </div>
+      </div>
+      <div class="ai-draft">
+        <div class="ai-header">
+          <div class="ai-title">✨ AI Concierge Draft — <em>ready in 32 seconds</em></div>
+          <div class="ai-time">🕐 Generated: 10:12 → 10:13</div>
+        </div>
+        <div class="ai-body">
+          Dear Professor Aldred,<br><br>
+          We are delighted to welcome you — the Roman necropolis of Carmona is one of the most important funerary sites of Roman Hispania, and the Parador itself stands on the foundations of the ancient fortress. You are, in a very real sense, staying inside history.<br><br>
+          <strong>1. Necropolis opening hours:</strong> The Necrópolis Romana de Carmona is open Tuesday–Sunday, 09:00–17:00 (summer schedule). Entry is free for EU citizens with academic credentials (your university ID qualifies). It is a 10-minute walk from the Parador.<br><br>
+          <strong>2. Specialist guide:</strong> We work with Dr Carmen Vela, a Seville University archaeologist who specialises in Roman Baetica and has led research excavations at the Carmona site. Her private guided visit (3 hours) is €90 and provides access to detailed stratigraphic analysis of the tomb chambers. We strongly recommend her — she brings the site to life in a way no standard tour can.<br><br>
+          <strong>3. Non-public access:</strong> Dr Vela can arrange a visit to the conservation workshop where ongoing restoration work takes place — subject to confirmation with the site director. We'll request this specifically on your behalf.<br><br>
+          <strong>4. Other Roman sites nearby:</strong> The Italica ruins (Santiponce, 40km — birthplace of Emperors Trajan and Hadrian) are the most significant. Also worth visiting: the Roman road section preserved near Carmona's Puerta de Córdoba, and the municipal museum's Roman coin and ceramics collection.<br><br>
+          May I reserve Dr Vela for the morning of July 22?<br><br>
+          With warm regards,<br>
+          Parador de Carmona — Concierge
+        </div>
+        <div class="ai-actions">
+          <button class="btn btn-primary">✉️ Send Email</button>
+          <button class="btn btn-accent">✏️ Edit Draft</button>
+          <button class="btn btn-secondary">🔄 Regenerate</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="roi-banner">
+      <div class="roi-title">📊 Your ROI — Parador de Carmona (63 rooms · Historic fortress hotel)</div>
+      <div class="roi-grid">
+        <div class="roi-card"><div class="roi-num">~32</div><div class="roi-label">Emails per day<br>(0.5 per room · peak)</div></div>
+        <div class="roi-card"><div class="roi-num">~17h</div><div class="roi-label">Hours saved per week<br>(15 min → 2 min)</div></div>
+        <div class="roi-card"><div class="roi-num">30s</div><div class="roi-label">AI draft time<br>per email</div></div>
+        <div class="roi-card"><div class="roi-num">120€</div><div class="roi-label">Monthly investment<br>Premium plan</div></div>
+      </div>
+      <div class="roi-note">Conservative estimate · Based on IBB Palazzo Bettina live production data, Malta · Peak season March–November</div>
+    </div>
+
+    <div class="pricing-row">
+      <div class="price-card">
+        <div class="price-name">Standard</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">80€ <span>/month</span></div>
+        <div class="price-features">AI concierge · Draft generation · Email analysis</div>
+      </div>
+      <div class="price-card featured">
+        <div class="price-badge">⭐ RECOMMENDED</div>
+        <div class="price-name">Premium</div>
+        <div class="price-setup">800€ one-time setup</div>
+        <div class="price-monthly">120€ <span>/month</span></div>
+        <div class="price-features">Everything in Standard · Weekly auto-improvement · Monthly report</div>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Premium+</div>
+        <div class="price-setup">1,200€ one-time setup</div>
+        <div class="price-monthly">150€ <span>/month</span></div>
+        <div class="price-features">Everything in Premium · Training on your real exchanges · Dedicated onboarding</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Personalised demo for <strong>Parador de Carmona</strong> · Carmona, Sevilla ·
+  Prepared by Enzo Cosnard · AI Concierge live at IBB Palazzo Bettina, Malta ·
+  <a href="mailto:enzo26cosnard@gmail.com" style="color: var(--primary);">enzo26cosnard@gmail.com</a>
+</div>
+
+<script>
+  function showEmail(n) {
+    document.querySelectorAll('.email-section').forEach(function(el, i) { el.classList.toggle('active', i === n); });
+    document.querySelectorAll('.email-item').forEach(function(el, i) { el.classList.toggle('selected', i === n); });
+  }
+  function highlightBtn(btn) {
+    document.querySelectorAll('.sel-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>

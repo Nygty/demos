@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Concierge - Il Boscareto Resort & Winery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f5f2eb; min-height: 100vh; display: flex; flex-direction: column; }
+        /* Palette Il Boscareto : bordeaux Barolo, crème nebbiolo, or Langhe, brun terreux */
+        :root {
+            --primary: #6b1a2a;      /* bordeaux Barolo */
+            --accent: #9b3a4a;       /* bordeaux clair */
+            --bg: #f5f2eb;
+            --bg-card: #ffffff;
+            --border: #e2d9cc;
+            --text-dark: #1f1215;
+            --text-light: #7a6a62;
+            --gold: #c8973a;
+        }
+        .header { background-color: #faf8f3; padding: 0; border-bottom: 1px solid var(--border); }
+        .header-top { background: var(--primary); padding: 8px 45px; display: flex; align-items: center; gap: 15px; }
+        .rc-badge { font-size: 9px; letter-spacing: 2px; color: #e8c8b0; text-transform: uppercase; }
+        .header-main { padding: 28px 45px; }
+        .stars { color: var(--gold); font-size: 14px; letter-spacing: 3px; margin-bottom: 8px; }
+        .hotel-name { font-family: 'Cormorant Garamond', serif; font-size: 30px; font-weight: 500; color: var(--text-dark); letter-spacing: 2px; margin-bottom: 5px; }
+        .subtitle { font-size: 10px; color: var(--text-light); letter-spacing: 3px; text-transform: uppercase; }
+        .tabs { display: flex; background-color: #faf8f3; padding: 0 45px; border-bottom: 1px solid var(--border); }
+        .tab { padding: 18px 26px; font-size: 11px; font-weight: 500; letter-spacing: 1.5px; color: #aaa; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; text-transform: uppercase; }
+        .tab:hover { color: var(--text-dark); }
+        .tab.active { color: var(--primary); border-bottom-color: var(--accent); }
+        .main-content { flex: 1; padding: 30px 45px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .inbox-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 12px; }
+        .refresh-btn { background: var(--primary); color: white; border: none; padding: 10px 22px; font-size: 11px; letter-spacing: 1px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
+        .refresh-btn:hover { background: var(--accent); }
+        .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter { padding: 8px 16px; font-size: 10px; letter-spacing: 1px; border: 1px solid var(--border); background: var(--bg-card); cursor: pointer; transition: all 0.2s; text-transform: uppercase; color: var(--text-light); }
+        .filter:hover, .filter.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .filter .count { background: #e5ddd5; padding: 2px 6px; border-radius: 10px; margin-left: 6px; font-size: 9px; }
+        .filter.active .count { background: rgba(255,255,255,0.2); }
+        .email-list { background: var(--bg-card); border: 1px solid var(--border); }
+        .email-item { padding: 22px 25px; border-bottom: 1px solid #ede5da; cursor: pointer; transition: background 0.2s; }
+        .email-item:hover { background: #f8f4ef; }
+        .email-item:last-child { border-bottom: none; }
+        .email-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .email-from { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+        .email-date { font-size: 11px; color: #bbb; }
+        .email-subject { font-size: 13px; color: #555; margin-bottom: 8px; }
+        .email-preview { font-size: 12px; color: #888; line-height: 1.6; }
+        .email-tags { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .tag { padding: 4px 10px; font-size: 9px; letter-spacing: 0.5px; border-radius: 3px; text-transform: uppercase; }
+        .tag.auto-replied { background: #d1fae5; color: #059669; }
+        .tag.to-validate { background: #fef3c7; color: #d97706; }
+        .ai-response { background: #f9f1f2; border-left: 3px solid var(--accent); padding: 16px 18px; margin-top: 14px; font-size: 12px; color: #444; line-height: 1.75; }
+        .ai-response-header { font-size: 10px; color: var(--accent); letter-spacing: 1px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+        .footer { background: var(--primary); color: #c8a0a8; padding: 20px 45px; font-size: 11px; letter-spacing: 2px; text-align: center; }
+        .roi-section { background: var(--bg-card); border: 1px solid var(--border); padding: 45px 40px; }
+        .roi-title { font-family: 'Cormorant Garamond', serif; font-size: 26px; color: var(--text-dark); margin-bottom: 6px; text-align: center; }
+        .roi-subtitle { text-align: center; font-size: 11px; color: var(--text-light); margin-bottom: 35px; letter-spacing: 1.5px; text-transform: uppercase; }
+        .roi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 35px; }
+        .roi-card { text-align: center; padding: 25px 15px; background: var(--bg); border: 1px solid var(--border); }
+        .roi-number { font-family: 'Cormorant Garamond', serif; font-size: 40px; font-weight: 600; color: var(--primary); line-height: 1; }
+        .roi-label { font-size: 10px; letter-spacing: 1px; color: var(--text-light); margin-top: 8px; text-transform: uppercase; }
+        .roi-note { text-align: center; font-size: 12px; color: var(--text-light); line-height: 2; border-top: 1px solid var(--border); padding-top: 25px; }
+        .roi-note b { color: var(--text-dark); }
+        .roi-highlight { background: var(--primary); color: white; display: inline-block; padding: 3px 12px; margin: 0 2px; font-size: 11px; }
+        .analyze-content { background: var(--bg-card); border: 1px solid var(--border); padding: 40px; }
+        .analyze-content h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--text-dark); margin-bottom: 20px; }
+        .analyze-content textarea { width: 100%; height: 200px; border: 1px solid var(--border); padding: 20px; font-family: inherit; font-size: 13px; resize: vertical; margin-bottom: 20px; background: var(--bg); color: var(--text-dark); outline: none; }
+        .analyze-btn { background: var(--accent); color: white; border: none; padding: 12px 30px; font-size: 12px; letter-spacing: 1px; cursor: pointer; text-transform: uppercase; }
+        .history-content { background: var(--bg-card); border: 1px solid var(--border); overflow: hidden; }
+        .history-table { width: 100%; text-align: left; border-collapse: collapse; }
+        .history-table th { font-size: 10px; letter-spacing: 1px; color: var(--text-light); padding: 15px 20px; border-bottom: 1px solid var(--border); font-weight: 500; text-transform: uppercase; background: var(--bg); }
+        .history-table td { padding: 16px 20px; font-size: 12px; border-bottom: 1px solid #ede5da; color: var(--text-dark); }
+        .history-table tr:last-child td { border-bottom: none; }
+        .status-badge { padding: 4px 10px; font-size: 10px; border-radius: 3px; display: inline-block; text-transform: uppercase; }
+        .status-badge.sent { background: #d1fae5; color: #059669; }
+        .status-badge.pending { background: #fef3c7; color: #d97706; }
+        @media (max-width: 768px) {
+            .roi-grid { grid-template-columns: repeat(2, 1fr); }
+            .tabs { overflow-x: auto; }
+            .header-main, .main-content { padding: 20px; }
+            .header-top { padding: 8px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-top">
+            <span class="rc-badge">⬥ 5 Star · Serralunga d'Alba · Langhe, Cuneo · Barolo & Barbaresco Wine Country</span>
+        </div>
+        <div class="header-main">
+            <div class="stars">★ ★ ★ ★ ★</div>
+            <div class="hotel-name">IL BOSCARETO RESORT & WINERY</div>
+            <div class="subtitle">AI Concierge · Langhe Wine Country · Serralunga d'Alba</div>
+        </div>
+    </div>
+    <div class="tabs">
+        <div class="tab active" data-tab="inbox">Inbox</div>
+        <div class="tab" data-tab="roi">📊 ROI</div>
+        <div class="tab" data-tab="analyze">Analyze an Email</div>
+        <div class="tab" data-tab="history">History</div>
+    </div>
+    <div class="main-content">
+
+        <!-- INBOX TAB -->
+        <div class="tab-content active" id="inbox">
+            <div class="inbox-header">
+                <button class="refresh-btn">↻ Refresh</button>
+                <div class="filters">
+                    <div class="filter active">All <span class="count">3</span></div>
+                    <div class="filter">To Validate <span class="count">1</span></div>
+                    <div class="filter">Auto-Replied <span class="count">2</span></div>
+                </div>
+            </div>
+            <div class="email-list">
+
+                <!-- Email 1 : Private cellar tour Gaja -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">James & Eleanor Whitmore</div>
+                        <div class="email-date">Today, 09:18</div>
+                    </div>
+                    <div class="email-subject">Private cellar tour at Gaja — 3 nights September</div>
+                    <div class="email-preview">Dear Concierge, we are staying 3 nights in September and would love to arrange a private visit to Gaja winery in Barbaresco. Could you contact them on our behalf and also book a truffle hunt nearby? We are both sommeliers so expect a very detailed experience.</div>
+                    <div class="email-tags">
+                        <span class="tag to-validate">To Validate</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Suggested Response — drafted in 28 sec</div>
+                        Dear James & Eleanor,<br><br>
+                        A warm welcome from Il Boscareto — it is a pleasure to host two sommeliers in the heart of Barolo and Barbaresco country.<br><br>
+                        <b>Day 1 — Gaja Winery, Barbaresco (private):</b><br>
+                        • We are reaching out directly to Gaja on your behalf for an exclusive private visit (morning, 10:00–12:30)<br>
+                        • Tour of the historic cellars, barrel hall and current vintages with a senior oenologist<br>
+                        • Vertical tasting: Barbaresco DOCG + Langhe Nebbiolo — estimated €220pp<br><br>
+                        <b>Day 2 — White Truffle Hunt, Serralunga d'Alba:</b><br>
+                        • Sunrise hunt with certified <em>tartufaio</em> and his Lagotto dog in the Boscareto woods<br>
+                        • Return to the resort: truffle shaved fresh over scrambled eggs with Fontina · Duration: 2.5h · €180pp<br><br>
+                        Shall I confirm September 9th and 10th for this itinerary? I will send Gaja's availability today.<br><br>
+                        With warm regards,<br>
+                        Il Boscareto Resort & Winery · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 2 : Slow Food dinner reservation -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Isabelle Perrin</div>
+                        <div class="email-date">Today, 07:45</div>
+                    </div>
+                    <div class="email-subject">Réservation dîner — restaurants Slow Food Langhe</div>
+                    <div class="email-preview">Bonjour, nous arrivons vendredi soir et souhaitons dîner dans un restaurant Slow Food typique des Langhe samedi et dimanche soir. Pouvez-vous nous conseiller et réserver en notre nom ? Nous sommes 2 personnes, sans allergies.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Chère Isabelle,<br><br>
+                        Bienvenue à Il Boscareto — les Langhe offrent quelques-unes des plus belles tables Slow Food d'Italie. Voici nos deux meilleures suggestions :<br><br>
+                        <b>Samedi soir — Ristorante La Ciau del Tornavento, Treiso :</b><br>
+                        • Vue panoramique sur les vignes, cuisine langarola contemporaine, carte des vins exceptionnelle (4 000 références)<br>
+                        • Réservation confirmée en votre nom : 20h00 · Table en terrasse<br><br>
+                        <b>Dimanche soir — Osteria del Vignaiolo, Serralunga d'Alba :</b><br>
+                        • Cuisine paysanne authentique, tajarin au beurre de sauge, brasato al Barolo<br>
+                        • Réservation confirmée : 19h30 · Table intérieure avec vue sur le château<br><br>
+                        Notre voiturier peut vous déposer et venir vous récupérer pour les deux soirées — souhaitez-vous que je le prévoie ?<br><br>
+                        Bien cordialement,<br>
+                        Il Boscareto Resort & Winery · Concierge
+                    </div>
+                </div>
+
+                <!-- Email 3 : Giacomo Conterno visit + wine allocation -->
+                <div class="email-item">
+                    <div class="email-header">
+                        <div class="email-from">Michael Thornton</div>
+                        <div class="email-date">Yesterday, 21:10</div>
+                    </div>
+                    <div class="email-subject">Visit to Giacomo Conterno — Barolo Monfortino allocation</div>
+                    <div class="email-preview">Hi, I'm a long-time collector of Giacomo Conterno's Barolo Monfortino and would love to visit the estate during my stay. Is there any possibility to purchase an allocation directly from the winery? Happy to discuss with Roberto Conterno personally.</div>
+                    <div class="email-tags">
+                        <span class="tag auto-replied">Auto-Replied</span>
+                    </div>
+                    <div class="ai-response">
+                        <div class="ai-response-header">✨ AI Auto-Response Sent</div>
+                        Dear Michael,<br><br>
+                        As a neighbour of the Conterno estate, Il Boscareto has a long-standing relationship with the family — this is exactly the kind of request we handle with care.<br><br>
+                        I have sent a personal introduction to the Conterno cantina on your behalf and will revert with their availability within 24 hours. Roberto Conterno does occasionally receive serious collectors — your background will be presented.<br><br>
+                        In the meantime, our own Boscareto wine cellar holds a curated selection of recent Monfortino vintages (2015, 2016, 2018) available for in-house tasting while you wait for confirmation.<br><br>
+                        I will be in touch by tomorrow morning. Please don't hesitate to call the concierge desk directly upon arrival.<br><br>
+                        Sincerely,<br>
+                        Il Boscareto Resort & Winery · Concierge
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ROI TAB -->
+        <div class="tab-content" id="roi">
+            <div class="roi-section">
+                <div class="roi-title">Estimated ROI — Il Boscareto Resort & Winery</div>
+                <div class="roi-subtitle">Serralunga d'Alba, Langhe · 36 Rooms · 5 Stars · Wine Country</div>
+                <div class="roi-grid">
+                    <div class="roi-card">
+                        <div class="roi-number">36</div>
+                        <div class="roi-label">Rooms</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">~432</div>
+                        <div class="roi-label">Emails / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">86h</div>
+                        <div class="roi-label">Time saved / month</div>
+                    </div>
+                    <div class="roi-card">
+                        <div class="roi-number">€2,160</div>
+                        <div class="roi-label">Monthly staff saving</div>
+                    </div>
+                </div>
+                <div class="roi-note">
+                    Based on <b>36 rooms</b> × ~12 emails per room per month × <b>12 minutes saved</b> per email.<br>
+                    Staff cost estimate: €25/h · <b>Positive ROI from month one</b> with the Standard plan (€80/month).<br><br>
+                    💡 <b>Recommended plan:</b> <span class="roi-highlight">Premium+ — €1,200 setup + €150/month</span><br>
+                    Includes weekly auto-improvement, monthly report + training on real Il Boscareto guest exchanges (wine tour requests, cellar bookings, truffle hunts).<br>
+                    Return on investment: <b>14.4× the monthly cost</b>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYZE TAB -->
+        <div class="tab-content" id="analyze">
+            <div class="analyze-content">
+                <h3>Paste an email to analyze</h3>
+                <textarea placeholder="Paste any guest email here — the AI will classify it, identify the intent, and draft a personalised response in the Il Boscareto tone in 30 seconds..."></textarea>
+                <button class="analyze-btn">Analyze with AI</button>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div class="tab-content" id="history">
+            <div class="history-content">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Response Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>James & Eleanor Whitmore</td>
+                            <td>Private cellar tour at Gaja + truffle hunt</td>
+                            <td><span class="status-badge pending">Pending</span></td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 16, 2026</td>
+                            <td>Isabelle Perrin</td>
+                            <td>Réservation dîner Slow Food Langhe</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>28 sec</td>
+                        </tr>
+                        <tr>
+                            <td>Jul 15, 2026</td>
+                            <td>Michael Thornton</td>
+                            <td>Visit to Giacomo Conterno — Monfortino allocation</td>
+                            <td><span class="status-badge sent">Sent</span></td>
+                            <td>31 sec</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+    <div class="footer">AI Concierge V3.0 — Il Boscareto Resort & Winery · Serralunga d'Alba, Langhe</div>
+    <script>
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
