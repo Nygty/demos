@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Porto Zante Villas &amp; Spa</title>
+  <style>
+    :root {
+      --gold:     #b8962e;
+      --gold-lt:  #d4b86a;
+      --cream:    #fdfaf4;
+      --dark:     #1c1508;
+      --text:     #2e2410;
+      --muted:    #7a6840;
+      --border:   #e8dcc0;
+      --green:    #2e6b48;
+      --green-lt: #e8f2ec;
+      --sea:      #1e5c8a;
+      --sea-lt:   #d0e8f5;
+      --shadow:   0 2px 16px rgba(28,21,8,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--gold);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px;
+      font-weight: bold;
+      color: var(--dark);
+      font-family: 'Georgia', serif;
+      letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--gold-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live {
+      background: var(--green);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-family: sans-serif;
+      letter-spacing: 1px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #1c1508 0%, #2e2010 50%, #1c1508 100%);
+      padding: 48px 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--gold);
+    }
+    .hero h1 {
+      color: var(--gold-lt);
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .hero p { color: #c8a860; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats {
+      display: flex;
+      justify-content: center;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat {
+      flex: 1;
+      max-width: 200px;
+      padding: 24px 20px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--gold); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 2px solid var(--border);
+      padding: 0 40px;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 14px 24px;
+      font-family: sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+    }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title {
+      font-family: sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .email-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .email-header {
+      background: #f8f2e4;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; letter-spacing: 0.5px; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--gold-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #2c1e08; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--gold-lt); }
+    .plan-price { font-size: 12px; color: #c8a860; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #a08040; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--gold); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: var(--dark); font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--gold); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #7a6840; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--gold-lt); text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">PZ</div>
+    <div>
+      <div class="hotel-name">Porto Zante</div>
+      <div class="hotel-sub">Villas &amp; Spa · Zakynthos · Greece</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Porto Zante's concierge team could handle every ultra-premium guest request in under 30 seconds — private yacht charters to Navagio Beach, Caretta turtle watching excursions, sea cave explorations — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">20</div>
+    <div class="stat-label">Private Villas</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~22</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~6h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Alexander von Richter &lt;avrichter@privewealth.de&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Private yacht to Navagio Beach + Blue Caves — full day for 4"</div>
+        </div>
+        <div class="email-time">Today · 07:55</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, we are arriving on August 15th for a 7-night stay. It is essential for us to visit Navagio (Shipwreck Beach) — we have always dreamed of seeing it from the sea rather than from the clifftop viewing platform. We would like a fully private yacht charter for the day for 4 guests, including the Blue Caves, with a gourmet picnic lunch on board. Please also confirm if helicopter access from Kefalonia airport is possible for our arrival. Thank you, Alexander
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 25s</div>
+          <div class="ai-time">⏱ 25 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Alexander,
+
+Arriving at Navagio by sea — anchored inside the cove — is truly one of Greece's most sublime experiences, and we are thrilled to arrange this for you.
+
+For August 16th (your first full day), we will reserve our partner's 14-metre motor yacht exclusively for your party of 4. The itinerary departs Porto Zante's private jetty at 09:00, heading north along the coastline to the Blue Caves at Cape Skinari (permit to enter by tender included), then continuing to Navagio where Captain Stavros will anchor inside the bay for two hours of swimming and photographs. A gourmet picnic prepared by our kitchen — chilled Robola wine, fresh seafood mezedes, local cheeses — will be served on deck.
+
+Regarding your arrival: helicopter transfer from Kefalonia airport to Zakynthos can be arranged (approx. 18 minutes). Could you confirm your landing time at KEF so I can coordinate the slot?
+
+I look forward to welcoming you to Porto Zante.
+
+With warm regards,
+Concierge Team — Porto Zante</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Charlotte Pemberton &lt;c.pemberton@outlook.co.uk&gt; <span class="tag tag-spec">Special Request</span></div>
+          <div class="email-subject">"Caretta turtle watching & snorkelling — eco experience for our children"</div>
+        </div>
+        <div class="email-time">Today · 10:20</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are a family of 5 (3 children aged 8, 11 and 14) staying at Porto Zante in July. The children are passionate about marine wildlife and we would love to arrange a guided early morning turtle watching experience at the nesting beaches. We also want to snorkel with a guide who can point out marine life — is this possible? We want something educational and eco-friendly. Many thanks, Charlotte
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 30s</div>
+          <div class="ai-time">⏱ 30 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Charlotte,
+
+What a wonderful choice — Zakynthos is home to the largest Caretta caretta nesting colony in the Mediterranean, and this will be a truly formative experience for your children.
+
+For the turtle watching, we work exclusively with ARCHELON (the Greek Sea Turtle Protection Society), whose certified guides lead small groups at dawn (05:30 departure from the resort) to the protected nesting beaches of Laganas Bay. The session typically lasts 90 minutes and includes a briefing on turtle biology — perfectly pitched for children aged 8 and up.
+
+For the marine snorkelling, our guide Yiorgos leads a 2-hour private session from the resort's private beach at 10:00, exploring the seagrass meadows where juvenile turtles often feed. He provides professional masks and wetsuits in children's sizes and narrates every discovery along the way.
+
+Both can be arranged on the same day. Could you confirm which date you would prefer during your stay?
+
+With warmest regards,
+Concierge Team — Porto Zante</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Marc Lefebvre &lt;m.lefebvre@privateoffice.fr&gt; <span class="tag tag-res">Reservation</span></div>
+          <div class="email-subject">"Villa upgrade + private chef dinner — proposal request for 8 guests"</div>
+        </div>
+        <div class="email-time">Yesterday · 14:10</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Bonjour, nous sommes un groupe de 8 personnes et nous souhaitons réserver votre plus belle villa disponible pour la semaine du 10 août. Nous aimerions également organiser un dîner gastronomique privé sur la terrasse avec un chef, un soir en milieu de séjour — fruits de mer, vins grecs premium. Pouvez-vous me faire une proposition? Merci, Marc
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Marc,
+
+Thank you for your enquiry — a week at Porto Zante for 8 guests is something we would be delighted to arrange at the highest level.
+
+For the week of August 10th, I am pleased to confirm availability of our Grand Villa — our most prestigious property, with a 180° Ionian Sea view, private infinity pool, 4 bedrooms and direct beach access via private jetty. I will send you a full accommodation proposal with photographs within the hour.
+
+For your private chef dinner on the terrace (August 13th, for example): we work with Chef Nikos Koutsourakis, formerly of a Michelin-starred kitchen in Athens, who will create a bespoke seafood tasting menu for 8 guests — Zakynthian lobster, raw Adriatic scallops, grilled stone bass with local herbs — paired with a curated selection of Greek fine wines (Assyrtiko from Santorini, Agiorgitiko from Nemea).
+
+Shall I confirm both and send full details?
+
+With pleasure,
+Concierge Team — Porto Zante</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Porto Zante</div>
+      <div class="roi-row"><span class="roi-key">Private Villas</span><span class="roi-val">20</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~22</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~15 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~6h 30</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€300/month</span></div>
+      <p class="roi-note">Ultra-premium properties typically receive fewer but more complex, time-intensive emails. Each saved at 14.5 min/email = significant concierge capacity freed for in-person guest experience.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Porto Zante Villas &amp; Spa</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta).<br><br>The AI drafts above reflect real ultra-premium requests — yacht charters, eco experiences, private chef dinners — the kind your concierge team handles daily.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#d4b86a">Porto Zante Villas &amp; Spa · Zakynthos, Greece</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

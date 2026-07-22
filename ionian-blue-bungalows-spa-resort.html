@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Ionian Blue Bungalows &amp; Spa Resort</title>
+  <style>
+    :root {
+      --blue:     #1a6b9a;
+      --blue-lt:  #4a9ec8;
+      --azure:    #d6eef8;
+      --cream:    #f5fbff;
+      --dark:     #0d2b3e;
+      --text:     #1e3a4f;
+      --muted:    #5a7e96;
+      --border:   #c8e4f0;
+      --green:    #1e7a52;
+      --green-lt: #e6f4ed;
+      --sand:     #e8d9b8;
+      --shadow:   0 2px 16px rgba(13,43,62,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── HEADER ─────────────────────────────────── */
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--blue-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      font-family: 'Georgia', serif;
+      letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--blue-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live {
+      background: var(--green);
+      color: #fff;
+      font-size: 11px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-family: sans-serif;
+      letter-spacing: 1px;
+    }
+
+    /* ── HERO BANNER ─────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #0d2b3e 0%, #1a4a6e 50%, #0d2b3e 100%);
+      padding: 48px 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--blue);
+    }
+    .hero h1 {
+      color: #a8d8f0;
+      font-size: 28px;
+      font-weight: normal;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .hero p { color: #7db8d8; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    /* ── STATS ROW ───────────────────────────────── */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat {
+      flex: 1;
+      max-width: 200px;
+      padding: 24px 20px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--blue); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    /* ── TABS ────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 2px solid var(--border);
+      padding: 0 40px;
+      gap: 0;
+      overflow-x: auto;
+    }
+    .tab {
+      padding: 14px 24px;
+      font-family: sans-serif;
+      font-size: 13px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      white-space: nowrap;
+    }
+    .tab.active { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+
+    /* ── MAIN LAYOUT ─────────────────────────────── */
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    /* ── EMAIL CARD ──────────────────────────────── */
+    .section-title {
+      font-family: sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .email-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .email-header {
+      background: #e8f4fb;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag {
+      display: inline-block;
+      font-family: sans-serif;
+      font-size: 10px;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; background: #fff; }
+    .email-body blockquote {
+      border-left: 3px solid var(--border);
+      margin: 0;
+      padding-left: 12px;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .ai-section {
+      background: var(--green-lt);
+      border-top: 2px solid #a8d4bc;
+      padding: 16px 20px;
+    }
+    .ai-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .ai-icon {
+      width: 28px; height: 28px;
+      background: var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff;
+      font-size: 14px;
+      font-family: sans-serif;
+      font-weight: bold;
+    }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .btn {
+      font-family: sans-serif;
+      font-size: 12px;
+      padding: 7px 18px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── SIDEBAR ─────────────────────────────────── */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #a8d8f0; margin-bottom: 16px; }
+    .plan {
+      padding: 12px 0;
+      border-bottom: 1px solid #1a4060;
+    }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #a8d8f0; }
+    .plan-price { font-size: 12px; color: #7db8d8; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #6098b8; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--blue-lt); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: var(--dark); font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--blue-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    footer {
+      text-align: center;
+      padding: 32px 20px;
+      background: var(--dark);
+      color: #5a7e96;
+      font-family: sans-serif;
+      font-size: 12px;
+      margin-top: 48px;
+      letter-spacing: 1px;
+    }
+    footer a { color: #a8d8f0; text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">IB</div>
+    <div>
+      <div class="hotel-name">Ionian Blue</div>
+      <div class="hotel-sub">Bungalows &amp; Spa · Nidri, Lefkada · Greece</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Ionian Blue's concierge team could handle every guest email in under 30 seconds — private sailing charters to Porto Katsiki, speedboat trips to Meganisi, spa bookings and more — with a personalised draft, ready to send.</p>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">40</div>
+    <div class="stat-label">Bungalows &amp; Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~32</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~8h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Thomas Müller &lt;t.mueller@gmail.com&gt; <span class="tag tag-res">Reservation</span></div>
+          <div class="email-subject">"Private sailing charter to Porto Katsiki + sunset cruise for 6 people"</div>
+        </div>
+        <div class="email-time">Today · 08:47</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, we are a group of 6 arriving on August 10th and staying for one week. We would love to organise a full-day private sailing trip to Porto Katsiki beach and the white cliffs — we have seen photos and it looks absolutely incredible. Could you also arrange a sunset cruise on the last evening, with drinks and local snacks on board? We are from Germany and would love to do this in a traditional wooden boat if possible. Many thanks, Thomas
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Thomas,
+
+Thank you — Porto Katsiki is one of the most breathtaking spots on the Ionian Sea and we are delighted to arrange this for your group.
+
+For a full-day private charter for 6 on a traditional wooden kaïki, we work with Captain Nikos whose 12-metre vessel departs from Nidri harbour (5 minutes from the resort) at 09:30. The route takes you to Porto Katsiki's turquoise waters, Egremni beach and the sea caves of Cape Lefkatas — with swimming stops at each. All snorkelling equipment, a cold lunch and drinks are included.
+
+For your sunset cruise on August 17th, we recommend an evening departure at 19:00 with Lefkadian wine, fresh mezedes and a return under the stars.
+
+Shall I confirm both reservations? I will need to know if anyone in your group has mobility considerations for the ladder entry at Porto Katsiki.
+
+Looking forward to welcoming you,
+Concierge Team — Ionian Blue</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Sophie van den Berg &lt;s.vandenberg@outlook.com&gt; <span class="tag tag-spec">Special Request</span></div>
+          <div class="email-subject">"Island hopping — Meganisi, Scorpios & Lefkada Town for 2 days"</div>
+        </div>
+        <div class="email-time">Today · 11:15</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, my husband and I are arriving on July 22nd for 10 nights. We would like to explore the surrounding islands — specifically Meganisi (we heard the village of Spartochori is beautiful) and if possible Scorpios island. We would also like a day trip to Lefkada Town to visit the old town and perhaps some local wineries. Can you help us plan all of this? Thank you, Sophie
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Sophie,
+
+What a wonderful itinerary — you have chosen some of Lefkada's very best experiences.
+
+For Meganisi, the ferry from Nidri takes just 20 minutes. We recommend arriving mid-morning in Vathy harbour, then taking the short walk up to Spartochori village — the views across the channel are extraordinary and the taverna at the top serves the freshest grilled octopus in the Ionian. We can arrange a private return taxi boat at your preferred time.
+
+Regarding Scorpios: the private island does not permit public access, but our captain can anchor nearby during your sailing day for photographs and swimming — the water around it is exceptional.
+
+For Lefkada Town, we suggest a Tuesday morning when the weekly market is in full swing. We will book a private driver and arrange a tasting visit at the Lefkaditiki Gi winery in Kariotes (45 minutes from town) — their Vertzami red is remarkable.
+
+Shall I put together a confirmed day-by-day plan for you?
+
+With pleasure,
+Concierge Team — Ionian Blue</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">James Hartley &lt;j.hartley@premiumtravel.co.uk&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Spa day for wife's birthday + romantic dinner on the terrace"</div>
+        </div>
+        <div class="email-time">Yesterday · 16:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi there, we are celebrating my wife's 40th birthday during our stay (August 3rd). I would love to surprise her with a full spa day — massages, treatments, the works — and a romantic dinner on the terrace or beach that evening with flowers and a birthday cake. She loves fresh seafood. Could you arrange this discreetly? Please don't mention anything if she contacts you separately. Thanks, James
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear James,
+
+What a beautiful way to celebrate — we would be honoured to make this a truly memorable day, and of course everything remains entirely confidential.
+
+For the spa, I suggest our "Ionian Indulgence" full-day package: arrival at 10:00 with a welcome herbal tea, followed by a 90-minute Ionian Sea salt and olive oil ritual, hot stone massage and a personalised facial. Our therapist Maria will then arrange a private relaxation hour by the spa pool with fresh fruit. Duration: 4.5 hours.
+
+For the evening, we will prepare our seafront terrace table privately decorated with white roses and candles. Chef Kostas will create a tasting menu built around fresh lobster, local grilled sea bream and a handcrafted birthday cake with her name.
+
+Could you confirm her preferred massage pressure (light/medium/firm) so Maria can personalise the treatment?
+
+Looking forward to making August 3rd unforgettable.
+
+With warm regards,
+Concierge Team — Ionian Blue</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left-col -->
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- ROI CARD -->
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Ionian Blue</div>
+      <div class="roi-row"><span class="roi-key">Bungalows &amp; Suites</span><span class="roi-val">40</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~32</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~8 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€360/month</span></div>
+      <p class="roi-note">Conservative estimate: 32 emails/day × 11.5 min saved per email. High season (July–Aug) volume likely 40% higher — the AI scales with no extra cost.</p>
+    </div>
+
+    <!-- PRICING -->
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Ionian Blue Bungalows &amp; Spa Resort</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a historic boutique hotel, just like yours.<br><br>The AI drafts above reflect the real types of requests your international guests (DE/NL/UK) send daily — sailing charters, island excursions, special occasions.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+
+  </div><!-- /sidebar -->
+</div><!-- /main -->
+
+<footer>
+  <p>Demo prepared for <strong style="color:#a8d8f0">Ionian Blue Bungalows &amp; Spa Resort · Nidri, Lefkada, Greece</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

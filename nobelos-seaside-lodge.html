@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Nobelos Seaside Lodge</title>
+  <style>
+    :root {
+      --pine:     #2a5c3a;
+      --pine-lt:  #5a9a6a;
+      --sea:      #1a6080;
+      --sea-lt:   #c8e4ef;
+      --cream:    #f4faf6;
+      --dark:     #0e2018;
+      --text:     #1c3226;
+      --muted:    #4a7060;
+      --border:   #bcd8c8;
+      --green:    #2a5c3a;
+      --green-lt: #e4f2e8;
+      --sand:     #f0e8d0;
+      --shadow:   0 2px 16px rgba(14,32,24,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--pine-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--pine), var(--pine-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: bold; color: #fff;
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--pine-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--sea); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #0e2018 0%, #1a3828 50%, #0e2018 100%);
+      padding: 48px 40px; text-align: center;
+      border-bottom: 1px solid var(--pine);
+    }
+    .hero h1 { color: #90d0a8; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #70b888; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--pine); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--pine); border-bottom-color: var(--pine); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #e8f5ee; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #dcfce7; color: #166534; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #a0c8b0; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--pine); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #90d0a8; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #1a3828; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #90d0a8; }
+    .plan-price { font-size: 12px; color: #70b888; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #508860; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--pine-lt); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: var(--dark); font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--pine-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #4a7060; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #90d0a8; text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">NB</div>
+    <div>
+      <div class="hotel-name">Nobelos</div>
+      <div class="hotel-sub">Seaside Lodge · Skopelos · Greece</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Nobelos's team could handle every guest request in under 30 seconds — pine forest hikes, sea kayaking, boat trips to the Alonissos marine sanctuary and more — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">14</div>
+    <div class="stat-label">Lodge Units</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~16</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~4h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Emma Richardson &lt;e.richardson@gmail.com&gt; <span class="tag tag-spec">Nature & Hiking</span></div>
+          <div class="email-subject">"Guided pine forest hike + sea kayaking on same day — is it possible?"</div>
+        </div>
+        <div class="email-time">Today · 09:10</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are two of us arriving on September 4th for a week. We are very outdoorsy and would love to combine a guided hike through the pine forests to one of the traditional churches on the hill with a sea kayak session in the afternoon. We have seen amazing photos of the coastline from the water. Are there options for beginners? We have never kayaked before. Thank you, Emma and David
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Emma and David,
+
+A perfect combination — and absolutely achievable in one day.
+
+For the morning hike, we recommend departing at 08:00 with our local guide Kostas through the Skopelos pine and olive forest trail to the Monastery of Agios Ioannis — famously perched on a clifftop rock, recognisable from the final scene of Mamma Mia! The return hike is approximately 3.5 hours, moderate difficulty, with stunning Aegean views throughout.
+
+For the afternoon, our kayaking partner offers a beginner-friendly 2-hour guided session departing from the beach directly below the lodge at 15:30. You will paddle along the sea caves and hidden pebble coves that are only accessible from the water. No experience required — full safety briefing and buoyancy aids provided.
+
+We will pack a light picnic lunch for the trail so you are energised for both.
+
+Shall I confirm both activities for September 5th?
+
+Looking forward to welcoming you,
+Concierge — Nobelos Seaside Lodge</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Lars Bergström &lt;lars.bergstrom@telia.com&gt; <span class="tag tag-res">Reservation</span></div>
+          <div class="email-subject">"Day trip to Alonissos marine sanctuary — scuba diving for certified diver"</div>
+        </div>
+        <div class="email-time">Today · 13:45</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, I am a certified PADI Open Water diver and I am very excited to dive in the Alonissos National Marine Park — I have read it is one of the most protected and biodiverse marine areas in the Mediterranean. I will be staying for 5 nights from August 19th. Can you organise a day trip with a dive guide to Alonissos and back? How long is the boat trip? Lars
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 31s</div>
+          <div class="ai-time">⏱ 31 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Lars,
+
+You have chosen one of the truly great diving destinations in the whole Mediterranean — the Alonissos Marine Park is the largest in Europe and a remarkable underwater world. You will not be disappointed.
+
+The ferry from Skopelos Town to Alonissos takes approximately 35 minutes. We work with Triton Dive Centre on Alonissos, certified by PADI, whose guides are authorised to lead dives inside the protected zones. Typical dive sites include the "Peristera Shipwreck" (a Byzantine vessel in 28 metres — stunning) and the Gioura marine canyon.
+
+I can arrange a full day trip for you on August 21st: departure 08:30 on the morning ferry, two guided dives with equipment provided (your PADI card will be checked on arrival), lunch at a local taverna, return ferry at 18:00.
+
+Could you confirm your last logged dive date and depth qualification so Triton can prepare the briefing?
+
+With pleasure,
+Concierge — Nobelos Seaside Lodge</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Isabelle Fontaine &lt;i.fontaine@wanadoo.fr&gt; <span class="tag tag-vip">Honeymoon</span></div>
+          <div class="email-subject">"Honeymoon stay — surprise for husband, private beach dinner request"</div>
+        </div>
+        <div class="email-time">Yesterday · 18:05</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Bonjour, nous arrivons le 14 juillet pour notre lune de miel — c'est mon mari qui pense que c'est juste des vacances, donc c'est une surprise ! Nous resterons 6 nuits. Est-ce qu'il serait possible d'organiser un dîner romantique sur la plage, avec des bougies et quelque chose de spécial pour l'occasion ? Merci beaucoup, Isabelle
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Isabelle,
+
+What a beautiful surprise — we will keep this entirely secret and make it a moment your husband will never forget.
+
+For the evening of July 15th (your first full day), we will prepare a private table for two directly on the pebble beach below the lodge: white linen, lanterns and candles, wildflowers, and a chilled bottle of Skopelos island wine waiting on ice. Our kitchen will prepare a bespoke menu of grilled local fish, fresh salads and a honeymoon dessert with a handwritten card from the team.
+
+The beach is entirely private at that hour — just the sound of the Aegean and the stars above Skopelos.
+
+We will also arrange a small surprise in your room on arrival: rose petals, a bottle of prosecco and a personalised welcome note.
+
+Could you let me know if your husband has any food allergies or dietary preferences?
+
+With all our warmest wishes,
+Concierge — Nobelos Seaside Lodge</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Nobelos</div>
+      <div class="roi-row"><span class="roi-key">Lodge Units</span><span class="roi-val">14</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~16</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~4h 30</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€200/month</span></div>
+      <p class="roi-note">For a small lodge of 14 units, that is almost a full day's work freed up every week — time your team can spend creating the personal touches that define Nobelos's reputation.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Nobelos Seaside Lodge</strong> by <strong>Enzo Cosnard</strong>, currently deploying this system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a historic boutique property with the same intimate character.<br><br>The AI drafts above are realistic — hiking, diving, honeymoon surprises — the real emails your team receives every day from international guests.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#90d0a8">Nobelos Seaside Lodge · Agios Ioannis, Skopelos, Greece</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

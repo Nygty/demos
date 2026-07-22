@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hotel Ristorante Villa Maria</title>
+  <style>
+    :root {
+      --terracotta: #c06040;
+      --terra-lt:   #d88060;
+      --cream:      #fdfaf6;
+      --dark:       #1a100a;
+      --text:       #2e1c10;
+      --muted:      #7a5840;
+      --border:     #e0caba;
+      --green:      #2e6b48;
+      --green-lt:   #e8f2ec;
+      --olive:      #6a7840;
+      --olive-lt:   #d8e0c0;
+      --sea-blue:   #1a5070;
+      --shadow:     0 2px 16px rgba(26,16,10,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--terra-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--terracotta), var(--terra-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: bold; color: #fff;
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: #e8a888; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a100a 0%, #2e1810 50%, #1a100a 100%);
+      padding: 48px 40px; text-align: center;
+      border-bottom: 1px solid var(--terracotta);
+    }
+    .hero h1 { color: #e8a888; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #c08868; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--terracotta); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--terracotta); border-bottom-color: var(--terracotta); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #faf0e8; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #fee2e2; color: #991b1b; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #e8a888; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #2e1810; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #e8a888; }
+    .plan-price { font-size: 12px; color: #c08868; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #a06848; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--terra-lt); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--terra-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #7a5840; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #e8a888; text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">VM</div>
+    <div>
+      <div class="hotel-name">Villa Maria</div>
+      <div class="hotel-sub">Famiglia Palumbo · Ravello, Amalfi Coast · Italy</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Villa Maria's team could handle every guest email in under 30 seconds — restaurant bookings, Amalfi Coast transport, Ravello Festival tickets, Positano day trips — with a personal, family-style reply, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">23</div>
+    <div class="stat-label">Rooms</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~24</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~6h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Robert &amp; Claire Bennett &lt;r.bennett@gmail.com&gt; <span class="tag tag-res">Transport</span></div>
+          <div class="email-subject">"Transfer from Naples airport + day trip to Positano for 2 people"</div>
+        </div>
+        <div class="email-time">Today · 09:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, we are arriving at Naples Capodichino on July 12th at 14:30 and need a transfer to Villa Maria in Ravello. Could you organise this? We would also like to visit Positano for a day — we have heard it is the most beautiful village on the coast. Can you recommend the best way to get there and back? We prefer not to drive on the Amalfi road ourselves. Many thanks, Robert
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Robert and Claire,
+
+Welcome — we are very much looking forward to your visit.
+
+For July 12th, I will arrange a private minivan transfer from Naples Capodichino to Villa Maria — departure from the arrivals hall at approximately 15:00, arriving Ravello in about 90 minutes depending on traffic. Our regular driver Giovanni speaks English and knows every bend of the Amalfi road. I will send you his mobile number closer to the date.
+
+For Positano: the most relaxed way is by private boat from Amalfi (20 minutes by sea rather than 1 hour of winding road), which also gives you the most spectacular view of the coastline as you approach. Our harbour contact can arrange a morning departure from Amalfi (we will drive you down, 25 minutes) with a return late afternoon. You will have the whole day to walk Positano's stepped streets, swim at the Spiaggia Grande and have lunch at La Tagliata overlooking the sea.
+
+Shall I confirm Giovanni for the 12th and book the boat for a day during your stay?
+
+With warm regards,
+Palumbo Family — Villa Maria, Ravello</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Brigitte Schäfer &lt;b.schaefer@t-online.de&gt; <span class="tag tag-spec">Restaurant</span></div>
+          <div class="email-subject">"Abendessen-Empfehlung in Ravello — bestes Restaurant für 2 Personen?"</div>
+        </div>
+        <div class="email-time">Today · 13:10</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Guten Tag, wir kommen am 5. August für 5 Nächte zu Ihnen. Könnten Sie uns Ihre besten Restaurantempfehlungen in Ravello geben? Wir suchen ein schönes Abendessen mit Blick auf die Küste — am liebsten mit frischen Meeresfrüchten. Können Sie eine Reservierung für 2 Personen am 6. August machen? Herzliche Grüße, Brigitte
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Liebe Brigitte,
+
+Herzlich willkommen — wir freuen uns sehr auf Ihren Besuch!
+
+Für einen unvergesslichen Abend mit Meeresblick empfehle ich Ihnen das Restaurant Rossellinis im Palazzo Avino — mit Blick über die gesamte Amalfiküste, frischen Meeresfrüchten und hervorragenden Weinen aus Kampanien. Es ist das eleganteste Restaurant in Ravello (Michelin-Stern). Für etwas Gemütlicheres und Typischeres ist das Ristorante Garden, direkt in der Villa Rufolo, eine wunderbare Alternative — besonders bei Sonnenuntergang.
+
+Für den 6. August werde ich für Sie einen Tisch reservieren — welches Ihnen lieber ist? Ich empfehle für Meeresfrüchte das Rossellinis, aber für den typischeren Ravello-Abend das Garden.
+
+Bitte teilen Sie mir mit, welche Uhrzeit am besten passt (ich schlage 20:00 Uhr vor).
+
+Mit herzlichen Grüßen,
+Familie Palumbo — Villa Maria, Ravello</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">François Dupuis &lt;f.dupuis@wanadoo.fr&gt; <span class="tag tag-vip">Festival</span></div>
+          <div class="email-subject">"Billets Ravello Festival — concert de clôture fin juillet, 4 personnes"</div>
+        </div>
+        <div class="email-time">Yesterday · 16:50</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Bonjour, nous sommes 4 amis qui séjournons du 25 au 30 juillet. Le Festival de Ravello se tient pendant notre visite et nous aimerions absolument assister à un concert — de préférence le concert de clôture en plein air sur la scène de la Villa Rufolo. Pouvez-vous nous obtenir des billets ? Merci d'avance, François
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Cher François,
+
+Quelle belle coïncidence — le Festival de Ravello en fin juillet est l'un des événements les plus extraordinaires de toute la côte amalfitaine. La scène du Belvédère de la Villa Rufolo, suspendue au-dessus de la mer, est unique au monde.
+
+Le concert de clôture du 29 juillet est généralement l'un des plus prisés (souvent un programme orchestral ou lyrique de grande envergure). Je vais contacter immédiatement la billetterie du Festival pour 4 places — les billets pour les concerts principaux de cette période se vendent rapidement, donc il est sage de confirmer le plus tôt possible.
+
+Pour ce soir-là, je suggère également de réserver une table pour le dîner dans notre propre restaurant panoramique avant le concert (19:00), pour profiter du coucher de soleil sur la côte avant la musique.
+
+Puis-je confirmer les 4 billets dès que j'ai la réponse de la billetterie ?
+
+Bien cordialement,
+Famille Palumbo — Villa Maria, Ravello</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Villa Maria</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">23</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~24</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~6h</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€270/month</span></div>
+      <p class="roi-note">For a family-run hotel, every hour saved on emails is an hour your team spends with guests — the personal touch that defines Villa Maria's reputation on the Amalfi Coast.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Villa Maria · Famiglia Palumbo</strong> by <strong>Enzo Cosnard</strong>, currently deploying this system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — another family-run historic property.<br><br>The AI answers in the guest's language (French, German, English) with the warm, personal tone your family has always been known for.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#e8a888">Hotel Ristorante Villa Maria · Famiglia Palumbo · Ravello, Amalfi Coast</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

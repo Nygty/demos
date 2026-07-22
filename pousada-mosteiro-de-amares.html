@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Pousada Mosteiro de Amares</title>
+  <style>
+    :root {
+      --stone:     #8a7a5a;
+      --stone-lt:  #b0a078;
+      --cream:     #fdfaf4;
+      --dark:      #18140a;
+      --text:      #2a2210;
+      --muted:     #7a6a48;
+      --border:    #ddd0b0;
+      --green:     #2e6b48;
+      --green-lt:  #e8f2ec;
+      --forest:    #2a4a2a;
+      --forest-lt: #c8e0c8;
+      --parchment: #f0e8d0;
+      --shadow:    0 2px 16px rgba(24,20,10,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--stone-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--stone), var(--stone-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: bold; color: #fff;
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--stone-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--forest); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #18140a 0%, #2a2010 50%, #18140a 100%);
+      padding: 48px 40px; text-align: center;
+      border-bottom: 1px solid var(--stone);
+    }
+    .hero h1 { color: var(--stone-lt); font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #a09060; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--stone); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--stone); border-bottom-color: var(--stone); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #f5f0e4; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #dcfce7; color: #166534; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--stone-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #2a2010; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--stone-lt); }
+    .plan-price { font-size: 12px; color: #a09060; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #807040; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--stone); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--stone-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #7a6a48; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--stone-lt); text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">PM</div>
+    <div>
+      <div class="hotel-name">Pousada Mosteiro de Amares</div>
+      <div class="hotel-sub">12th-Century Monastery · Braga, Minho · Portugal</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Pousada Mosteiro de Amares's team could respond to every guest email in under 30 seconds — Peneda-Gerês hikes, thermal spa visits, Braga & Guimarães tours, pilgrimage routes — with a personalised draft, in the guest's own language.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">32</div>
+    <div class="stat-label">Rooms</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~28</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~7h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Peter &amp; Anke Hofmann &lt;p.hofmann@gmx.de&gt; <span class="tag tag-spec">Nature &amp; Hiking</span></div>
+          <div class="email-subject">"Guided hike in Peneda-Gerês National Park — full day, moderate level"</div>
+        </div>
+        <div class="email-time">Today · 09:05</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Guten Morgen, wir sind ein deutsches Ehepaar und kommen im September für 6 Nächte zu Ihnen. Wir möchten unbedingt eine geführte Wanderung im Nationalpark Peneda-Gerês machen — gerne auf mittlerem Schwierigkeitsgrad, mit schönen Aussichten und vielleicht einem Wasserfall. Können Sie etwas organisieren? Wir sprechen leider kein Portugiesisch. Herzlichen Dank, Peter und Anke
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Peter and Anke,
+
+Wonderful — the Peneda-Gerês is Portugal's only national park and one of the most untouched natural landscapes in Western Europe. September is particularly beautiful, with clear skies and mild temperatures.
+
+We work with Filipe, a certified mountain guide who speaks excellent German and has been leading private hikes in Gerês for 15 years. For a moderate full-day hike with panoramic views and a waterfall, we suggest the Cascata do Arado trail — through ancient oak and laurel forests, past Bronze Age rock carvings, arriving at a series of beautiful cascades where you can swim. Distance: approximately 9 km, 4 hours walking.
+
+Filipe will collect you from the Pousada at 09:00 in his 4×4. A packed lunch prepared by our kitchen is included.
+
+Would you prefer September 3rd or 4th? I will confirm Filipe's availability immediately.
+
+Mit herzlichen Grüßen,
+Concierge — Pousada Mosteiro de Amares</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Céline Moreau &lt;c.moreau@orange.fr&gt; <span class="tag tag-res">Thermal Spa</span></div>
+          <div class="email-subject">"Thermes de Gerês — réservation pour 2 personnes, soins et bains"</div>
+        </div>
+        <div class="email-time">Today · 14:20</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Bonjour, mon mari et moi séjournons du 10 au 15 octobre. Nous avons entendu parler des thermes de Gerês et aimerions y passer une journée — bains thermaux, massages si possible. Pouvez-vous faire une réservation pour nous ? Avez-vous d'autres recommandations pour se ressourcer dans la région ? Merci, Céline
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 30s</div>
+          <div class="ai-time">⏱ 30 seconds</div>
+        </div>
+        <div class="ai-draft">Bonjour Céline,
+
+Quelle excellente idée — les Termas de Gerês sont à seulement 25 minutes de la Pousada et offrent l'une des expériences thermales les plus authentiques du Portugal, dans un cadre de forêts et granit.
+
+Je vous réserverai le forfait "Bem-Estar" pour 2 personnes à l'établissement Vidago/Gerês Thermal Spa — bains thermaux naturels, massage relaxant 60 minutes chacun et accès libre à l'espace aquatique (piscine thermale extérieure avec vue sur la montagne). Durée recommandée : une demi-journée.
+
+Pour compléter votre séjour bien-être, je vous suggère également :
+— Une promenade matinale à pied dans les villages de granit de Lindoso ou Soajo, authentiques et préservés, à 30 minutes.
+— Une dégustation de vins Vinho Verde dans une quinta familiale au retour.
+
+Souhaitez-vous que je confirme le 12 octobre pour les thermes ?
+
+Chaleureusement,
+Conciergerie — Pousada Mosteiro de Amares</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">John &amp; Patricia Walsh &lt;jpwalsh@eircom.net&gt; <span class="tag tag-vip">Heritage Stay</span></div>
+          <div class="email-subject">"History of the monastery — what can you tell us before we arrive?"</div>
+        </div>
+        <div class="email-time">Yesterday · 11:50</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are arriving from Ireland on August 20th for 4 nights. We are both retired history teachers and we are very excited to stay in a 12th-century Cistercian monastery — it is a dream come true. Could you tell us something about the history of the monastery before we arrive? And is there a guided tour of the historic parts of the building? Thank you so much, John and Patricia Walsh
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 31s</div>
+          <div class="ai-time">⏱ 31 seconds</div>
+        </div>
+        <div class="ai-draft">Dear John and Patricia,
+
+What a pleasure to welcome two historians — you will feel a deep connection with the story of this extraordinary place.
+
+The Mosteiro de Santa Maria de Bouro was founded in the 12th century by Cistercian monks, part of the great monastic reform movement that spread from Cîteaux in Burgundy across all of Christian Europe. For over 600 years it was a centre of learning, agriculture and spiritual life in the Minho — until the dissolution of the monasteries in 1834, when it fell silent for 150 years. The building you will sleep in was then entrusted to the architect Eduardo Souto de Moura, who won the Pritzker Prize for his thoughtful conversion — preserving every medieval stone while creating spaces of extraordinary serenity.
+
+For a guided tour of the Romanesque cloister, the refectory with its 17th-century tilework and the granite façade, we work with Dr. Ana Lima, a local historian who leads private visits for guests with a deeper interest. Duration: approximately 90 minutes. We can arrange this for your first morning.
+
+We look forward to welcoming you in August.
+
+Warm regards,
+Concierge — Pousada Mosteiro de Amares</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Pousada Mosteiro</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">32</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~28</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~7h</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€315/month</span></div>
+      <p class="roi-note">Guests write long, detailed emails — in German, French, English. The AI reads them all and drafts a precise reply in the guest's language in 30 seconds.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Pousada Mosteiro de Amares</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — another historic palace-hotel, same DNA as yours.<br><br>The AI responds naturally in French, German and English — without you needing to switch between languages.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#b0a078">Pousada Mosteiro de Amares · Amares, Braga, Portugal</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

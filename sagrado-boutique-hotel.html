@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Sagrado Boutique Hotel</title>
+  <style>
+    :root {
+      --clay:      #b06040;
+      --clay-lt:   #d08060;
+      --cream:     #fdfaf6;
+      --dark:      #1a100c;
+      --text:      #2c1c14;
+      --muted:     #7a5848;
+      --border:    #e0c8b8;
+      --green:     #2e6b48;
+      --green-lt:  #e8f2ec;
+      --teal:      #1a7080;
+      --teal-lt:   #d0eef0;
+      --sand:      #f0e4d0;
+      --shadow:    0 2px 16px rgba(26,16,12,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--clay-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--clay), var(--clay-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: bold; color: #fff;
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: #e0a080; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a100c 0%, #2c1810 50%, #1a100c 100%);
+      padding: 48px 40px; text-align: center;
+      border-bottom: 1px solid var(--clay);
+    }
+    .hero h1 { color: #e0a080; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #c08060; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--clay); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--clay); border-bottom-color: var(--clay); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #faf2ec; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #ccfbf1; color: #065f46; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #e0a080; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #2c1810; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #e0a080; }
+    .plan-price { font-size: 12px; color: #c08060; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #a06040; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--clay-lt); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--clay-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #7a5848; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #e0a080; text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">SG</div>
+    <div>
+      <div class="hotel-name">Sagrado</div>
+      <div class="hotel-sub">Boutique Hotel · Faro, Algarve · Portugal</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Sagrado's team could handle every guest email in under 30 seconds — Ria Formosa boat trips, Ilha Deserta excursions, old town tours, Algarve gastronomy — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">20</div>
+    <div class="stat-label">Rooms</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~22</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~6h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Andrew &amp; Helen Carter &lt;ah.carter@btinternet.com&gt; <span class="tag tag-spec">Nature</span></div>
+          <div class="email-subject">"Ria Formosa nature tour + boat to Ilha Deserta — full day?"</div>
+        </div>
+        <div class="email-time">Today · 09:45</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi there, we are coming to Faro from the UK for 5 nights in September. We are both keen birdwatchers and we are very excited about the Ria Formosa Natural Park — we have read it is one of the best birding spots in Europe during migration season. Could you arrange a guided birdwatching boat tour through the lagoon? We would also love to visit Ilha Deserta for a swim and lunch. Can this all be done in one day? Many thanks, Andrew and Helen
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Andrew and Helen,
+
+You have chosen a wonderful time to visit — September in the Ria Formosa is genuinely exceptional for birdwatching. Flamingos, spoonbills, Kentish plovers and early waders from northern Europe begin arriving in significant numbers, and the lagoon light in autumn is magnificent.
+
+I can arrange a full day combining both experiences:
+
+Morning (08:30 departure): A 2-hour guided birdwatching boat tour of the Ria Formosa lagoon with João, a certified ornithologist and naturalist guide. He will take you through the channels and saltpans, pointing out nesting flamingos, herons, kingfishers and migratory waders with a spotting scope. Binoculars and field guides provided.
+
+Afternoon (12:00): The boat continues to Ilha Deserta — the most remote and pristine of the barrier islands, accessible only by boat. The sole restaurant there (O Estaminé) serves extraordinary fresh fish and clams caught that morning. Swim in the warm Atlantic shallows and return to Faro around 17:30.
+
+The whole day — birdwatching + island — can be done with João's private boat.
+
+Shall I confirm for September 12th?
+
+With kind regards,
+Sagrado Boutique Hotel — Faro</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Jan van der Berg &lt;j.vdberg@kpnmail.nl&gt; <span class="tag tag-res">City Tour</span></div>
+          <div class="email-subject">"Walking tour of Faro old town + evening restaurant recommendation"</div>
+        </div>
+        <div class="email-time">Today · 12:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, I am arriving alone on October 5th for 3 nights. I am very interested in history and would like to explore Faro's old town — the Islamic walls, the cathedral and the old bishop's palace. Is there a walking tour available? Also, where would you recommend for a good dinner with local Algarvian food on my first evening? Thank you, Jan
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Jan,
+
+Welcome — Faro's walled old town (Cidade Velha) is one of the most underrated historic centres in all of Portugal, and a pleasure to explore on foot.
+
+For the walking tour, I can arrange a private 2-hour guided walk with Sofia, a local art historian who specialises in the history of the Islamic Algarve and the post-Reconquista architecture. The route includes: the original Moorish walls and Arco da Vila (the 18th-century gateway built over the original Islamic gate), the Sé Cathedral (begun in the 13th century on the site of a mosque), the bone chapel of Nossa Senhora do Carmo, and the quiet Largo da Sé square. This typically takes place in the late afternoon when the light is beautiful on the old stone — 17:00 departure from Sagrado.
+
+For dinner on October 5th, I recommend Restaurante Dois Irmãos, a Faro institution since 1925, just 3 minutes from the hotel — excellent cataplana (traditional Algarvian clay pot) of clams and pork, outstanding tuna à lagareiro with olive oil, fair prices. I can make a reservation for you at 20:00.
+
+Shall I confirm both?
+
+With pleasure,
+Sagrado Boutique Hotel — Faro</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Sophie Dreher &lt;s.dreher@gmx.de&gt; <span class="tag tag-vip">Early Arrival</span></div>
+          <div class="email-subject">"Frühankunft 11 Uhr — Gepäckaufbewahrung und Empfehlung bis Check-in?"</div>
+        </div>
+        <div class="email-time">Yesterday · 15:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hallo, ich komme am 20. August früh morgens mit dem Zug in Faro an — voraussichtlich um 11 Uhr. Check-in ist erst um 15 Uhr. Können Sie mein Gepäck aufbewahren? Und haben Sie Empfehlungen, was ich in der Zwischenzeit in Faro tun kann? Ich bin allein und freue mich über jeden Tipp. Vielen Dank, Sophie
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 25s</div>
+          <div class="ai-time">⏱ 25 seconds</div>
+        </div>
+        <div class="ai-draft">Liebe Sophie,
+
+Herzlich willkommen in Faro! Natürlich können Sie Ihr Gepäck bei uns ab 11 Uhr aufgeben — wir halten es sicher, bis Ihr Zimmer fertig ist.
+
+Für die Zeit bis zum Check-in empfehle ich Ihnen Folgendes:
+
+11:15 – 12:30: Spaziergang durch die Altstadt (Cidade Velha), nur 5 Minuten zu Fuß vom Hotel. Die Kathedrale, die maurischen Stadtmauern und der ruhige Largo da Sé sind zu dieser Tageszeit fast leer — wunderschön.
+
+12:30 – 14:00: Mittagessen am Hafen. Das Restaurante Capote oder die Mercado Municipal Biergärten bieten frischen Fisch und Meeresfrüchte zu sehr guten Preisen. Mit Blick auf die Ria Formosa.
+
+14:00 – 15:00: Kurzes Stöbern im Faro-Markt oder Kaffee im Café Aliança (das älteste Café der Stadt, gegründet 1908 — sehr schöne Jugendstileinrichtung).
+
+Um 15 Uhr ist Ihr Zimmer garantiert bereit.
+
+Ich freue mich auf Ihre Ankunft!
+
+Mit herzlichen Grüßen,
+Sagrado Boutique Hotel — Faro</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Sagrado</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">20</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~22</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~6h</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€250/month</span></div>
+      <p class="roi-note">Conservative estimate: 22 emails/day × 11.5 min saved. The AI responds in the guest's language — English, Dutch, German — with the personal touch of a boutique hotel.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Sagrado Boutique Hotel</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — another design boutique in a historic city centre.<br><br>The AI drafts above are realistic — bird tours, old town walks, German early-arrival questions — exactly what Sagrado's team handles daily.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#e0a080">Sagrado Boutique Hotel · Faro, Algarve, Portugal</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

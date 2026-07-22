@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Mythos Palace Resort &amp; Spa</title>
+  <style>
+    :root {
+      --cobalt:    #1a3a7a;
+      --cobalt-lt: #4a6aaa;
+      --lagoon:    #1e9090;
+      --lagoon-lt: #c0eaea;
+      --cream:     #f5fafd;
+      --dark:      #0e1e30;
+      --text:      #1a2c3c;
+      --muted:     #4a6070;
+      --border:    #c0d8e8;
+      --green:     #2e6b48;
+      --green-lt:  #e8f2ec;
+      --gold:      #9a7a2a;
+      --shadow:    0 2px 16px rgba(14,30,48,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--cobalt-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--cobalt), var(--cobalt-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: bold; color: #fff;
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--cobalt-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #0e1e30 0%, #1a3050 50%, #0e1e30 100%);
+      padding: 48px 40px; text-align: center;
+      border-bottom: 1px solid var(--cobalt);
+    }
+    .hero h1 { color: #90b0d8; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #7090b8; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--cobalt); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--cobalt); border-bottom-color: var(--cobalt); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #e8f0f8; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #d1fae5; color: #065f46; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #90b0d8; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #1a3050; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #90b0d8; }
+    .plan-price { font-size: 12px; color: #7090b8; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #507098; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--cobalt-lt); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--cobalt-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #4a6070; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #90b0d8; text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">MP</div>
+    <div>
+      <div class="hotel-name">Mythos Palace</div>
+      <div class="hotel-sub">Resort &amp; Spa · Kavros, Georgioupolis · Crete</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Mythos Palace's team could handle every guest email in under 30 seconds — Samaria Gorge treks, Melidoni Caves, Cretan gastronomy tours, Kavros lagoon activities — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">37</div>
+    <div class="stat-label">Rooms &amp; Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~30</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~8h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Stefan &amp; Monika Bauer &lt;s.bauer@gmx.de&gt; <span class="tag tag-spec">Hiking</span></div>
+          <div class="email-subject">"Samaria-Schlucht Wanderung — Organisation für 2 Personen, Anfänger?"</div>
+        </div>
+        <div class="email-time">Today · 08:55</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Guten Morgen, wir sind zum ersten Mal auf Kreta und sehr gespannt auf die Samaria-Schlucht. Wir sind nicht erfahrene Wanderer — ist die Wanderung machbar für "normale" Fitness? Wie lange dauert es? Können Sie uns alles organisieren (Transfer, Tickets, Rücktransport)? Wir kommen am 10. Juli für 8 Nächte. Herzliche Grüße, Stefan und Monika
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Liebe Stefan und Monika,
+
+Die Samaria-Schlucht ist eine der großartigsten Wanderungen Europas — und mit normaler Fitness absolut machbar! Wir organisieren das gerne komplett für Sie.
+
+Zur Wanderung selbst: Die Route führt von Xyloskalo (1.250 m Höhe) hinunter durch die 18 km lange Schlucht bis zum Hafen Agia Roumeli — ausschließlich bergab. Durchschnittliche Zeit: 4–6 Stunden für normale Fitness. Die Engstelle „Eiserne Tore" (nur 3 Meter breit, 300 Meter hohe Felswände) ist unvergesslich. Festes Schuhwerk und Wasser sind wichtig — wir stellen Ihnen am Abend vorher ein Wanderpaket zusammen (Wasserflaschen, Energieriegel, Sonnenschutz).
+
+Organisation:
+– 05:30 Uhr: Transfer vom Mythos Palace zum Startpunkt Xyloskalo (1,5 Std.)
+– Wanderung eigenständig oder mit unserem lokalen Guide Nikos (optional)
+– Rückkehr: Fähre von Agia Roumeli nach Chora Sfakion, dann Bus zurück zum Hotel — Sie sind gegen 20:00 Uhr zurück.
+
+Soll ich alles für den 13. Juli reservieren?
+
+Mit herzlichen Grüßen,
+Concierge — Mythos Palace Resort &amp; Spa</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">James &amp; Lucy Forsythe &lt;j.forsythe@googlemail.com&gt; <span class="tag tag-res">Family</span></div>
+          <div class="email-subject">"Activities for children aged 7 and 10 — kayaking, cave visit, beach?"</div>
+        </div>
+        <div class="email-time">Today · 11:20</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are a family of 4 arriving on August 5th. Our children are 7 and 10. We would love to organise some activities specifically for them — something adventurous but safe. We have seen the Kavros lagoon looks perfect for kayaking. Is there also a cave or archaeological site nearby that would appeal to children? Thanks, James and Lucy
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 30s</div>
+          <div class="ai-time">⏱ 30 seconds</div>
+        </div>
+        <div class="ai-draft">Dear James and Lucy,
+
+What a great age for Crete — your children will have the time of their lives.
+
+The Kavros lagoon is perfect for family kayaking: shallow, crystal clear, warm water and absolutely calm — ideal for children from age 6. Our partner Water Sports Kavros is 200 metres from the resort and offers guided kayak tours of the lagoon (1 hour, both ages fully supervised). They also have pedal boats, stand-up paddleboards and windsurfing for older children.
+
+For the cave: Melidoni Cave is extraordinary for children — a vast cavern 20 minutes from Georgioupolis with spectacular stalactites, stalagmites and fascinating mythology (the cave was sacred to Hermes in antiquity). Guided visits last 45 minutes and children aged 7+ love the atmosphere. I can arrange a private family guided visit.
+
+For a full family day, I suggest: morning kayaking on the lagoon, picnic lunch on our beach terrace, afternoon Melidoni Cave visit, sunset swim. All in the same day.
+
+Shall I put this together for August 7th?
+
+With warm regards,
+Concierge — Mythos Palace Resort &amp; Spa</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Pieter van Houten &lt;p.vanhouten@ziggo.nl&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Private Cretan cooking class + wine tasting — romantic evening for 2"</div>
+        </div>
+        <div class="email-time">Yesterday · 17:15</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, my wife and I are celebrating our 10th wedding anniversary during our stay (we arrive August 20th, 7 nights). I would love to organise something special — perhaps a private Cretan cooking class and a wine tasting in the evening? Something intimate and memorable, just the two of us. Can you arrange this? Pieter
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Pieter,
+
+Congratulations on your 10th anniversary — what a perfect reason to discover the food and wine of Crete together.
+
+I suggest an evening on August 22nd with the following:
+
+17:00 — Private Cretan cooking class with Maria, a local cook from Georgioupolis who teaches in her traditional farmhouse kitchen (15 minutes from the resort). You and your wife will prepare together: dakos (Cretan rusk salad), stuffed zucchini flowers, lamb with wild herbs and Cretan kaltsounia pastries. Everything is made from her garden and local producers. Duration: 2 hours, entirely in English.
+
+19:30 — Dinner of everything you have cooked, served at Maria's garden table by candlelight with local wine.
+
+21:00 — Private wine tasting back at Mythos Palace: our sommelier Dimitris has curated a tasting of 4 exceptional Cretan wines (Vidiano white from Heraklion, Dafni from Sitia, Liatiko red, Romeiko) with small food pairings on our rooftop terrace.
+
+Shall I confirm this for you?
+
+With warmest congratulations,
+Concierge — Mythos Palace Resort &amp; Spa</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Mythos Palace</div>
+      <div class="roi-row"><span class="roi-key">Rooms &amp; Suites</span><span class="roi-val">37</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~30</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~8h</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€360/month</span></div>
+      <p class="roi-note">Conservative estimate for 30 emails/day × 11.5 min saved. Peak summer volume can reach 45+ emails/day — the AI scales effortlessly with no extra cost.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Mythos Palace Resort &amp; Spa</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta).<br><br>The AI drafts above reflect exactly what your team handles daily — Samaria logistics in German, family activities in English, romantic experiences in Dutch.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#90b0d8">Mythos Palace Resort &amp; Spa · Kavros, Georgioupolis, Crete, Greece</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

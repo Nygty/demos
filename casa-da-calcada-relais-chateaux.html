@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Casa da Calcada Relais &amp; Châteaux</title>
+  <style>
+    :root {
+      --burgundy:  #7a2030;
+      --burg-lt:   #a84858;
+      --cream:     #fdf9f4;
+      --dark:      #1a0c10;
+      --text:      #2e1820;
+      --muted:     #7a5860;
+      --border:    #e0c8cc;
+      --green:     #2e6b48;
+      --green-lt:  #e8f2ec;
+      --gold:      #9a7d3a;
+      --gold-lt:   #c4a85a;
+      --stone:     #e8e0d0;
+      --shadow:    0 2px 16px rgba(26,12,16,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--burg-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--burgundy), var(--burg-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: bold; color: #fff;
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: #d08088; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a0c10 0%, #2e1018 50%, #1a0c10 100%);
+      padding: 48px 40px; text-align: center;
+      border-bottom: 1px solid var(--burgundy);
+    }
+    .hero h1 { color: #d08088; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #b06070; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--burgundy); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--burgundy); border-bottom-color: var(--burgundy); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #f8f0f2; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #fce7f3; color: #9d174d; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #d08088; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #2e1018; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #d08088; }
+    .plan-price { font-size: 12px; color: #b06070; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #904858; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--burg-lt); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--burg-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #7a5860; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #d08088; text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">CC</div>
+    <div>
+      <div class="hotel-name">Casa da Calcada</div>
+      <div class="hotel-sub">Relais &amp; Châteaux · Amarante, Minho · Portugal</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Casa da Calcada's concierge team could handle every guest request in under 30 seconds — Vinho Verde estate visits, Santiago de Compostela pilgrimages, Guimarães cultural tours, Michelin dinner bookings — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">30</div>
+    <div class="stat-label">Rooms &amp; Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~28</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~7h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">William Thornton &lt;w.thornton@btinternet.com&gt; <span class="tag tag-spec">Wine &amp; Gastronomy</span></div>
+          <div class="email-subject">"Private Vinho Verde estate tour + winery lunch — 2 people"</div>
+        </div>
+        <div class="email-time">Today · 08:50</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, my wife and I are passionate about wine and have been looking forward to exploring the Vinho Verde region for years. We will be staying at Casa da Calcada from October 3rd for 5 nights. Could you organise a private tour of one of the better wine estates in the Minho — ideally with access to the vineyards, a cellar tour and a proper sit-down lunch with the winemaker? We are looking for something genuinely authentic, not a group tour. Many thanks, William
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear William,
+
+The Minho is one of Europe's most underrated wine regions and October is the very best time to visit — harvest season, with the estates buzzing with energy and the new vintage just beginning.
+
+For a truly private and authentic experience, we recommend Quinta de Soalheiro in the Moncão-Melgaço sub-region — considered by many to produce the finest Alvarinho in Portugal. The Cerdeira family welcome private guests for a personal cellar tour led by António, the winemaker, followed by a seated tasting lunch in their private dining room overlooking the Minho river valley, paired with current and library vintages.
+
+Alternatively, if you would prefer to stay closer to Amarante, Quinta da Aveleda (15 minutes) is one of the oldest estates in Portugal, with formal gardens and an extraordinary historic manor — equally personal in a private visit.
+
+Both can be arranged for October 5th. Which sounds more like your style? I will confirm and send full details.
+
+With warm regards,
+Concierge — Casa da Calcada</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Klaus Hartmann &lt;k.hartmann@web.de&gt; <span class="tag tag-res">Cultural Tour</span></div>
+          <div class="email-subject">"Day trip to Guimarães + Braga baroque — private guide for 3 people"</div>
+        </div>
+        <div class="email-time">Today · 11:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Guten Morgen, wir sind drei Personen und möchten während unseres Aufenthaltes Guimarães (die Geburtsstätte Portugals) und Braga besuchen. Könnten Sie einen privaten Reiseführer organisieren, der uns beide Städte an einem Tag zeigt? Wir interessieren uns besonders für die romanische und barocke Architektur. Herzlichen Dank, Klaus
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Klaus,
+
+An excellent choice — Guimarães and Braga together form one of the great medieval and baroque itineraries in the whole of Iberia, and both are perfectly suited to a single full day from Amarante.
+
+We work with Dr. Maria João Ferreira, an art historian and licensed guide who specialises in Romanesque and Baroque architecture of the Norte. She speaks fluent German and English. A suggested itinerary for 3 guests:
+
+Morning — Guimarães: The Castle (11th century birthplace of Portugal's first king), the Ducal Palace and the medieval old town (UNESCO World Heritage). Approximately 2.5 hours.
+
+Afternoon — Braga: The Cathedral (one of the oldest in Portugal, extraordinary interior), the Archbishop's Palace and the terraced pilgrimage stairway of Bom Jesus do Monte — Baroque at its most dramatic. Approximately 2 hours.
+
+Private driver included throughout. Departure from Casa da Calcada at 09:00, return by 18:00.
+
+Shall I confirm a date during your stay?
+
+Mit freundlichen Grüßen,
+Concierge — Casa da Calcada</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Sarah Coleman &lt;s.coleman@travelaffinity.com&gt; <span class="tag tag-vip">Group Booking</span></div>
+          <div class="email-subject">"Michelin dinner reservation for 8 — tasting menu + wine pairing"</div>
+        </div>
+        <div class="email-time">Yesterday · 15:20</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, I am a travel agent booking for a group of 8 guests arriving September 28th. They would like to dine at the Michelin-starred restaurant one evening — the full tasting menu with wine pairing. Is it possible to also arrange a private dining room for the group? They are celebrating a retirement. Please advise on availability and pricing. Thank you, Sarah
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Sarah,
+
+A wonderful choice to celebrate this occasion — our Michelin-starred restaurant Largo do Paço is one of the finest in northern Portugal and we would be delighted to create an exceptional evening for your group.
+
+For 8 guests, we can reserve our private dining room in the historic palace wing — exclusively yours for the evening, with original stone walls and candlelight. Chef Tiago Bonito's Grand Tasting Menu (currently 9 courses) celebrates Minho's finest seasonal produce, paired with a curated Vinho Verde and Douro wine selection by our sommelier.
+
+For September 29th (first full evening), we have full availability. Menu pricing for the tasting menu with wine pairing is available on request — I will send the current menu and pricing document to you directly.
+
+Could you also confirm if any guests have dietary restrictions or allergies? And would a personalised menu card for the retirement celebration be appreciated?
+
+With kind regards,
+Concierge &amp; Restaurant Team — Casa da Calcada</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Casa da Calcada</div>
+      <div class="roi-row"><span class="roi-key">Rooms &amp; Suites</span><span class="roi-val">30</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~28</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~7h</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€315/month</span></div>
+      <p class="roi-note">Conservative estimate for 28 emails/day × 11.5 min saved. At Relais &amp; Châteaux level, the quality and speed of your responses directly reflects the property's prestige.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Casa da Calcada Relais &amp; Châteaux</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a historic 5-star palace boutique, just like yours.<br><br>The AI drafts above reflect wine tours, cultural itineraries and restaurant bookings — the real emails your team handles daily in multiple languages.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#d08088">Casa da Calcada Relais &amp; Châteaux · Amarante, Minho, Portugal</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

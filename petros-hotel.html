@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Petros Hotel Patmos</title>
+  <style>
+    :root {
+      --aegean:    #1e4a7a;
+      --aegean-lt: #4a7aaa;
+      --white:     #f8fbff;
+      --cream:     #f5f8ff;
+      --dark:      #0e1e30;
+      --text:      #1a2c40;
+      --muted:     #4a6080;
+      --border:    #c0d4e8;
+      --green:     #2e6b48;
+      --green-lt:  #e8f2ec;
+      --shadow:    0 2px 16px rgba(14,30,48,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--aegean-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--aegean), var(--aegean-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: bold; color: #fff;
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 18px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--aegean-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #0e1e30 0%, #1a3050 50%, #0e1e30 100%);
+      padding: 48px 40px; text-align: center;
+      border-bottom: 1px solid var(--aegean);
+    }
+    .hero h1 { color: #90b8d8; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #7098b8; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--aegean); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--aegean); border-bottom-color: var(--aegean); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #e8f0f8; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #ede9fe; color: #5b21b6; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #90b8d8; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #1a3050; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #90b8d8; }
+    .plan-price { font-size: 12px; color: #7098b8; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #507898; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--aegean-lt); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--aegean-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #4a6080; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #90b8d8; text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">PH</div>
+    <div>
+      <div class="hotel-name">Petros Hotel</div>
+      <div class="hotel-sub">Skala · Patmos · Dodecanese · Greece</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Petros Hotel's team could answer every guest email in under 30 seconds — monastery visits, inter-island boat trips to Lipsi and Leros, scuba diving arrangements — with a precise, personal draft ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">18</div>
+    <div class="stat-label">Rooms</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~20</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~5h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Margaret Wilson &lt;m.wilson@virginmedia.com&gt; <span class="tag tag-spec">Pilgrimage</span></div>
+          <div class="email-subject">"Visit to St John Monastery + Cave of Apocalypse — practical advice?"</div>
+        </div>
+        <div class="email-time">Today · 08:15</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, my husband and I are coming to Patmos for the first time — we are both deeply interested in early Christian history and Patmos is a lifelong dream. We will be staying at Petros from September 10th for 6 nights. Could you advise us on visiting the Monastery of Saint John in Khora and the Cave of the Apocalypse? What time is best to visit, is there a dress code, and is it easy to walk up from Skala? Thank you, Margaret
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Margaret,
+
+Welcome to Patmos — you have chosen one of the most spiritually significant islands in the Christian world. We are delighted to help you make the most of your visit to these sacred sites.
+
+For the best experience, I recommend visiting on your second morning (September 11th), arriving at the Cave of the Apocalypse at 08:00 before the day visitors arrive from the cruise ships. The cave is a short walk above Skala — approximately 15 minutes on a well-marked path — or we can arrange a taxi for €5.
+
+From the Cave, continue uphill on foot to Khora (20 minutes further) and arrive at the Monastery of Saint John the Theologian before 09:30. The UNESCO-listed monastery opens at 08:00; the Treasury (icons, manuscripts, the original parchment of the Book of Revelation) requires a small additional entrance fee.
+
+Dress code: both sites require covered shoulders and knees — long trousers or skirt, no sleeveless tops. We keep spare wraps at reception if needed.
+
+Shall I also suggest a traditional breakfast café in Khora after your visit?
+
+With warm regards,
+Petros Hotel — Skala, Patmos</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Nils Andersson &lt;n.andersson@gmail.com&gt; <span class="tag tag-res">Boat Trip</span></div>
+          <div class="email-subject">"Ferry to Lipsi and Leros — day trips possible from Skala?"</div>
+        </div>
+        <div class="email-time">Today · 11:40</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, I am staying with you for 8 nights from July 28th. I would love to explore the smaller islands around Patmos — I have read about Lipsi and Leros. Are there ferries from Skala to these islands? Can I do day trips or do I need to stay overnight? I am travelling alone. Thanks, Nils
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Nils,
+
+Great news — both Lipsi and Leros are very accessible from Skala and make excellent day trips in summer.
+
+Lipsi: The Blue Star or Dodekanisos Seaways ferry departs Skala at approximately 08:30 and reaches Lipsi in 40 minutes. The island has only 800 permanent residents, a single port village, turquoise bays (Platis Gialos is exceptional) and a handful of authentic tavernas. The return ferry leaves Lipsi around 17:30, back in Skala before 18:30. Perfect as a solo day trip.
+
+Leros: Slightly further (1 hour 30 minutes by fast ferry), Leros is fascinating — a large Italian Art Deco harbour town left from the Italian occupation, dramatic hilltop castle, excellent fish restaurants. I recommend staying for a full day; the 08:00 departure and 18:00 return works well.
+
+I will print you a current ferry timetable on arrival. Summer schedules change weekly, so I always check before your trip.
+
+Would you like me to put together a day-by-day suggestion for your 8 nights?
+
+With pleasure,
+Petros Hotel — Skala, Patmos</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Astrid Müller &lt;a.mueller@freenet.de&gt; <span class="tag tag-vip">Diving</span></div>
+          <div class="email-subject">"Tauchen in Patmos — gibt es eine gute Tauchschule am Hafen?"</div>
+        </div>
+        <div class="email-time">Yesterday · 09:25</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hallo, ich bin PADI Advanced Open Water zertifiziert und suche eine gute Tauchschule auf Patmos, die Tauchgänge für erfahrene Taucher anbietet. Ich möchte am liebsten Unterwasserhöhlen und Felsformationen erkunden. Können Sie mir eine Empfehlung geben und eventuell eine Reservierung für 3 Tauchgänge während meines einwöchigen Aufenthalts vornehmen? Vielen Dank, Astrid
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Liebe Astrid,
+
+Patmos bietet für erfahrene Taucher einige wirklich faszinierende Unterwasserlandschaften — Unterwasserhöhlen, Felsformationen und außergewöhnliche Sichtweiten bis zu 30 Meter in der Hauptsaison.
+
+Ich empfehle das Blue Cave Diving Center, das sich 5 Gehminuten von unserem Hotel entfernt am Hafen von Skala befindet. Inhaber Georgios ist PADI-zertifiziert und spezialisiert auf Taucher mit Fortgeschrittenen-Zertifikat. Typische Tauchgänge für AOWD-Taucher umfassen:
+
+– Die Unterwasserhöhle bei Lambi (8–22 m) mit Stalaktiten und reicher Fauna
+– Das Felsriff bei Kambos mit kleinen Tintenfischen, Zackenbarsch und Meeräschen
+– Ein tieferes Wrack aus dem 2. Weltkrieg (28 m, ein besonderes Highlight)
+
+Für 3 Tauchgänge verteilt auf Ihre Woche werde ich Georgios direkt kontaktieren und die besten Termine nach Wetter und Gezeiten reservieren. Benötigt werden: Ihr PADI-Zertifikat und Ihr letztes Logbuch (oder Angabe Ihrer Tauchanzahl).
+
+Darf ich die Reservierung für Sie vornehmen?
+
+Mit freundlichen Grüßen,
+Petros Hotel — Skala, Patmos</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Petros Hotel</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">18</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~20</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~5h</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€225/month</span></div>
+      <p class="roi-note">For 18 rooms on a remote sacred island, that is nearly a full working day saved each week — time your team uses to make guests feel genuinely welcome in Patmos.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Petros Hotel</strong> by <strong>Enzo Cosnard</strong>, currently deploying this system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a similar boutique property on a historic Mediterranean island.<br><br>The AI responds naturally in German and English — pilgrimage questions, boat trips, diving — the emails Petros receives every single day.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#90b8d8">Petros Hotel · Skala, Patmos, Dodecanese, Greece</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Patmos Aktis Suites &amp; Spa</title>
+  <style>
+    :root {
+      --sand:     #c9a96e;
+      --sand-lt:  #e0c88e;
+      --cream:    #fdfaf5;
+      --dark:     #1a140a;
+      --text:     #2c2010;
+      --muted:    #786040;
+      --border:   #e0d0b0;
+      --green:    #2e6b48;
+      --green-lt: #e8f2ec;
+      --aegean:   #1e4878;
+      --aegean-lt:#d0e0f5;
+      --white:    #f8f5f0;
+      --shadow:   0 2px 16px rgba(26,20,10,.09);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', serif;
+      background: var(--cream);
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--sand-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--sand), var(--sand-lt));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: bold; color: var(--dark);
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--sand-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #1a140a 0%, #2a2010 50%, #1a140a 100%);
+      padding: 48px 40px; text-align: center;
+      border-bottom: 1px solid var(--sand);
+    }
+    .hero h1 { color: var(--sand-lt); font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #c0a070; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--sand); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--sand); border-bottom-color: var(--sand); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #f8f2e4; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #ede9fe; color: #5b21b6; }
+
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: var(--sand-lt); margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #2a2010; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: var(--sand-lt); }
+    .plan-price { font-size: 12px; color: #c0a070; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #a08050; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--sand); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: var(--dark); font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--sand-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #786040; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: var(--sand-lt); text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">PA</div>
+    <div>
+      <div class="hotel-name">Patmos Aktis</div>
+      <div class="hotel-sub">Suites &amp; Spa · Grikos, Patmos · Greece</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Patmos Aktis's concierge team could handle every spiritual and cultural guest request in under 30 seconds — private monastery tours, island cruises to Lipsi and Arki, cultural experiences — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">25</div>
+    <div class="stat-label">Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~26</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~7h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Dr. Heinrich Baumann &lt;h.baumann@heidelberg.de&gt; <span class="tag tag-spec">Cultural &amp; Spiritual</span></div>
+          <div class="email-subject">"Private guided visit to Monastery of Saint John — treasury & caves"</div>
+        </div>
+        <div class="email-time">Today · 08:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, my wife and I are theologians and Patmos holds immense spiritual significance for us. We are arriving on June 15th for 7 nights. We would like to arrange a private guided visit to the Monastery of Saint John the Theologian in Khora — including access to the treasury if possible — and also the Cave of the Apocalypse where the Book of Revelation was written. Could you arrange an early morning visit to avoid the tourist crowds? Thank you, Heinrich
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Dr. Baumann,
+
+Patmos is indeed one of the most sacred sites in Christendom, and we are privileged to welcome guests who truly understand its significance.
+
+For a private visit on June 16th, we work with Father Nikolaos, a monk and academic theologian who conducts private scholarly visits to the Monastery of Saint John before the main gates open to the public (08:00). He has special permission to include the Byzantine Treasury — illuminated manuscripts, rare icons and the gold-embroidered vestments of the 11th century — which standard tours do not access.
+
+Following the monastery, he will guide you privately to the Cave of the Apocalypse (Grotto of Saint Anna), where the voice that dictated the Book of Revelation to Saint John was heard. This is a particularly moving experience in the stillness of early morning.
+
+The visit lasts approximately 2.5 hours. Our driver will collect you from Patmos Aktis at 07:30.
+
+May I reserve June 16th for you?
+
+With respectful regards,
+Concierge — Patmos Aktis Suites &amp; Spa</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Fiona MacLeod &lt;f.macleod@outlook.co.uk&gt; <span class="tag tag-res">Boat Charter</span></div>
+          <div class="email-subject">"Private boat trip to Lipsi & Arki — 2 days, can you arrange?"</div>
+        </div>
+        <div class="email-time">Today · 12:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, I am staying at Patmos Aktis for 10 nights from August 5th. I am very keen to explore the smaller unspoiled islands nearby — I have read about Lipsi and Arki which seem completely off the beaten path. Could you organise a 2-day boat excursion to both islands, staying overnight on Arki if there is a simple taverna? I want something authentic, not touristy. Fiona
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 32s</div>
+          <div class="ai-time">⏱ 32 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Fiona,
+
+You have an excellent instinct — Arki and Lipsi are among the most unspoiled islands in the entire Aegean, rarely visited by anyone beyond the few fishing families who live there. This will be a genuinely authentic experience.
+
+For August 8–9th, I suggest the following with Captain Manolis on his traditional wooden caïque:
+
+Day 1: Depart Skala harbour at 08:30, sail north to Lipsi (90 minutes). Lipsi has one small port, a handful of houses and an extraordinary little taverna run by Kyria Eleni — her fresh octopus stew is famous on the island. Afternoon swim in the deserted bay of Platis Gialos. Then sail on to Arki (45 minutes further north).
+
+Overnight Arki: There is one taverna-rooms run by the Maltezos family — basic, completely authentic, unforgettable. Dinner of freshly caught fish by candlelight.
+
+Day 2: Morning swim, return to Patmos by early afternoon.
+
+Shall I confirm this for you? Captain Manolis speaks English and knows these waters perfectly.
+
+With pleasure,
+Concierge — Patmos Aktis Suites &amp; Spa</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Marie-Claire Dupont &lt;mcdupont@gmail.com&gt; <span class="tag tag-vip">VIP Wellness</span></div>
+          <div class="email-subject">"Week of wellness & silence — yoga, spa, no phone. What can you organise?"</div>
+        </div>
+        <div class="email-time">Yesterday · 17:40</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Bonjour, je cherche une semaine de vraie déconnexion sur Patmos — yoga le matin, soins spa, peut-être une visite culturelle légère. Pas de programme trop chargé. Juste la mer, la paix et des soins de qualité. Est-ce que Patmos Aktis peut proposer quelque chose de ce genre ? Merci, Marie-Claire
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Marie-Claire,
+
+Patmos is one of the most naturally serene islands in the Aegean — and Patmos Aktis the ideal setting for exactly what you are seeking.
+
+We can put together a gentle weekly rhythm for you:
+
+Mornings: Private sunrise yoga on the sea-view terrace with our resident instructor Maria (07:30, one-on-one, 60 minutes). No group, no pressure.
+
+Afternoons: Daily access to our spa — our "Aegean Restoration" treatment combines warm local stone massage with Patmos wild herb compress (90 minutes). Three sessions are recommended across the week.
+
+Culture, lightly: One morning we suggest a private early visit to the Monastery of Khora with our guide — 2 hours, deeply peaceful, no crowds. Patmos has a unique spiritual silence unlike anywhere else in Greece.
+
+The rest of your time: the sea, the terrace, the silence, and our kitchen's fresh Dodecanese cuisine served at whatever hour you wish.
+
+Shall I prepare a personalised programme for your dates?
+
+With warmth,
+Concierge — Patmos Aktis Suites &amp; Spa</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Patmos Aktis</div>
+      <div class="roi-row"><span class="roi-key">Suites</span><span class="roi-val">25</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~26</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~13 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~7h</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€315/month</span></div>
+      <p class="roi-note">Spiritual and cultural guests write detailed, thoughtful emails that take longer to answer well. The AI drafts from their context in 30s — your team simply refines and sends.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Patmos Aktis Suites &amp; Spa</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a historic Mediterranean boutique.<br><br>The AI drafts above reflect the cultural depth and spiritual sensitivity your guests expect in every reply.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#e0c88e">Patmos Aktis Suites &amp; Spa · Grikos, Patmos, Greece</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>
