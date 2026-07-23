@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hotel Balcón de Córdoba</title>
+  <style>
+    :root {
+      --ruby:    #8b1a1a;
+      --ruby-lt: #c43030;
+      --cream:   #fdf8f0;
+      --dark:    #1a0808;
+      --text:    #3a1818;
+      --muted:   #7a5858;
+      --border:  #e0ccc0;
+      --green:   #2e6b48;
+      --green-lt:#e8f2ec;
+      --gold:    #c8902a;
+      --shadow:  0 2px 16px rgba(26,8,8,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--ruby-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--ruby); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: #e8a0a0; letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #1a0808 0%, #5a1010 60%, #1a0808 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--ruby); }
+    .hero h1 { color: #f0a090; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #e0c0b8; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--ruby); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; gap: 0; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--ruby); border-bottom-color: var(--ruby); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #faf0ec; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; background: #fff; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; letter-spacing: 0.5px; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #f0a090; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #3a1010; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #f0a090; }
+    .plan-price { font-size: 12px; color: #e0c0b8; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #906060; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--ruby); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+    .about-card { border-left: 4px solid var(--ruby-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #7a5858; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #f0a090; text-decoration: none; }
+
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">BC</div>
+    <div>
+      <div class="hotel-name">Hotel Balcón de Córdoba</div>
+      <div class="hotel-sub">Córdoba · Andalusia · Spain</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Balcón de Córdoba's team could handle every guest email in under 30 seconds — Mezquita timed entry, Flamenco shows, Andalusian horse riding, and Jewish Quarter tours — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">10</div>
+    <div class="stat-label">Rooms</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~10</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~3h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Rachel &amp; Ben Goldstein &lt;rgoldstein@gmail.com&gt; <span class="tag tag-res">Reservation</span></div>
+          <div class="email-subject">"Mezquita entry — earliest possible slot + no crowds"</div>
+        </div>
+        <div class="email-time">Today · 09:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are arriving Thursday and staying 3 nights. We want to visit the Mezquita but we've read that it gets extremely crowded by mid-morning. What is the earliest entry time, and is there any way to avoid the tour groups? We'd also love a private guide who can explain the history of the mosque and the cathedral within it. Thank you, Rachel & Ben
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 25s</div>
+          <div class="ai-time">⏱ 25 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Rachel and Ben,
+
+You are absolutely right — the Mezquita by 10:30 belongs to tour groups. The secret is to arrive at 08:30 when the doors open, before the large coaches arrive from Seville and Granada.
+
+As you are staying directly behind the Mezquita (our rooftop terrace overlooks the minaret), the walk from your room to the entrance takes precisely 3 minutes.
+
+For a private guide: we work with Carlos, a licensed guide who specialises in the coexistence of the three Abrahamic faiths in medieval Córdoba — the unique history of the Mezquita-Catedral is his speciality. He speaks fluent English and is available Thursday morning. His early entry tour (08:30–10:15) before the crowds arrive is genuinely one of the best cultural experiences in Andalusia.
+
+Carlos's fee: €90 for the two of you (2 hours). Entrance tickets: €13 per person (I can book these now to guarantee the 08:30 slot).
+
+Shall I confirm both?
+
+With warm regards,
+Concierge — Hotel Balcón de Córdoba</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Olivia Pemberton &lt;o.pemberton@arte-uk.com&gt; <span class="tag tag-spec">Cultural Request</span></div>
+          <div class="email-subject">"Authentic flamenco show in Córdoba — not a tourist performance"</div>
+        </div>
+        <div class="email-time">Today · 14:10</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi there, I'm staying with you next week and am passionate about flamenco — I've seen performances in London but I want to experience something genuinely rooted in Andalusian tradition, not a dinner show for tourists. Is there anything like that in Córdoba? Thank you, Olivia
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Olivia,
+
+Your instinct is right to avoid the dinner shows — and Córdoba is actually one of the better cities to find the real thing, precisely because it has fewer tourists than Seville.
+
+Two honest recommendations:
+
+Tablao Cardenal (Calle Torrijos): the most respected venue in Córdoba — a small intimate space with 60 seats, no dinner, and serious artists. The programme changes seasonally; performances Tuesday–Saturday at 22:00. The quality is consistently high. Tickets: €25 per person. I can reserve directly.
+
+Peña Flamenca Los Califas: a members' club that occasionally opens its Friday evening sessions to recommended visitors. The atmosphere is entirely local — no stage, no tourists, artists performing for their own community. Access is by personal introduction only; I will contact them on your behalf to ask if there is availability during your stay. No guarantee, but worth trying.
+
+Which evenings are you free? I'll pursue both options.
+
+With admiration,
+Concierge — Hotel Balcón de Córdoba</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Michael &amp; Jennifer Hartley &lt;m.hartley@hartley-travels.com&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Horse riding in the Andalusian countryside — half day, experienced riders"</div>
+        </div>
+        <div class="email-time">Yesterday · 11:45</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, we are both experienced riders and would love to spend a morning on horseback in the Andalusian countryside around Córdoba. We are not interested in a beginners' trail ride — we'd like to actually ride proper horses and experience the landscape. Can you arrange something? Michael & Jennifer
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Michael and Jennifer,
+
+The Sierra Morena hills north of Córdoba are beautiful riding country, and the Real Escuela Andaluza del Arte Ecuestre tradition means the horses in this region are exceptional.
+
+We work with Hacienda El Morisco, a working horse stud 25km from Córdoba that breeds and trains Pura Raza Española horses. For experienced riders, they offer a 3-hour morning circuit through olive groves and cork oak woodland on trained, responsive horses — this is genuine riding, not a led trail. The route includes a resting stop at a stone reservoir with views toward the Sierra.
+
+Departure from the hotel: 08:00 by private transfer (included). Riding: 09:00–12:00. Return to hotel by 13:00.
+
+Cost for two: €180, including transfer and horses. Could you confirm your level — are you comfortable with a collected trot and canter, or would you like a more demanding route with some open terrain?
+
+Looking forward to arranging this,
+Concierge — Hotel Balcón de Córdoba</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Balcón de Córdoba</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">10</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~10</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~3 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€110/month</span></div>
+      <p class="roi-note">For a 10-room boutique, 3 hours saved weekly is significant. At Balcón de Córdoba's level, every hour of concierge time is extremely valuable — especially in peak season.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Prepared for <strong>Hotel Balcón de Córdoba</strong> by <strong>Enzo Cosnard</strong>, deploying this system at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — exactly the same scale (10 rooms), same historic building profile, same highly personal guest experience.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#f0a090">Hotel Balcón de Córdoba · Córdoba, Andalusia</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

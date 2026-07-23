@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Hotel Miramare e Castello</title>
+  <style>
+    :root {
+      --cobalt:    #1b4d8e;
+      --cobalt-lt: #3a72c4;
+      --cream:     #f8f6f0;
+      --dark:      #0d1f38;
+      --text:      #2c3e50;
+      --muted:     #6e7f8d;
+      --border:    #dde4ed;
+      --green:     #2e6b48;
+      --green-lt:  #e8f2ec;
+      --sand:      #c8a96e;
+      --sand-lt:   #f5ead8;
+      --shadow:    0 2px 16px rgba(13,31,56,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header {
+      background: var(--dark);
+      color: #fff;
+      padding: 0 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+      border-bottom: 3px solid var(--cobalt-lt);
+    }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark {
+      width: 44px; height: 44px;
+      background: var(--cobalt-lt);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: bold; color: #fff;
+      font-family: 'Georgia', serif; letter-spacing: 1px;
+    }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--cobalt-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero {
+      background: linear-gradient(135deg, #0d1f38 0%, #1b4d8e 60%, #0d1f38 100%);
+      padding: 48px 40px;
+      text-align: center;
+      border-bottom: 1px solid var(--cobalt-lt);
+    }
+    .hero h1 { color: #a8c8f0; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #c0d4e8; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--cobalt); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; gap: 0; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--cobalt); border-bottom-color: var(--cobalt); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #eef3fa; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; background: #fff; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; letter-spacing: 0.5px; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #a8c8f0; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #1b3a5c; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #a8c8f0; }
+    .plan-price { font-size: 12px; color: #c0d4e8; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #8098b0; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--cobalt-lt); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+
+    .about-card { border-left: 4px solid var(--cobalt-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #6e7f8d; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #a8c8f0; text-decoration: none; }
+
+    @media (max-width: 800px) {
+      .main { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      .hero  { padding: 32px 16px; }
+      .tabs  { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">MC</div>
+    <div>
+      <div class="hotel-name">Hotel Miramare e Castello</div>
+      <div class="hotel-sub">Ischia Porto · Bay of Naples · Italy</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Miramare e Castello's team could handle every guest request in under 30 seconds — thermal spa bookings, Aragonese Castle visits, boat charters to Capri, and island transfers — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">45</div>
+    <div class="stat-label">Rooms & Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~36</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~9h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Patricia Holz &lt;p.holz@architekten-holz.de&gt; <span class="tag tag-res">Reservation</span></div>
+          <div class="email-subject">"Thermal spa package — 4 nights, two guests, June arrival"</div>
+        </div>
+        <div class="email-time">Today · 08:42</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, my husband and I are planning to visit Ischia in June for 4 nights and are very interested in a thermal spa package at your hotel. We would like to know which treatments are available, if you have a pool with thermal water on site, and what the best room category would be for two people seeking a restful retreat. Could you also advise on the best time to visit the Aragonese Castle? Many thanks, Patricia
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Patricia,
+
+Thank you for choosing Ischia for your June retreat — you and your husband are in for a truly restorative experience.
+
+Our thermal spa packages for two guests start from €320 per couple for 4 nights, and include daily access to our thermal seawater pool, two 50-minute massages (your choice of volcanic mud wrap, hydro-massage, or aromatherapy), and a private spa session at a time of your choosing. Our Superior Sea-View room is our most popular choice for couples seeking a calm, panoramic setting.
+
+The Aragonese Castle is best visited in the morning (9:00–11:00) before the day-trip crowds arrive — the views from the top over the Bay of Naples are extraordinary. We can arrange a private boat transfer of 10 minutes directly from our jetty.
+
+Shall I put together a tailored June quote and check availability for your preferred dates?
+
+With warm regards,
+Concierge Team — Hotel Miramare e Castello</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Thomas &amp; Claire Marchand &lt;tcmarchand@gmail.com&gt; <span class="tag tag-spec">Special Request</span></div>
+          <div class="email-subject">"Private boat to Capri for our anniversary — sunset dinner"</div>
+        </div>
+        <div class="email-time">Today · 11:15</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are staying at your hotel 14–18 July and would like to celebrate our wedding anniversary with a private boat charter to Capri. We are hoping to arrive in Capri in time for a sunset dinner at a good restaurant — ideally somewhere overlooking the sea. Could you also arrange for a small bottle of prosecco on the boat? Thank you, Thomas & Claire
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 30s</div>
+          <div class="ai-time">⏱ 30 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Thomas and Claire,
+
+What a wonderful way to mark your anniversary — Capri at sunset is simply magical, and we will make sure every detail is perfect.
+
+We work with a trusted private captain who sails a traditional wooden gozzo from our jetty. Departure at 16:00 from Ischia Porto will bring you into Capri's Marina Grande by approximately 17:30 — with plenty of time to settle before sunset. The boat will be dressed with a chilled bottle of prosecco and seasonal fruit awaiting you on board.
+
+For dinner, we recommend Il Riccio at Marina Grande for its seafront terrace and exceptional local seafood — or, if you prefer a clifftop view over the Faraglioni, Da Luigi ai Faraglioni is equally spectacular. We can make the reservation on your behalf once you confirm your preference.
+
+Round-trip charter price: approx. €380 for two guests. Shall I confirm the booking for 15 July?
+
+With warmest congratulations,
+Concierge Team — Hotel Miramare e Castello</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Dr. Andrea Ferretti &lt;a.ferretti@ospedaleroma.it&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Early check-in + hydrotherapy programme for back pain recovery"</div>
+        </div>
+        <div class="email-time">Yesterday · 17:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Buonasera, arriverò da Roma sabato mattina con il traghetto delle 10:30 e avrei bisogno di un check-in anticipato se possibile. Sto cercando un programma termale specifico per il recupero dalla lombalgia — qualcosa di più terapeutico che estetico. Potete indicarmi i trattamenti disponibili e se avete un medico termale in struttura? Grazie, Andrea Ferretti
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Gentile Dottor Ferretti,
+
+La ringraziamo per il suo messaggio e siamo lieti di accoglierla sabato.
+
+Per il check-in anticipato: le prepareremo la camera per le 10:45, così potrà sistemarsi comodamente all'arrivo del traghetto delle 10:30. Non ci sono costi aggiuntivi.
+
+Per quanto riguarda il programma termale terapeutico: lavoriamo in convenzione con il Centro Termale di Ischia Porto, a 5 minuti dall'hotel. Il protocollo per la lombalgia prevede fangoterapia con fango termale vulcanico (15 sedute ideali, ma anche cicli brevi di 4–6 giorni mostrano risultati), idropineoterapia e balneoterapia. Il medico termale è disponibile in struttura il sabato e lunedì mattina per la visita di ammissione (obbligatoria per i trattamenti terapeutici).
+
+Le consiglio di prenotare la visita medica per sabato pomeriggio così da iniziare i trattamenti domenica. Posso riservare lo slot per lei?
+
+Con cordialità,
+Concierge — Hotel Miramare e Castello</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left-col -->
+
+  <div class="sidebar">
+
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Miramare e Castello</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">45</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~36</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~9 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€400/month</span></div>
+      <p class="roi-note">Conservative estimate: 36 emails/day × 11.5 min saved per email. Spa & activity requests from Ischia guests are among the most time-intensive to draft personally.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">This demo was prepared specifically for <strong>Hotel Miramare e Castello</strong> by <strong>Enzo Cosnard</strong>, currently deploying this exact system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a similarly intimate waterfront boutique.<br><br>The AI drafts above reflect the actual types of requests your concierge handles daily: thermal treatments, island charters, and personalised guest requests.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#a8c8f0">Hotel Miramare e Castello · Ischia Porto, Bay of Naples</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

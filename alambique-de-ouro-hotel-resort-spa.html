@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Alambique de Ouro Hotel Resort &amp; Spa</title>
+  <style>
+    :root {
+      --forest:   #2a5c2a;
+      --forest-lt:#4a9a4a;
+      --cream:    #f4f8f4;
+      --dark:     #0a1a0a;
+      --text:     #1a3a1a;
+      --muted:    #5a7a5a;
+      --border:   #c0d8c0;
+      --green:    #2e6b48;
+      --green-lt: #e8f2ec;
+      --amber:    #c87a20;
+      --shadow:   0 2px 16px rgba(10,26,10,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--forest-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--forest); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 16px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--forest-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #0a1a0a 0%, #2a5c2a 60%, #0a1a0a 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--forest); }
+    .hero h1 { color: #90d090; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #b0e0b0; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--forest); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; gap: 0; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--forest); border-bottom-color: var(--forest); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #ecf5ec; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; background: #fff; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; letter-spacing: 0.5px; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #90d090; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #1a3a1a; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #90d090; }
+    .plan-price { font-size: 12px; color: #b0e0b0; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #508050; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--forest); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+    .about-card { border-left: 4px solid var(--forest-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #5a7a5a; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #90d090; text-decoration: none; }
+
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">AO</div>
+    <div>
+      <div class="hotel-name">Alambique de Ouro Resort &amp; Spa</div>
+      <div class="hotel-sub">Fundão · Serra da Estrela · Portugal</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Alambique de Ouro's team could handle every guest email in under 30 seconds — cherry blossom tours, Serra da Estrela treks, Wool Museum visits, and spa packages — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">30</div>
+    <div class="stat-label">Rooms & Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~22</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~6h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Nora &amp; Franz Kiefer &lt;n.kiefer@outlook.de&gt; <span class="tag tag-spec">Seasonal Request</span></div>
+          <div class="email-subject">"Cherry blossom — exact timing and best spots around Fundão"</div>
+        </div>
+        <div class="email-time">Today · 09:15</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are planning to visit specifically for the cherry blossom season. We know timing is everything with blossom — could you tell us the typical peak window in Fundão, and which specific valleys or roads are the most spectacular? We are also interested in any cherry-related festivals or events during that time. We would like to plan our visit around the best possible week. Thank you, Nora & Franz
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Nora and Franz,
+
+You have chosen the right destination — Fundão is genuinely the cherry capital of Portugal, with over 1.5 million cherry trees across the Cova da Beira valley, and the blossom is extraordinary.
+
+Typical peak: the last week of March to the first week of April, though this varies by up to 10 days depending on winter temperatures. The higher-altitude orchards (above 600m) bloom slightly later than the valley floor. We monitor conditions each year and can advise closer to your dates.
+
+Best spots:
+— The road between Alcongosta and Telhado (the "Rota da Cerejeira") is the classic route — a 15km arc through pure white blossom.
+— The Aldeia das Dez valley (45 min from Fundão): smaller, less visited, equally beautiful.
+— Alpedrinha village: the oldest cherry orchards in the region, with trees over 100 years old.
+
+The Festa da Cereja typically takes place in mid-June (cherry harvest, not blossom season) — but the blossom itself draws photographers from across Europe and no festival is needed.
+
+Could you share your planned travel year? I'll give you a more specific window based on the previous season's pattern.
+
+With pleasure,
+Concierge — Alambique de Ouro</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Peter &amp; Alice Morrow &lt;p.morrow@gmail.com&gt; <span class="tag tag-res">Trekking</span></div>
+          <div class="email-subject">"Serra da Estrela trek — 2 days, moderate level, guide needed"</div>
+        </div>
+        <div class="email-time">Today · 13:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hi, we are active travellers and would love to spend 2 days trekking in the Serra da Estrela. We are moderate-level hikers — comfortable with 15–18km days and some elevation gain, but not mountaineers. Could you suggest a 2-day itinerary and arrange a local guide? We'd also like to know the best time of year to go and what to expect in terms of weather. Thank you, Peter & Alice
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 30s</div>
+          <div class="ai-time">⏱ 30 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Peter and Alice,
+
+The Serra da Estrela is Portugal's highest mountain range and one of the most underrated landscapes in the country — your two days will be well spent.
+
+A suggested itinerary for moderate-level hikers:
+
+Day 1 — Vale do Zêzere: a classic glacial valley route from Manteigas (40 min from Fundão). 14km, 500m elevation gain, with the striking glacially-carved U-shape valley as your constant backdrop. Lunch stop at a shepherd's hut midway. Return to Alambique de Ouro for dinner and recovery.
+
+Day 2 — Torre plateau and Covão d'Ametade: the Torre (1,993m, highest point in mainland Portugal) accessible by vehicle, then a circular walk around the plateau and down to the glacial lake at Covão d'Ametade. 12km, 350m gain. Spectacular views in clear weather.
+
+Best season: May–June or September–October. July–August is fine but busy; winter (Nov–Mar) can bring snow at altitude.
+
+We work with Rui, a certified mountain guide based in Manteigas who speaks excellent English. His fee for 2 days: €180. Shall I check his availability for your dates?
+
+With enthusiasm,
+Concierge — Alambique de Ouro</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Helena &amp; Ricardo Santos &lt;h.santos@gmail.com&gt; <span class="tag tag-vip">Spa Package</span></div>
+          <div class="email-subject">"Pacote spa romântico — aniversário de casamento, 2 noites"</div>
+        </div>
+        <div class="email-time">Yesterday · 20:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Boa tarde, gostaria de reservar um pacote de spa romântico para mim e o meu marido para celebrar o nosso aniversário de casamento — 2 noites em julho. Gostaríamos de ter acesso às instalações de spa, pelo menos 2 tratamentos a dois, e um jantar especial. Podem enviar-me informação sobre as opções disponíveis? Obrigada, Helena
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Cara Helena,
+
+Que bonita forma de celebrar o vosso aniversário — ficamos felizes em ajudar a tornar este fim de semana verdadeiramente especial.
+
+O nosso Pacote Romântico para 2 noites inclui:
+— Acomodação em quarto Superior ou Suite (com upgrade sujeito a disponibilidade)
+— Acesso ilimitado às instalações do spa: piscina interior aquecida, sauna, banho turco e sala de relaxamento
+— 2 massagens a dois de 50 minutos (escolha entre massagem de relaxamento, pedras vulcânicas ou aromaterapia)
+— Jantar de gala no restaurante, com entrada, prato principal e sobremesa de aniversário surpresa
+— Garrafa de vinho da região na chegada e pequeno-almoço buffet incluído
+
+Preço indicativo: a partir de 380€ por casal para 2 noites, dependendo do tipo de quarto.
+
+Poderia indicar-me as datas exactas em julho? Assim verifico a disponibilidade e envio uma proposta detalhada.
+
+Com os nossos melhores cumprimentos,
+Concierge — Alambique de Ouro</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Alambique de Ouro</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">30</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~22</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~6 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€250/month</span></div>
+      <p class="roi-note">Resort & spa properties receive layered inquiries combining accommodation, activities, and treatment bookings — each requiring a carefully composed, personalised response.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Portuguese &amp; multilingual fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Prepared for <strong>Alambique de Ouro Hotel Resort &amp; Spa</strong> by <strong>Enzo Cosnard</strong>, deploying this system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta).<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#90d090">Alambique de Ouro Resort &amp; Spa · Fundão, Serra da Estrela</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

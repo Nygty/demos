@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Vila Joya Boutique Resort</title>
+  <style>
+    :root {
+      --azure:    #1a5c8b;
+      --azure-lt: #2a8ecb;
+      --cream:    #f6f8fc;
+      --dark:     #081018;
+      --text:     #182838;
+      --muted:    #4a6878;
+      --border:   #c8d8e8;
+      --green:    #2e6b48;
+      --green-lt: #e8f2ec;
+      --gold:     #c89040;
+      --shadow:   0 2px 16px rgba(8,16,24,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--azure-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--azure); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--azure-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #081018 0%, #1a5c8b 60%, #081018 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--azure); }
+    .hero h1 { color: #90c8f0; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #b0d8f8; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--azure); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; gap: 0; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--azure); border-bottom-color: var(--azure); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #eef4fa; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; background: #fff; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; letter-spacing: 0.5px; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #90c8f0; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #182838; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #90c8f0; }
+    .plan-price { font-size: 12px; color: #b0d8f8; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #507090; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--azure); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+    .about-card { border-left: 4px solid var(--azure-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+    .michelin-badge { display: inline-block; background: #c8002a; color: #fff; font-family: sans-serif; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.5px; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #4a6878; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #90c8f0; text-decoration: none; }
+
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">VJ</div>
+    <div>
+      <div class="hotel-name">Vila Joya Boutique Resort</div>
+      <div class="hotel-sub">Albufeira · Algarve · Portugal</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Vila Joya's team could handle every guest request in under 30 seconds — tasting menu reservations, wine pairings, private beach access, boat charters, and spa bookings — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">20</div>
+    <div class="stat-label">Rooms & Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~18</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~5h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Mr &amp; Mrs Yamamoto &lt;h.yamamoto@nipponlux.co.jp&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Chef's Table reservation — tasting menu + wine pairing for our arrival"</div>
+        </div>
+        <div class="email-time">Today · 08:20</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, we are arriving at Vila Joya on Saturday evening for a 4-night stay. We would very much like to dine at Chef Koschina's table on our first evening — the full tasting menu with wine pairing. Could you also ask if the Chef would be willing to accommodate a dietary preference for no raw fish, while keeping the overall menu as designed? We are looking forward to the experience tremendously. Best, Hiroshi & Yuki Yamamoto
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Mr. and Mrs. Yamamoto,
+
+We are delighted to welcome you to Vila Joya this Saturday — and what a way to begin your stay.
+
+I have passed your request directly to the restaurant team. Chef Koschina's Saturday tasting menu is a 7-course journey through the Atlantic coast and the Alentejo interior; the wine pairing (curated by our sommelier) is included. We have noted your preference to avoid raw fish and the kitchen will prepare a seamlessly adapted course for you — the transition will be invisible and the dish equally extraordinary.
+
+Dinner reservations begin at 19:30; Chef Koschina's preferred seating for guests staying with us is 20:00, which allows the kitchen to welcome you personally. I will reserve your table for 20:00 on Saturday.
+
+Is there anything else we can prepare before your arrival?
+
+With great anticipation,
+Concierge — Vila Joya</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Charles &amp; Diana Pemberton &lt;c.pemberton@pemcapital.co.uk&gt; <span class="tag tag-spec">Activity</span></div>
+          <div class="email-subject">"Private boat charter — grottos + dolphin spotting, full day"</div>
+        </div>
+        <div class="email-time">Today · 12:45</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are staying 5 nights and would love to spend a full day on the water exploring the Algarve coast — ideally seeing the famous grottos at Ponta da Piedade and if possible spotting dolphins. We would like a private charter rather than a group tour, with a skipper who knows the coast well. Can this be arranged? Charles & Diana
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 26s</div>
+          <div class="ai-time">⏱ 26 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Charles and Diana,
+
+The Algarve coastline from a private boat is breathtaking — and the grottos at Ponta da Piedade are genuinely among the most beautiful rock formations in Europe, best seen from the water at mid-morning when the light enters the caves.
+
+We work with Captain João, a local skipper based at Albufeira marina who has been sailing this coast for 25 years. His full-day charter (09:00–17:00) for two guests aboard a comfortable 10-metre sloop typically covers: the sea caves and arches at Ponta da Piedade (Lagos), the Benagil cave (best accessed from the water), a swimming stop at a secluded cove, and a dolphin spotting route in the open Atlantic where common dolphins are regularly seen in summer. Lunch is a seafood picnic on board with local wine.
+
+Full-day private charter for two: €480 including skipper, fuel, and picnic. Transfer from Vila Joya to Albufeira marina (5 min) included.
+
+Which day suits you? I'll check João's availability.
+
+Warmly,
+Concierge — Vila Joya</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Isabelle Garnier &lt;i.garnier@gastronomie-fr.com&gt; <span class="tag tag-res">Dining Inquiry</span></div>
+          <div class="email-subject">"Rencontre privée avec le Chef Koschina — possible?"</div>
+        </div>
+        <div class="email-time">Yesterday · 17:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Bonjour, je suis journaliste gastronomique et je séjourne à Vila Joya en août. J'aimerais beaucoup avoir l'opportunité d'échanger brièvement avec le Chef Koschina — pas nécessairement un entretien formel, mais peut-être quelques minutes en cuisine ou autour d'un verre. Est-ce que c'est quelque chose qui pourrait être envisageable ? Je reste bien sûr à sa disposition selon ses contraintes. Merci, Isabelle
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Chère Isabelle,
+
+Merci pour votre message — nous sommes toujours heureux d'accueillir des passionnés de gastronomie à Vila Joya.
+
+J'ai transmis votre demande directement au Chef Koschina. Le Chef est présent en cuisine chaque soir du service, et il a l'habitude d'accueillir en fin de service — généralement vers 22h30 — les convives qu'il souhaite rencontrer. Août est l'une de ses périodes les plus chargées, mais pour une rencontre informelle autour d'un verre, les chances sont bonnes.
+
+Pourriez-vous me préciser vos dates de séjour en août ? Je pourrai ainsi transmettre au Chef les informations nécessaires et lui demander de vous réserver un moment. Si vous souhaitez aussi dîner au restaurant ce soir-là, je vous suggère de réserver la table en même temps — les places partent vite en août.
+
+Dans l'attente de votre retour,
+Concierge — Vila Joya</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Vila Joya</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">20</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~18</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~5 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€200/month</span></div>
+      <p class="roi-note">A 2-Michelin-star property attracts guests with very high expectations. Every email requires care and expertise — the AI handles the drafting so your team focuses on the experience.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Chef Koschina's tone, fine-tuned.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Prepared for <strong>Vila Joya Boutique Resort</strong> by <strong>Enzo Cosnard</strong>, deploying this system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a luxury boutique with a similarly exceptional dining experience and high-demand concierge.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#90c8f0">Vila Joya Boutique Resort · Albufeira, Algarve</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

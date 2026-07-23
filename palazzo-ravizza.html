@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Palazzo Ravizza</title>
+  <style>
+    :root {
+      --siena:    #8b3a0f;
+      --siena-lt: #c4622a;
+      --cream:    #faf6f0;
+      --dark:     #1a0e06;
+      --text:     #3a2416;
+      --muted:    #7a6050;
+      --border:   #e0d4c4;
+      --green:    #2e6b48;
+      --green-lt: #e8f2ec;
+      --gold:     #b8902a;
+      --shadow:   0 2px 16px rgba(26,14,6,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--siena-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--siena); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 17px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--siena-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #1a0e06 0%, #5a1e0a 60%, #1a0e06 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--siena); }
+    .hero h1 { color: #f0b080; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #e0c0a0; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--siena); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; gap: 0; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--siena); border-bottom-color: var(--siena); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #f8f0e8; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; background: #fff; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; letter-spacing: 0.5px; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #f0b080; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #3a2010; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #f0b080; }
+    .plan-price { font-size: 12px; color: #e0c0a0; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #907060; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--siena); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+    .about-card { border-left: 4px solid var(--siena-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #7a6050; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #f0b080; text-decoration: none; }
+
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">PR</div>
+    <div>
+      <div class="hotel-name">Palazzo Ravizza</div>
+      <div class="hotel-sub">Siena · Tuscany · Italy</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Palazzo Ravizza's team could handle every guest email in under 30 seconds — Palio di Siena tickets, Chianti vineyard tours, truffle hunts, and private Duomo access — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">38</div>
+    <div class="stat-label">Rooms & Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~30</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~8h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">William &amp; Catherine Forsythe &lt;w.forsythe@forsythe-legal.com&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Palio di Siena tickets — July 2nd edition, best seats possible"</div>
+        </div>
+        <div class="email-time">Today · 07:55</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, we are staying at Palazzo Ravizza from 1–5 July and would very much like to attend the Palio on the 2nd. We understand tickets are extremely difficult to obtain and that the best seats are in private windows overlooking the Campo. Could you advise on how to secure the best possible experience, and whether you are able to help? This is a bucket-list moment for us. William & Catherine
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 33s</div>
+          <div class="ai-time">⏱ 33 seconds</div>
+        </div>
+        <div class="ai-draft">Dear William and Catherine,
+
+The Palio is indeed extraordinary — and you are right that the experience varies enormously depending on where you watch. I want to be honest with you about what is genuinely possible.
+
+The best views are from private windows on the piano nobile of the palazzi surrounding the Campo. These are managed directly by Sienese families and our concierge team has an established relationship with two families who occasionally make seats available for hotel guests. I will contact them today on your behalf — there is no guarantee, but it is our best avenue.
+
+The official standing area in the centre of the Campo is free, offers a powerful atmosphere, but requires arriving by 13:00 and standing for 5+ hours in July heat.
+
+I'll come back to you by tomorrow with whatever I've been able to arrange. In the meantime — is there a maximum budget per seat you'd like me to work within?
+
+With warm regards,
+Concierge — Palazzo Ravizza</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Clara &amp; Hans Steinmann &lt;c.steinmann@gmail.com&gt; <span class="tag tag-spec">Day Trip</span></div>
+          <div class="email-subject">"Full day Chianti wine tour — small group or private, not a bus"</div>
+        </div>
+        <div class="email-time">Today · 10:40</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we are staying 3 nights and would love to spend one day in the Chianti wine country — visiting 2 or 3 family estates rather than a big commercial winery. We are not interested in a coach tour. Ideally something where we can walk the vineyards and have a proper lunch with the winemaker. Is this something you could arrange? Clara & Hans
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 28s</div>
+          <div class="ai-time">⏱ 28 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Clara and Hans,
+
+This is exactly the kind of day we love arranging — and fortunately Palazzo Ravizza is in the perfect position for it.
+
+We work with Luca, a private guide and sommelier who has been showing guests the real Chianti for 15 years. His typical itinerary for two guests:
+
+Morning: Castello di Brolio (the Ricasoli estate, birthplace of Chianti Classico) — private vineyard walk and barrel tasting, 10:00–12:00.
+Lunch: A working family estate in Gaiole in Chianti — a long table lunch under the pergola with 4 wines, typically 12:30–15:30.
+Afternoon: One smaller organic estate for contrast — tasting of Riserva and olive oil.
+
+Return to Siena by 18:30. Private driver + Luca's guiding: approx. €280 for two, excluding wines purchased. Lunch is typically €45–65 per person depending on the estate.
+
+Would you like me to provisionally book Luca for one of your three days?
+
+With pleasure,
+Concierge — Palazzo Ravizza</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Prof. Margaret Ellison &lt;m.ellison@oxford.ac.uk&gt; <span class="tag tag-spec">Cultural Request</span></div>
+          <div class="email-subject">"Private access Siena Duomo — Piccolomini Library + expert guide"</div>
+        </div>
+        <div class="email-time">Yesterday · 16:00</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Dear Concierge, I am an art history professor and will be staying with you in September for 4 nights. I have a particular scholarly interest in the Piccolomini Library frescoes by Pinturicchio and would like to arrange a private early-morning visit to the Duomo with an expert guide who can engage at an academic level. I am also interested in any access to Siena's private collections that might be arranged. Many thanks, Professor Ellison
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 30s</div>
+          <div class="ai-time">⏱ 30 seconds</div>
+        </div>
+        <div class="ai-draft">Dear Professor Ellison,
+
+What a delight — Siena's Duomo before the crowds, with time to truly study the Piccolomini Library, is one of the great art historical experiences available in Italy.
+
+For the Duomo: we can arrange early access at 08:00 (before public opening at 10:30) through the Opera della Metropolitana. I will connect you with Dr. Francesca Bartalini, an art historian specialising in Sienese Trecento and Quattrocento who has worked as a consultant for the Pinacoteca Nazionale. She engages readily at an academic level and reads Latin, which occasionally matters with the inscriptions.
+
+For private collections: the Chigi-Saracini collection at the Accademia Musicale Chigiana is occasionally accessible by appointment — I will reach out to them directly. The Spannocchi collection at the Palazzo Salimbeni is another possibility, though access is more restricted.
+
+Could I ask your dates in September so I can check Dr. Bartalini's availability?
+
+With admiration,
+Concierge — Palazzo Ravizza</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Palazzo Ravizza</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">38</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~30</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~8 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€340/month</span></div>
+      <p class="roi-note">Siena is one of the most email-intensive destinations in Tuscany — Palio logistics, vineyard tours, cultural access requests all require careful, researched replies.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Prepared for <strong>Palazzo Ravizza</strong> by <strong>Enzo Cosnard</strong>, deploying this system live at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a similarly historic palazzo boutique receiving a similar profile of culturally engaged international guests.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#f0b080">Palazzo Ravizza · Siena, Tuscany</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>

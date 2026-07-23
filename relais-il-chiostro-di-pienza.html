@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Concierge Demo — Relais Il Chiostro di Pienza</title>
+  <style>
+    :root {
+      --stone:    #7a6a4a;
+      --stone-lt: #b0985e;
+      --cream:    #faf8f2;
+      --dark:     #1a1608;
+      --text:     #3a3018;
+      --muted:    #7a7060;
+      --border:   #e0d8c0;
+      --green:    #2e6b48;
+      --green-lt: #e8f2ec;
+      --terracot: #a84830;
+      --shadow:   0 2px 16px rgba(26,22,8,.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Georgia', serif; background: var(--cream); color: var(--text); font-size: 15px; line-height: 1.6; }
+
+    header { background: var(--dark); color: #fff; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; height: 72px; border-bottom: 3px solid var(--stone-lt); }
+    .logo-zone { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 44px; height: 44px; background: var(--stone); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #fff; font-family: 'Georgia', serif; letter-spacing: 1px; }
+    .hotel-name { font-size: 16px; font-weight: normal; letter-spacing: 2px; text-transform: uppercase; color: #fff; }
+    .hotel-sub  { font-size: 11px; color: var(--stone-lt); letter-spacing: 3px; text-transform: uppercase; margin-top: 2px; }
+    .badge-live { background: var(--green); color: #fff; font-size: 11px; padding: 4px 14px; border-radius: 20px; font-family: sans-serif; letter-spacing: 1px; }
+
+    .hero { background: linear-gradient(135deg, #1a1608 0%, #3a2c10 60%, #1a1608 100%); padding: 48px 40px; text-align: center; border-bottom: 1px solid var(--stone); }
+    .hero h1 { color: #d8c090; font-size: 28px; font-weight: normal; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+    .hero p { color: #c8b880; font-size: 16px; max-width: 640px; margin: 0 auto; line-height: 1.7; }
+
+    .stats { display: flex; justify-content: center; gap: 0; background: #fff; border-bottom: 1px solid var(--border); }
+    .stat { flex: 1; max-width: 200px; padding: 24px 20px; text-align: center; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .stat-number { font-size: 32px; color: var(--stone); font-weight: bold; font-family: sans-serif; }
+    .stat-label  { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; font-family: sans-serif; }
+
+    .tabs { display: flex; background: #fff; border-bottom: 2px solid var(--border); padding: 0 40px; gap: 0; overflow-x: auto; }
+    .tab { padding: 14px 24px; font-family: sans-serif; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; white-space: nowrap; }
+    .tab.active { color: var(--stone); border-bottom-color: var(--stone); font-weight: 600; }
+
+    .main { max-width: 1100px; margin: 32px auto; padding: 0 24px; display: grid; grid-template-columns: 1fr 340px; gap: 28px; }
+    .section-title { font-family: sans-serif; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; }
+    .email-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+    .email-header { background: #f5f0e0; padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .email-meta { flex: 1; }
+    .email-from { font-family: sans-serif; font-size: 13px; font-weight: 600; color: var(--dark); }
+    .email-subject { font-size: 14px; color: var(--text); margin-top: 2px; font-style: italic; }
+    .email-time { font-family: sans-serif; font-size: 11px; color: var(--muted); white-space: nowrap; }
+    .tag { display: inline-block; font-family: sans-serif; font-size: 10px; padding: 2px 10px; border-radius: 12px; font-weight: 600; letter-spacing: 0.5px; }
+    .tag-res  { background: #dbeafe; color: #1e40af; }
+    .tag-vip  { background: #fef3c7; color: #92400e; }
+    .tag-spec { background: #f3e8ff; color: #6b21a8; }
+    .email-body { padding: 16px 20px; font-size: 14px; color: var(--text); line-height: 1.7; background: #fff; }
+    .email-body blockquote { border-left: 3px solid var(--border); margin: 0; padding-left: 12px; color: var(--muted); font-style: italic; }
+    .ai-section { background: var(--green-lt); border-top: 2px solid #b6d9c4; padding: 16px 20px; }
+    .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ai-icon { width: 28px; height: 28px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-family: sans-serif; font-weight: bold; }
+    .ai-label { font-family: sans-serif; font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: 1px; }
+    .ai-time  { font-family: sans-serif; font-size: 11px; color: var(--muted); margin-left: auto; }
+    .ai-draft { font-size: 13.5px; color: var(--dark); line-height: 1.75; white-space: pre-line; }
+    .draft-actions { display: flex; gap: 10px; margin-top: 14px; }
+    .btn { font-family: sans-serif; font-size: 12px; padding: 7px 18px; border-radius: 5px; border: none; cursor: pointer; font-weight: 600; letter-spacing: 0.5px; }
+    .btn-approve { background: var(--green); color: #fff; }
+    .btn-edit    { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .sidebar-card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; box-shadow: var(--shadow); }
+    .roi-title { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+    .roi-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .roi-row:last-child { border-bottom: none; }
+    .roi-key { font-family: sans-serif; font-size: 12px; color: var(--muted); }
+    .roi-val { font-family: sans-serif; font-size: 14px; font-weight: 700; color: var(--dark); }
+    .roi-highlight { color: var(--green); font-size: 18px; }
+    .roi-note { font-size: 12px; color: var(--muted); margin-top: 12px; font-style: italic; line-height: 1.5; }
+    .pricing-card { background: var(--dark); color: #fff; border-radius: 8px; padding: 24px; box-shadow: var(--shadow); }
+    .pricing-title { font-family: sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #d8c090; margin-bottom: 16px; }
+    .plan { padding: 12px 0; border-bottom: 1px solid #3a3010; }
+    .plan:last-child { border-bottom: none; }
+    .plan-name { font-family: sans-serif; font-size: 13px; font-weight: 700; color: #d8c090; }
+    .plan-price { font-size: 12px; color: #c8b880; margin-top: 3px; font-family: sans-serif; }
+    .plan-desc  { font-size: 11px; color: #887860; margin-top: 3px; font-family: sans-serif; line-height: 1.4; }
+    .plan-rec { background: var(--stone); border-radius: 3px; padding: 1px 6px; font-size: 10px; color: #fff; font-weight: 700; font-family: sans-serif; margin-left: 8px; }
+    .about-card { border-left: 4px solid var(--stone-lt); }
+    .about-text { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+    footer { text-align: center; padding: 32px 20px; background: var(--dark); color: #7a7060; font-family: sans-serif; font-size: 12px; margin-top: 48px; letter-spacing: 1px; }
+    footer a { color: #d8c090; text-decoration: none; }
+
+    @media (max-width: 800px) { .main { grid-template-columns: 1fr; } header { padding: 0 16px; } .hero { padding: 32px 16px; } .tabs { padding: 0 16px; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-zone">
+    <div class="logo-mark">CP</div>
+    <div>
+      <div class="hotel-name">Relais Il Chiostro di Pienza</div>
+      <div class="hotel-sub">Pienza · Val d'Orcia · Tuscany</div>
+    </div>
+  </div>
+  <div class="badge-live">🤖 AI Concierge — Live Demo</div>
+</header>
+
+<div class="hero">
+  <h1>Your AI Concierge Assistant</h1>
+  <p>See how Il Chiostro di Pienza's team could handle every guest email in under 30 seconds — Pecorino tastings, Montepulciano wine tours, truffle hunts in Montalcino, and hot air balloon rides over the Val d'Orcia — with a personalised draft, ready to send.</p>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-number">37</div>
+    <div class="stat-label">Rooms & Suites</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~28</div>
+    <div class="stat-label">Emails / day</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">30s</div>
+    <div class="stat-label">AI draft time</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">~7h</div>
+    <div class="stat-label">Saved / week</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">Live</div>
+    <div class="stat-label">At IBB Palazzo Bettina, Malta</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active">📥 Inbox</div>
+  <div class="tab">🔍 Analyse</div>
+  <div class="tab">📋 History</div>
+  <div class="tab">📅 Reservations</div>
+  <div class="tab">💶 Invoices</div>
+</div>
+
+<div class="main">
+  <div class="left-col">
+    <div class="section-title">📧 Recent Guest Emails — AI Draft Preview</div>
+
+    <!-- EMAIL 1 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">David &amp; Anna Kowalski &lt;d.kowalski@kowalskiarch.com&gt; <span class="tag tag-spec">Day Experience</span></div>
+          <div class="email-subject">"Hot air balloon over Val d'Orcia + sunrise departure"</div>
+        </div>
+        <div class="email-time">Today · 08:10</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Good morning, we have seen incredible photos of hot air balloons drifting over the Val d'Orcia at sunrise — it looks absolutely magical. We are staying with you for 4 nights in May. Is this something you can arrange, and roughly what does it cost? We're also wondering if there is a specific morning that tends to work best for weather. Thank you, David & Anna
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 27s</div>
+          <div class="ai-time">⏱ 27 seconds</div>
+        </div>
+        <div class="ai-draft">Dear David and Anna,
+
+Those photos don't do it justice — the Val d'Orcia at dawn from a balloon, with the cypress lines and Montalcino in the distance, is genuinely one of the most beautiful things you can do in Tuscany.
+
+We work with Ballooning in Tuscany, who are based 20 minutes from Il Chiostro. Flights depart at sunrise (typically 05:30 in May), last approximately 1–1.5 hours depending on wind, and land in a different location with a champagne breakfast in the field. A shared flight for two is approx. €280 per person; a private basket for two is approx. €700. Both options are wonderful — the private flight allows more flexibility in the flight path.
+
+For weather: May mornings are generally excellent. The operator monitors forecasts daily and will give you 48h notice of the go/no-go decision. We advise booking for your second or third morning so there is a fallback day if needed.
+
+Shall I check availability for your May dates?
+
+With great excitement on your behalf,
+Concierge — Il Chiostro di Pienza</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 2 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Sarah &amp; Tom Whitaker &lt;s.whitaker@gmail.com&gt; <span class="tag tag-res">Food Experience</span></div>
+          <div class="email-subject">"Truffle hunt near Montalcino — full experience with lunch"</div>
+        </div>
+        <div class="email-time">Today · 11:30</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Hello, we would love to do a truffle hunt during our stay — the real thing with a truffle hunter and trained dogs, in actual oak woodland, not a sanitised tourist version. And ideally ending with a lunch using what we find. Is this possible to arrange from Pienza? Thank you, Sarah & Tom
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-time">⏱ 29 seconds</div>
+          <div class="ai-label">AI Draft — Ready in 29s</div>
+        </div>
+        <div class="ai-draft">Dear Sarah and Tom,
+
+We appreciate you asking for the authentic version — and that is exactly what we can offer.
+
+We work with Marco, a third-generation trufaraio (truffle hunter) based in the hills between Montalcino and San Giovanni d'Asso. He hunts with his two Lagotto Romagnolo dogs in private woodland, and the experience is genuinely working — you go where the dogs go, in real terrain, in the early morning when the scent is strongest. No marked trails, no performance.
+
+The half-day experience (08:00–12:30): woodland hunt, then a farmhouse lunch at Marco's family home with truffle taglieri, pasta al tartufo using what was found, and local Brunello.
+
+Cost for two: approx. €180 per person including transport from Pienza, the hunt, and lunch. October–December is the prime season for black truffle; spring hunts focus on the less intense but more aromatic white Bianchetto variety.
+
+Which dates are you thinking? I will check Marco's availability and confirm.
+
+With pleasure,
+Concierge — Il Chiostro di Pienza</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMAIL 3 -->
+    <div class="email-card">
+      <div class="email-header">
+        <div class="email-meta">
+          <div class="email-from">Margot Lefèvre &lt;m.lefevre@lefevreconseil.fr&gt; <span class="tag tag-vip">VIP</span></div>
+          <div class="email-subject">"Pecorino di Pienza tasting + private visit to a fromagerie"</div>
+        </div>
+        <div class="email-time">Yesterday · 15:20</div>
+      </div>
+      <div class="email-body">
+        <blockquote>
+          Bonjour, je séjourne chez vous en juin avec mon mari, tous deux amateurs de fromages. Pienza est bien sûr célèbre pour son Pecorino. Seriez-vous en mesure d'organiser une visite privée d'un producteur artisanal — idéalement dans la campagne proche — avec une dégustation de plusieurs affinages ? Et si possible, une petite démonstration de fabrication ? Merci, Margot
+        </blockquote>
+      </div>
+      <div class="ai-section">
+        <div class="ai-header">
+          <div class="ai-icon">✦</div>
+          <div class="ai-label">AI Draft — Ready in 31s</div>
+          <div class="ai-time">⏱ 31 seconds</div>
+        </div>
+        <div class="ai-draft">Chère Margot,
+
+Quelle belle idée — et vous ne pouviez pas choisir un meilleur endroit. Pienza est sans doute la capitale mondiale du Pecorino, et les meilleurs producteurs sont à quelques kilomètres de l'hôtel.
+
+Nous travaillons avec la famiglia Cugusi, dont la ferme se trouve dans les collines à 8 km de Pienza. Ils élèvent leurs propres brebis de race Sarda et affinent le Pecorino dans des caves en tuf. La visite privée comprend : la traite du matin (si vous souhaitez arriver tôt), une démonstration de caillage et moulage avec Signora Cugusi, et une dégustation comparée de 5 affinages — fresco (10 jours), semi-stagionato (45 jours), stagionato (90 jours), stagionato alle vinacce (enrobé de marc de raisin), et reserva (6 mois en cave).
+
+Durée : environ 2h30. Prix pour deux personnes : 80 € tout compris, avec un panier de fromages à emporter.
+
+Puis-je réserver pour l'un de vos matins de juin ?
+
+Avec plaisir,
+Concierge — Il Chiostro di Pienza</div>
+        <div class="draft-actions">
+          <button class="btn btn-approve">✓ Approve &amp; Send</button>
+          <button class="btn btn-edit">✎ Edit draft</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sidebar">
+
+    <div class="sidebar-card">
+      <div class="roi-title">📊 ROI Estimate — Il Chiostro di Pienza</div>
+      <div class="roi-row"><span class="roi-key">Rooms</span><span class="roi-val">37</span></div>
+      <div class="roi-row"><span class="roi-key">Est. emails/day</span><span class="roi-val">~28</span></div>
+      <div class="roi-row"><span class="roi-key">Current draft time</span><span class="roi-val">~12 min/email</span></div>
+      <div class="roi-row"><span class="roi-key">AI draft time</span><span class="roi-val">30 seconds</span></div>
+      <div class="roi-row"><span class="roi-key">Time saved/week</span><span class="roi-val roi-highlight">~7 hours</span></div>
+      <div class="roi-row"><span class="roi-key">Equiv. staff cost saved</span><span class="roi-val roi-highlight">~€300/month</span></div>
+      <p class="roi-note">Val d'Orcia guests request immersive experiences — balloons, truffle hunts, wine tours — each requiring research and personalised replies. The AI handles this in seconds.</p>
+    </div>
+
+    <div class="pricing-card">
+      <div class="pricing-title">Investment</div>
+      <div class="plan">
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">800€ setup · 80€/month</div>
+        <div class="plan-desc">AI concierge agent, email drafts in 30s, full inbox integration.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium <span class="plan-rec">Recommended</span></div>
+        <div class="plan-price">800€ setup · 120€/month</div>
+        <div class="plan-desc">+ Weekly auto-improvement · Monthly performance report.</div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Premium+</div>
+        <div class="plan-price">1 200€ setup · 150€/month</div>
+        <div class="plan-desc">+ Training on your real guest exchanges · Personalised tone fine-tuning.</div>
+      </div>
+    </div>
+
+    <div class="sidebar-card about-card">
+      <div class="roi-title">About this demo</div>
+      <p class="about-text">Prepared for <strong>Relais Il Chiostro di Pienza</strong> by <strong>Enzo Cosnard</strong>, deploying this system at <strong>IBB Palazzo Bettina</strong> (Birgu, Malta) — a 15th-century historic building, like yours, with a deeply personal guest experience.<br><br>Questions? <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <p>Demo prepared for <strong style="color:#d8c090">Relais Il Chiostro di Pienza · Val d'Orcia, Tuscany</strong> &nbsp;·&nbsp; AI Concierge by Enzo Cosnard &nbsp;·&nbsp; <a href="mailto:enzo26cosnard@gmail.com">enzo26cosnard@gmail.com</a></p>
+  <p style="margin-top:8px">Currently live at IBB Palazzo Bettina, Birgu, Malta &nbsp;·&nbsp; <a href="https://nygty.github.io/demos/">View all demos</a></p>
+</footer>
+
+</body>
+</html>
