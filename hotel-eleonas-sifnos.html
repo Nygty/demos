@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Hotel Eleonas, Sifnos</title>
+<style>
+  :root {
+    --primary: #2C4A3E;       /* Aegean olive grove deep green */
+    --accent:  #C9A84C;       /* Cycladic golden stone */
+    --light:   #F5F2EC;       /* whitewashed Cycladic plaster */
+    --dark:    #1A2E27;
+    --text:    #2D2D2D;
+    --muted:   #8A9280;
+    --border:  #DAD6CA;
+    --blue:    #5B89A6;       /* Aegean sea blue */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.15rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                 display: flex; justify-content: space-between; border-top: 1px solid var(--border); }
+
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 24px; background: #fff; }
+  .plan.highlight { border-color: var(--accent); border-width: 2px; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .plan .plan-price { font-size: 1.9rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .plan .plan-price sub { font-size: 0.8rem; color: var(--muted); }
+  .plan .plan-setup { font-family: sans-serif; font-size: 0.75rem; color: var(--muted); margin-top: 4px; margin-bottom: 16px; }
+  .plan ul { list-style: none; }
+  .plan ul li { font-family: sans-serif; font-size: 0.78rem; color: #555; padding: 4px 0; display: flex; gap: 8px; }
+  .plan ul li::before { content: '✓'; color: var(--accent); flex-shrink: 0; }
+  .plan.highlight .plan-name { color: var(--accent); }
+
+  .cta-block { background: var(--primary); color: #fff; padding: 48px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .cta-block h3 { font-family: sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 0.04em; }
+  .cta-block p { font-family: sans-serif; font-size: 0.85rem; opacity: 0.7; margin-top: 6px; }
+  .cta-btn { background: var(--accent); color: #fff; border: none; padding: 14px 32px;
+             font-family: sans-serif; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+             border-radius: 2px; cursor: pointer; white-space: nowrap; }
+
+  .footer { padding: 24px 52px; font-family: sans-serif; font-size: 0.7rem; color: var(--muted);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+  @media (max-width: 768px) {
+    .header, .hero, .section, .cta-block, .roi-strip, .footer { padding-left: 20px; padding-right: 20px; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-wrap: wrap; gap: 24px; }
+    .email-grid { grid-template-columns: 1fr; }
+    .email-card.full { grid-column: 1; }
+    .pricing { grid-template-columns: 1fr; }
+    .cta-block { flex-direction: column; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Hotel <em>Eleonas</em> — Sifnos</div>
+  <span class="badge">AI Concierge · Preview</span>
+</header>
+
+<section class="hero">
+  <div class="tag">Apollonia, Sifnos · Cyclades, Greece · 20 Rooms in the Olive Groves</div>
+  <h1>Your AI Concierge<br>for the Culinary Island</h1>
+  <p>Sifnos is the Cyclades' gastronomic capital. Your guests email every day about cooking classes with Sifniot chefs, pottery workshops in Kamares and boat trips to Chrysopigi. Your AI concierge drafts the perfect personalised reply in 30 seconds — freeing your team to deliver the island hospitality that defines Eleonas.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">20</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~28</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">AI draft time</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">★★★★</div>
+      <div class="lbl">Sifnos Boutique</div>
+    </div>
+  </div>
+</section>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~28</div>
+    <div class="lbl">Guest emails per day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">9.3 hrs</div>
+    <div class="lbl">Writing time saved / week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~25 days</div>
+    <div class="lbl">ROI payback period</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">EN / DE / FR</div>
+    <div class="lbl">Languages handled</div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-title">Live examples — Hotel Eleonas inbox</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Culinary Experience Request</div>
+          <div>Sophie H. — Arriving 10 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">09:22</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hello, we've heard that Sifnos is the best island for Greek food and we're very excited! Could you arrange a traditional cooking class with a local chef? We'd love to learn to make revithada (the chickpea stew). We're also interested in visiting the pottery workshops — is Kamares the best place for that? Any recommendations for a memorable dinner would be wonderful.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear Sophie,<br><br>
+        You've chosen the perfect island for food! Sifnos has been Greece's culinary capital for centuries.<br><br>
+        <strong>Cooking class:</strong> We work with Chef Nikos Poulis, a 4th-generation Sifniot chef who runs classes from his home kitchen in Artemonas (€60/person, 3 hours). Revithada is absolutely on the menu — traditionally slow-cooked overnight in clay pots in the wood oven. We can book for your group directly.<br><br>
+        <strong>Pottery:</strong> The best workshops are in <strong>Kamares</strong> (Costas Despotakis, open 09:00–13:00) and <strong>Artemonas</strong>. Sifnos pottery tradition dates to antiquity — plan 2 hours.<br><br>
+        <strong>Dinner:</strong> <em>Chez Stelios</em> in Apollonia for contemporary Sifniot cuisine, and <em>To Meraki</em> in Kastro for sunset views and fresh seafood.<br><br>
+        Shall we make the booking?<br><br>
+        Warmly,<br>Hotel Eleonas</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 29s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Boat Trip Enquiry</div>
+          <div>Karl &amp; Anna B. — Arriving 5 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">11:04</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Guten Morgen! Wir möchten gerne einen Bootsausflug zur Insel Chrysopigi und entlang der Küste von Sifnos buchen. Können Sie uns helfen? Außerdem interessieren wir uns für einen Tagesausflug nach Antiparos. Wie lange ist die Überfahrt? Für wie viele Tage würden Sie empfehlen, auf Sifnos zu bleiben, um alles zu sehen? Vielen Dank!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s (German detected → reply in German)
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Guten Morgen Karl und Anna,<br><br>
+        Herzlich willkommen — wir freuen uns sehr auf Ihren Besuch!<br><br>
+        <strong>Bootsausflug Chrysopigi:</strong> Wir organisieren täglich Touren mit unserem Partner Sifnos Sea Tours. Die Halbtagestour (€45/Person) umfasst Chrysopigi, die Blaue Grotte und Vathy zum Mittagessen. Volltagestour (€75/Person) mit Schnorcheln und Picknick an Bord — sehr empfehlenswert.<br><br>
+        <strong>Antiparos:</strong> Mit der Fähre von Kamares ca. 1,5 Stunden via Paros. Ein wundervoller Tagesausflug — die Grotte von Antiparos (eine der größten Europas) ist beeindruckend.<br><br>
+        <strong>Empfehlung:</strong> Planen Sie mindestens 5–6 Tage auf Sifnos ein — Kastro, Apollonia, Chrysopigi, die Wanderung zum Kloster Profitis Ilias und natürlich die Gastronomie verdienen alle Zeit der Welt.<br><br>
+        Soll ich die Bootstour für Sie reservieren?<br><br>
+        Herzliche Grüße,<br>Hotel Eleonas</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 33s · Language auto-detected: German</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Arrival &amp; Special Requests</div>
+          <div>James &amp; Emma L. — Arriving 20 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">16:11</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hello, we're arriving on the 20th by ferry from Piraeus (arriving Kamares at 14:30 on the Speedrunner). We have two large suitcases and were wondering if you offer a transfer from the port. We're also celebrating our 10th wedding anniversary during our stay — is there anything special you could arrange? We'd love a bottle of local Sifnos wine and perhaps some local treats in the room. Budget is not a constraint for the right experience.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear James and Emma,<br><br>
+        Congratulations on your 10th anniversary — what a wonderful island you've chosen to celebrate!<br><br>
+        <strong>Port transfer:</strong> Our driver Georgios will meet you at Kamares port at 14:30 on the 20th — he'll be waiting with a sign. The drive to Eleonas takes about 15 minutes through the olive groves. No charge for our guests.<br><br>
+        <strong>Anniversary welcome:</strong> We'll arrange the following in your room upon arrival:<br>
+        — A chilled bottle of <em>Sifnos Winery</em> Assyrtiko (the island's finest white)<br>
+        — A plate of local mezes: Sifniot almond sweets, preserved figs, local honey and <em>manoura</em> cheese aged in wine lees<br>
+        — Fresh flowers from our garden<br>
+        — A handwritten card from our team<br><br>
+        We'd also love to offer you a complimentary sunset aperitivo on our terrace on your anniversary evening — just let us know which night works best.<br><br>
+        We cannot wait to welcome you both.<br><br>
+        With warm regards,<br>Hotel Eleonas — Apollonia, Sifnos</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 26s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">Plans — transparent pricing</div>
+  <div class="pricing">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">80€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>AI concierge agent (EN / DE / FR / GR)</li>
+        <li>Draft replies in ~30 seconds</li>
+        <li>Dashboard with inbox + history</li>
+        <li>Unlimited emails</li>
+      </ul>
+    </div>
+    <div class="plan highlight">
+      <div class="plan-name">Premium ★</div>
+      <div class="plan-price">120€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly automatic AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="plan-price">150€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your actual Sifnos email archive</li>
+        <li>Personalised to Eleonas tone of voice</li>
+        <li>Onboarding session with your team</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="cta-block">
+  <div>
+    <h3>Ready to see it live on your inbox?</h3>
+    <p>Already live at IBB Palazzo Bettina (Birgu, Malta) — a similar island boutique property.</p>
+  </div>
+  <button class="cta-btn">Book a 20-min demo</button>
+</div>
+
+<footer class="footer">
+  <span>AI Concierge · enzo26cosnard@gmail.com · IBB Palazzo Bettina, Birgu, Malta</span>
+  <span>Demo prepared for Hotel Eleonas · Apollonia, Sifnos · July 2026</span>
+</footer>
+
+</body>
+</html>

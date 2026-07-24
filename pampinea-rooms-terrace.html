@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Pampinea Rooms &amp; Terrace, Manarola</title>
+<style>
+  :root {
+    --primary: #1C3044;       /* Ligurian deep sea navy */
+    --accent:  #D4622A;       /* Manarola terracotta — the coloured houses */
+    --light:   #F5F1EA;       /* Ligurian limestone cliff */
+    --dark:    #0F1E2E;
+    --text:    #2D2D2D;
+    --muted:   #8A8E96;
+    --border:  #DDD8CE;
+    --teal:    #2E8B7A;       /* Ligurian sea turquoise */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header { background: var(--dark); color: #fff; padding: 0 52px;
+            display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.2em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero { background: var(--primary); color: #fff; padding: 70px 52px 56px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+                  background: linear-gradient(90deg, transparent, rgba(212,98,42,0.08)); }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2; font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                 display: flex; justify-content: space-between; border-top: 1px solid var(--border); }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 24px; background: #fff; }
+  .plan.highlight { border-color: var(--accent); border-width: 2px; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .plan .plan-price { font-size: 1.9rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .plan .plan-price sub { font-size: 0.8rem; color: var(--muted); }
+  .plan .plan-setup { font-family: sans-serif; font-size: 0.75rem; color: var(--muted); margin-top: 4px; margin-bottom: 16px; }
+  .plan ul { list-style: none; }
+  .plan ul li { font-family: sans-serif; font-size: 0.78rem; color: #555; padding: 4px 0; display: flex; gap: 8px; }
+  .plan ul li::before { content: '✓'; color: var(--accent); flex-shrink: 0; }
+  .plan.highlight .plan-name { color: var(--accent); }
+
+  .cta-block { background: var(--primary); color: #fff; padding: 48px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .cta-block h3 { font-family: sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 0.04em; }
+  .cta-block p { font-family: sans-serif; font-size: 0.85rem; opacity: 0.7; margin-top: 6px; }
+  .cta-btn { background: var(--accent); color: #fff; border: none; padding: 14px 32px;
+             font-family: sans-serif; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+             border-radius: 2px; cursor: pointer; white-space: nowrap; }
+
+  .footer { padding: 24px 52px; font-family: sans-serif; font-size: 0.7rem; color: var(--muted);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+  @media (max-width: 768px) {
+    .header, .hero, .section, .cta-block, .roi-strip, .footer { padding-left: 20px; padding-right: 20px; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-wrap: wrap; gap: 24px; }
+    .email-grid { grid-template-columns: 1fr; }
+    .email-card.full { grid-column: 1; }
+    .pricing { grid-template-columns: 1fr; }
+    .cta-block { flex-direction: column; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Pampinea <em>Rooms &amp; Terrace</em></div>
+  <span class="badge">AI Concierge · Preview</span>
+</header>
+
+<section class="hero">
+  <div class="tag">Manarola · Cinque Terre · Liguria · 12 Rooms · Cliff-Side Boutique</div>
+  <h1>Your AI Concierge<br>for the World's Most Photographed Village</h1>
+  <p>Manarola clings to the cliffs above the Ligurian Sea — and your 12-room boutique is right at the heart of it. Your guests email every single day: the Corniglia trail, private boat tours, Sciacchetrà wine tastings. With a small team running a high-demand property, an AI concierge that answers in 30 seconds isn't a luxury — it's essential.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">12</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~18</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">AI draft time</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">★★★★</div>
+      <div class="lbl">Cinque Terre Boutique</div>
+    </div>
+  </div>
+</section>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~18</div>
+    <div class="lbl">Guest emails per day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">6 hrs</div>
+    <div class="lbl">Writing time saved / week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~40 days</div>
+    <div class="lbl">ROI payback period</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">EN / IT / FR / DE</div>
+    <div class="lbl">Languages handled</div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-title">Live examples — Pampinea inbox</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Photography &amp; Sunrise Request</div>
+          <div>Lena K. — Arriving 6 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">07:11</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hello! I'm a travel photographer and chose Pampinea specifically for the views. What time is golden hour in Manarola in August? I'd like to photograph the famous viewpoint — is it within walking distance? Also, is the Via dell'Amore (path of love) between Riomaggiore and Manarola open? I've seen conflicting information online. Thank you!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear Lena,<br><br>
+        You've chosen the perfect base — our terrace has one of the finest unobstructed views of Manarola's famous clifftop houses and sea in the Cinque Terre.<br><br>
+        <strong>Golden hour (August):</strong> Sunrise ~06:15, sunset ~20:30 (golden light begins ~19:45). For the iconic Manarola shot — the coloured houses cascading down to the sea — the <em>Punta Bonfiglio viewpoint</em> is 5 minutes on foot from Pampinea (we'll mark it on your map). Best light: 30 minutes before sunset for warm front-lit colours, or dawn for misty soft light and empty streets.<br><br>
+        <strong>Via dell'Amore:</strong> Good news — as of June 2024 the path has partially reopened (Riomaggiore side, first section). The full path to Manarola remains closed for restoration works. We recommend confirming the current status on arrival as reopening is gradual.<br><br>
+        <strong>Alternative cliff path:</strong> The Manarola → Corniglia trail (CAI 586, 45 min) offers stunning sea-cliff photography and is fully open. A significantly more dramatic walk than Via dell'Amore.<br><br>
+        We'll prepare your room with an early check-in so you're ready for the sunset.<br><br>
+        Looking forward to it,<br>Pampinea Rooms &amp; Terrace</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 29s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Private Boat Tour</div>
+          <div>François &amp; Marie D. — Arrivée 14 août</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">12:33</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Bonjour, nous souhaiterions faire une excursion en bateau privé pour voir les 5 villages depuis la mer. Est-ce organisable depuis Manarola ? Avez-vous un partenaire ? Nous voudrions aussi pouvoir nager dans des criques inaccessibles à pied. Et est-il possible d'inclure un déjeuner à bord ou dans un des villages ? Merci d'avance.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s (French detected → reply in French)
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Bonjour François et Marie,<br><br>
+        Absolument — et c'est probablement la plus belle façon de découvrir les Cinque Terre.<br><br>
+        <strong>Bateau privé depuis Manarola :</strong> Notre partenaire <em>Cinqueterre Charter</em> propose des sorties en bateau privé depuis le petit port de Manarola (8–12 places). Journée complète : 09:00–17:30, €380 pour le bateau complet. Le programme inclut :<br>
+        — Visite des 5 villages depuis la mer<br>
+        — 2–3 arrêts baignade dans des criques accessibles uniquement par bateau (eaux cristallines, pas de foule)<br>
+        — Pause déjeuner à Vernazza : table réservée à <em>Belforte</em>, terrasse sur la mer<br><br>
+        <strong>Option déjeuner à bord :</strong> également possible avec panier de la mer (focaccia ligure, anchois de Monterosso marinés, vin Cinque Terre blanc) pour €25/personne en supplément.<br><br>
+        Juillet–août : réservez impérativement 5–7 jours à l'avance. Souhaitez-vous que nous réservions pour vous ?<br><br>
+        À bientôt,<br>Pampinea Rooms &amp; Terrace — Manarola</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 31s · Language auto-detected: French</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Late Arrival &amp; Logistics</div>
+          <div>James &amp; Priya R. — Arriving 20 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">18:54</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hi, we're arriving by train and our connection means we'll get to Manarola station at around 21:30. I know Cinque Terre is quite complex logistically — is there a suitcase porter or do we have to carry everything ourselves? We have two large bags. Also, since we're arriving late, will anyone be there to check us in? And just to confirm — Pampinea is in the village itself, not outside? We've read some accommodations are further away than they appear on maps.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear James and Priya,<br><br>
+        Great questions — Manarola logistics can indeed surprise first-time visitors. Let us make it seamless for you.<br><br>
+        <strong>Pampinea's location:</strong> We are in the heart of Manarola village — 3 minutes on foot from the train station, right on the main lane above the harbour. No hidden surprises. You can see the sea from our terrace.<br><br>
+        <strong>Luggage at 21:30:</strong> The Manarola carriola (luggage porter) service operates until approximately 20:00 in peak season. Since you arrive at 21:30, the solution is this: our local partner <em>Cinque Terre Luggage</em> offers an evening service (pre-booked, €12/bag) — they take your bags from the station to our door before you arrive. We book this for you today and send you the confirmation. When you step off the train, walk empty-handed. It's worth every cent.<br><br>
+        <strong>Late check-in:</strong> Our reception is staffed until 22:00 on weekdays and 23:00 on weekends. For 21:30, no problem at all — someone will be here. If for any reason this changes, we'll provide a key code with instructions in advance.<br><br>
+        We'll also leave a welcome note with the best late-night snack option in the village (the small bar on Via Discovolo is open until 23:00 and does excellent bruschetta and local wine).<br><br>
+        See you on the 20th!<br>Pampinea Rooms &amp; Terrace</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 27s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">Plans — transparent pricing</div>
+  <div class="pricing">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">80€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>AI concierge (EN / IT / FR / DE)</li>
+        <li>Draft replies in ~30 seconds</li>
+        <li>Dashboard with inbox + history</li>
+        <li>Unlimited emails</li>
+      </ul>
+    </div>
+    <div class="plan highlight">
+      <div class="plan-name">Premium ★</div>
+      <div class="plan-price">120€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly automatic AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="plan-price">150€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on Pampinea's real email archive</li>
+        <li>Personalised to your cliff-side boutique voice</li>
+        <li>Onboarding with your small team</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="cta-block">
+  <div>
+    <h3>Ready to see it live on your inbox?</h3>
+    <p>Already live at IBB Palazzo Bettina (Birgu, Malta) — a similarly cliff-perched island boutique.</p>
+  </div>
+  <button class="cta-btn">Book a 20-min demo</button>
+</div>
+
+<footer class="footer">
+  <span>AI Concierge · enzo26cosnard@gmail.com · IBB Palazzo Bettina, Birgu, Malta</span>
+  <span>Demo prepared for Pampinea Rooms &amp; Terrace · Manarola, Cinque Terre · July 2026</span>
+</footer>
+
+</body>
+</html>

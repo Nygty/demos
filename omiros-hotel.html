@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Omiros Hotel, Syros</title>
+<style>
+  :root {
+    --primary: #2A3556;       /* neoclassical Ermoupolis indigo */
+    --accent:  #C4873A;       /* Cycladic terracotta gold */
+    --light:   #F4F2EE;       /* aged Syros marble */
+    --dark:    #181E36;
+    --text:    #2D2D2D;
+    --muted:   #8A8E9A;
+    --border:  #DAD6CE;
+    --warm:    #7B5EA7;       /* Byzantine purple — Ano Syros Catholic legacy */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header { background: var(--dark); color: #fff; padding: 0 52px;
+            display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .header .logo { font-size: 1.15rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero { background: var(--primary); color: #fff; padding: 70px 52px 56px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+                  background: linear-gradient(90deg, transparent, rgba(196,135,58,0.07)); }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2; font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                 display: flex; justify-content: space-between; border-top: 1px solid var(--border); }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 24px; background: #fff; }
+  .plan.highlight { border-color: var(--accent); border-width: 2px; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .plan .plan-price { font-size: 1.9rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .plan .plan-price sub { font-size: 0.8rem; color: var(--muted); }
+  .plan .plan-setup { font-family: sans-serif; font-size: 0.75rem; color: var(--muted); margin-top: 4px; margin-bottom: 16px; }
+  .plan ul { list-style: none; }
+  .plan ul li { font-family: sans-serif; font-size: 0.78rem; color: #555; padding: 4px 0; display: flex; gap: 8px; }
+  .plan ul li::before { content: '✓'; color: var(--accent); flex-shrink: 0; }
+  .plan.highlight .plan-name { color: var(--accent); }
+
+  .cta-block { background: var(--primary); color: #fff; padding: 48px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .cta-block h3 { font-family: sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 0.04em; }
+  .cta-block p { font-family: sans-serif; font-size: 0.85rem; opacity: 0.7; margin-top: 6px; }
+  .cta-btn { background: var(--accent); color: #fff; border: none; padding: 14px 32px;
+             font-family: sans-serif; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+             border-radius: 2px; cursor: pointer; white-space: nowrap; }
+
+  .footer { padding: 24px 52px; font-family: sans-serif; font-size: 0.7rem; color: var(--muted);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+  @media (max-width: 768px) {
+    .header, .hero, .section, .cta-block, .roi-strip, .footer { padding-left: 20px; padding-right: 20px; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-wrap: wrap; gap: 24px; }
+    .email-grid { grid-template-columns: 1fr; }
+    .email-card.full { grid-column: 1; }
+    .pricing { grid-template-columns: 1fr; }
+    .cta-block { flex-direction: column; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Omiros <em>Hotel</em> — Syros</div>
+  <span class="badge">AI Concierge · Preview</span>
+</header>
+
+<section class="hero">
+  <div class="tag">Ermoupolis, Syros · Cyclades' Capital · 29-Room Neoclassical Mansion</div>
+  <h1>Your AI Concierge<br>for the Cosmopolitan Cyclades</h1>
+  <p>Ermoupolis is unlike any other Greek island capital — neoclassical grandeur, the Apollo Theatre, a thriving cultural scene. Your guests arrive with high expectations and detailed questions about the Apollo Theatre, Ano Syros and private Cyclades boat trips. Your AI concierge handles every email with the same care your team would — in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">29</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~38</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">AI draft time</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">★★★★</div>
+      <div class="lbl">Historic Mansion</div>
+    </div>
+  </div>
+</section>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~38</div>
+    <div class="lbl">Guest emails per day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">12.7 hrs</div>
+    <div class="lbl">Writing time saved / week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~22 days</div>
+    <div class="lbl">ROI payback period</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">EN / FR / DE / IT</div>
+    <div class="lbl">Languages handled</div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-title">Live examples — Omiros Hotel inbox</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Cultural Itinerary Request</div>
+          <div>James T. — Arriving 12 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">08:43</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Good morning. We're arriving on the 12th and have 4 days on Syros. We're particularly interested in the Apollo Theatre — is it possible to visit inside and perhaps attend a performance? We'd also like to explore Ano Syros, the Catholic quarter, and we heard there's a wonderful view from the top. Could you help organise our days so we see the best of Ermoupolis?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear James,<br><br>
+        Welcome to Syros — a hidden gem even among those who know Greece well.<br><br>
+        <strong>Apollo Theatre:</strong> One of Greece's finest neoclassical theatres, modelled on La Scala. Guided tours run Tue–Sat at 10:00 (€5). The summer season sometimes includes concerts and opera — we'll check the August programme and reserve seats if anything is on during your stay.<br><br>
+        <strong>Ano Syros:</strong> The medieval Catholic quarter perched above the port is extraordinary. The Church of San Giorgio and the panoramic view from the top are not to be missed. We recommend the morning walk (cool and photogenic) — about 45 minutes from Omiros on foot via the marble-paved stairways.<br><br>
+        <strong>Suggested itinerary:</strong><br>
+        Day 1 — Apollo Theatre tour + Vaporia neoclassical mansions + Aegli Square for evening coffee<br>
+        Day 2 — Ano Syros morning + afternoon Kini Beach<br>
+        Day 3 — Day trip to Paros or Mykonos (30 min by ferry)<br>
+        Day 4 — Market district + Galissas sunset<br><br>
+        We'll prepare a printed map for your arrival.<br><br>
+        Warmly,<br>Omiros Hotel</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 31s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Boat Trip Request</div>
+          <div>Famille Moreau — Arrivée 18 août</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">10:17</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Bonjour, nous sommes une famille de 4 (2 adultes, 2 enfants de 10 et 13 ans). Nous aimerions faire une excursion en bateau pour visiter une autre île des Cyclades depuis Syros. Quelle île conseillez-vous pour une journée avec des enfants ? Aussi, est-ce que le restaurant de l'hôtel est adapté aux enfants ? Merci beaucoup.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s (French detected → reply in French)
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Chère famille Moreau,<br><br>
+        Bienvenue à bord — quelle belle idée de découvrir les Cyclades en famille !<br><br>
+        <strong>Excursion en bateau :</strong> Notre recommandation pour les familles : <strong>Paros</strong> (30 minutes). Village de Naoussa avec ses tavernes au bord de l'eau et son port coloré — parfait pour les enfants. En juillet-août, Cyclades Ferries propose des départs à 09:00 depuis le port d'Ermoupolis.<br><br>
+        Autre option : <strong>Mykonos</strong> (également 30 min) pour la plage de Platys Gialos, plus calme que le centre-ville et idéale avec des enfants.<br><br>
+        Nous pouvons organiser un <strong>bateau privé</strong> pour la journée (environ €350 pour 4 personnes, déjeuner inclus à bord) — l'expérience la plus mémorable pour vos enfants.<br><br>
+        <strong>Restaurant :</strong> Absolument adapté aux enfants — menu simplifié disponible, portions enfants, et notre terrasse est spacieuse et sécurisée.<br><br>
+        À très bientôt !<br>Omiros Hotel — Ermoupolis</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 28s · Language auto-detected: French</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Late Arrival &amp; Room Request</div>
+          <div>Marco &amp; Giulia R. — Check-in 25 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">19:48</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Buonasera, arriveremo con il traghetto da Atene che arriva alle 23:30 circa. C'è qualcuno alla reception a quell'ora? Abbiamo prenotato una camera doppia standard ma vorremmo sapere se è possibile avere una camera con vista sul porto — siamo disponibili a pagare un supplemento. Infine, avete il parcheggio? Arriviamo con la macchina dal porto di Pireo via traghetto. Grazie.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s (Italian detected → reply in Italian)
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Cara Giulia, caro Marco,<br><br>
+        Benvenuti — non preoccupatevi per l'orario di arrivo tardivo.<br><br>
+        <strong>Check-in notturno:</strong> La nostra reception è presidiata fino alle 24:00. Per arrivi dopo la mezzanotte, vi lasciamo le chiavi in una cassetta sicura con codice — vi invieremo il codice via email il giorno prima dell'arrivo. Tutto è organizzato per voi.<br><br>
+        <strong>Camera con vista porto:</strong> Abbiamo una Junior Suite al terzo piano con balcone panoramico sul porto di Ermoupolis — una delle viste più belle delle Cicladi, specialmente di notte con le luci del lungomare. Supplemento: €35/notte. Confermate e la reserviamo subito.<br><br>
+        <strong>Parcheggio:</strong> Non disponiamo di parcheggio privato, ma il <em>Parcheggio Municipale</em> si trova a 200 metri dall'hotel (€8/giorno) — all'uscita dal porto, seguite le indicazioni Omiros Hotel, lo trovate sulla sinistra. Oppure possiamo indicarvi i parcheggi gratuiti nella zona residenziale (5 minuti a piedi).<br><br>
+        A presto!<br>Omiros Hotel — Ermoupoli, Syros</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 30s · Language auto-detected: Italian</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">Plans — transparent pricing</div>
+  <div class="pricing">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">80€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>AI concierge (EN / FR / DE / IT / GR)</li>
+        <li>Draft replies in ~30 seconds</li>
+        <li>Dashboard with inbox + history</li>
+        <li>Unlimited emails</li>
+      </ul>
+    </div>
+    <div class="plan highlight">
+      <div class="plan-name">Premium ★</div>
+      <div class="plan-price">120€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly automatic AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="plan-price">150€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on Omiros Hotel's real emails</li>
+        <li>Personalised to your mansion's tone of voice</li>
+        <li>Onboarding session with your front desk team</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="cta-block">
+  <div>
+    <h3>Ready to see it live on your inbox?</h3>
+    <p>Already live at IBB Palazzo Bettina (Birgu, Malta) — a similar Mediterranean boutique palazzo.</p>
+  </div>
+  <button class="cta-btn">Book a 20-min demo</button>
+</div>
+
+<footer class="footer">
+  <span>AI Concierge · enzo26cosnard@gmail.com · IBB Palazzo Bettina, Birgu, Malta</span>
+  <span>Demo prepared for Omiros Hotel · Ermoupolis, Syros · July 2026</span>
+</footer>
+
+</body>
+</html>

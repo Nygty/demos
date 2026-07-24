@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Cà Sagredo Hotel, Venice</title>
+<style>
+  :root {
+    --primary: #12243A;       /* Grand Canal deep navy */
+    --accent:  #C4922A;       /* Tiepolo fresco gold */
+    --light:   #F4F1EB;       /* aged Venetian stucco */
+    --dark:    #0A1622;
+    --text:    #2D2D2D;
+    --muted:   #8A8E98;
+    --border:  #DDD9CE;
+    --crimson: #8B2635;       /* Venetian crimson velvet */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header { background: var(--dark); color: #fff; padding: 0 52px;
+            display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .header .logo { font-size: 1.15rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero { background: var(--primary); color: #fff; padding: 70px 52px 56px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+                  background: linear-gradient(90deg, transparent, rgba(196,146,42,0.07)); }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2; font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                 display: flex; justify-content: space-between; border-top: 1px solid var(--border); }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 24px; background: #fff; }
+  .plan.highlight { border-color: var(--accent); border-width: 2px; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .plan .plan-price { font-size: 1.9rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .plan .plan-price sub { font-size: 0.8rem; color: var(--muted); }
+  .plan .plan-setup { font-family: sans-serif; font-size: 0.75rem; color: var(--muted); margin-top: 4px; margin-bottom: 16px; }
+  .plan ul { list-style: none; }
+  .plan ul li { font-family: sans-serif; font-size: 0.78rem; color: #555; padding: 4px 0; display: flex; gap: 8px; }
+  .plan ul li::before { content: '✓'; color: var(--accent); flex-shrink: 0; }
+  .plan.highlight .plan-name { color: var(--accent); }
+
+  .cta-block { background: var(--primary); color: #fff; padding: 48px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .cta-block h3 { font-family: sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 0.04em; }
+  .cta-block p { font-family: sans-serif; font-size: 0.85rem; opacity: 0.7; margin-top: 6px; }
+  .cta-btn { background: var(--accent); color: #fff; border: none; padding: 14px 32px;
+             font-family: sans-serif; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+             border-radius: 2px; cursor: pointer; white-space: nowrap; }
+
+  .footer { padding: 24px 52px; font-family: sans-serif; font-size: 0.7rem; color: var(--muted);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+  @media (max-width: 768px) {
+    .header, .hero, .section, .cta-block, .roi-strip, .footer { padding-left: 20px; padding-right: 20px; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-wrap: wrap; gap: 24px; }
+    .email-grid { grid-template-columns: 1fr; }
+    .email-card.full { grid-column: 1; }
+    .pricing { grid-template-columns: 1fr; }
+    .cta-block { flex-direction: column; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Cà Sagredo <em>Hotel</em> — Venice</div>
+  <span class="badge">AI Concierge · Preview</span>
+</header>
+
+<section class="hero">
+  <div class="tag">Grand Canal · Venice · 15th-Century Palazzo · 42 Rooms · 5 Stars</div>
+  <h1>Your AI Concierge<br>for a Palazzo on the Grand Canal</h1>
+  <p>Cà Sagredo is not just a hotel — it's a living piece of Venetian history. Original Tiepolo frescoes. A Grand Canal address. 42 individually designed rooms. Your guests' expectations match your setting. They email every day about private water-taxi transfers, Accademia visits at dawn, and exclusive dining along the canal. Your AI concierge meets that bar — every time, in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">42</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~58</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">AI draft time</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">★★★★★</div>
+      <div class="lbl">Grand Canal Palazzo</div>
+    </div>
+  </div>
+</section>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~58</div>
+    <div class="lbl">Guest emails per day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">19.3 hrs</div>
+    <div class="lbl">Writing time saved / week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~18 days</div>
+    <div class="lbl">ROI payback period</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">EN / IT / FR / DE / RU</div>
+    <div class="lbl">Languages handled</div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-title">Live examples — Cà Sagredo inbox</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Private Transfer &amp; VIP Arrival</div>
+          <div>Lord &amp; Lady A. — Arriving 9 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">06:14</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Good morning. We will be arriving at Marco Polo Airport on 9 August at 11:45 on BA flight 664. We wish to arrange a private water taxi directly to the hotel — not a shared service. Could you also ensure our suite (Canal Grand Deluxe) is ready early, from 10:00 if possible? We'll require Champagne on arrival and a fruit arrangement — my wife is allergic to kiwi and melon. Would also like to book a private gondola for the evening of the 11th.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear Lord and Lady Ashford,<br><br>
+        Welcome — we are delighted to prepare Cà Sagredo for your arrival.<br><br>
+        <strong>Private water taxi:</strong> We will arrange an exclusive Consorzio Motoscafi private launch from Marco Polo Airport directly to our palazzo dock on the Grand Canal (~35 minutes, €140). Your driver will be waiting at Arrivals with a sign. We will confirm the booking once your flight lands on schedule.<br><br>
+        <strong>Early check-in:</strong> Your Canal Grand Deluxe Suite will be prepared and available from <strong>10:00</strong> on 9 August. We will pre-stock: one bottle of Ruinart Blanc de Blancs on ice, and a seasonal fruit arrangement — <em>kiwi and melon strictly excluded</em>, noted in your profile.<br><br>
+        <strong>Private gondola, 11 August:</strong> We will arrange a 45-minute private gondola departing from our palazzo at 20:00 — aperitivo hour, before the evening light fades. Our preferred gondolier, Giacomo, speaks excellent English. Should we include Prosecco and cicchetti on board?<br><br>
+        We look forward to welcoming you.<br><br>
+        Yours sincerely,<br>Cà Sagredo Hotel — Venice</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 28s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Museum Access &amp; Cultural Programme</div>
+          <div>Dr. Klaus W. — Arriving 22 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">09:31</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Guten Morgen. Ich bin Kunsthistoriker und möchte während meines Aufenthaltes die Accademia, Ca' d'Oro und den Palazzo Grimani besuchen. Gibt es die Möglichkeit, die Accademia vor der Öffnungszeit zu besuchen, um die Werke ohne Besuchermengen zu studieren? Ich interessiere mich besonders für die Bellini-Altarbilder und Tizians Assunta. Könnten Sie auch eine private Führung durch die Frari-Kirche organisieren?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s (German detected → reply in German)
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Sehr geehrter Herr Dr. Wagner,<br><br>
+        Als Kunsthistoriker haben Sie eine ausgezeichnete Wahl getroffen — Cà Sagredo liegt nur 10 Gehminuten von der Accademia entfernt.<br><br>
+        <strong>Accademia vor Öffnung:</strong> Die offizielle Öffnungszeit ist 08:15 (Di–So). Für Forschungszwecke kann man über die Soprintendenza einen Vorabzugang beantragen — wir können bei der Kontaktaufnahme helfen, obwohl eine Genehmigung 2–3 Wochen vorab benötigt wird. Alternativ empfehlen wir den Einlass bei Öffnung Di–Do (geringstes Besucheraufkommen).<br><br>
+        <strong>Bellini &amp; Tizian:</strong> Saal II (Bellini-Altarbilder) und Saal XXIV (Tizians Assunta) — wir bereiten eine detaillierte Besucherroute vor.<br><br>
+        <strong>Frari-Kirche Privatführung:</strong> Unser Partner Dr. Elisabetta Corti (art historian, multilingual DE/EN/IT) leitet exklusive Privatführungen (2h, €180) mit Zugang zum Chor und den Grabmonumenten. Wir reservieren für Sie.<br><br>
+        <strong>Palazzo Grimani:</strong> Vorausgebuchte Tickets empfohlen — wir buchen alle Eintritte für Sie.<br><br>
+        Mit freundlichen Grüßen,<br>Cà Sagredo Hotel — Venedig</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 34s · Language auto-detected: German</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Private Dining &amp; Exclusive Experience</div>
+          <div>Valentina K. — Arriving 30 August (Corporate)</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">11:47</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hi, I'm organising a 3-night stay for our CEO and his partner arriving 30 August. Budget is not a constraint — we need the best suite available with Grand Canal view. They'd love a private dinner in a spectacular setting (not a restaurant — somewhere unique, perhaps in a palazzo or on the canal itself). Also, what's the most exclusive experience you can arrange in Venice that most tourists never get to do? We want to impress.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear Valentina,<br><br>
+        Understood — we specialise in exactly this. Let me share what we've arranged for guests with similar expectations.<br><br>
+        <strong>Suite:</strong> Our <em>Piano Nobile Grand Suite</em> (available 30 August): 90 m² overlooking the Grand Canal, original 15th-century beamed ceiling, private terrace. We will prepare it with a flower arrangement and welcome Champagne.<br><br>
+        <strong>Private dinner in a palazzo:</strong> We work exclusively with <em>Palazzo Contarini del Bovolo</em> — a private dinner on the rooftop terrace of one of Venice's most beautiful secret courtyards (the Gothic spiral staircase). Dinner prepared by a private chef, maximum 6 guests, €450/person. Alternatively, a private dinner on a moored palazzo barge on the Grand Canal at sunset — spectacular and completely private.<br><br>
+        <strong>The experience tourists never get:</strong><br>
+        — <em>After-hours Basilica di San Marco</em>: private access to the Basilica after closing, with the mosaics lit exclusively for your guests (€800, max 6 persons — arranged through a cultural foundation we partner with)<br>
+        — <em>Private glassblowing atelier in Murano</em>: master glassblower creates a bespoke piece while your guests dine on the furnace terrace<br>
+        — <em>Rialto fish market at 05:30 with a Michelin chef</em>: select the morning catch, cook it in his kitchen<br><br>
+        We'll prepare a full bespoke programme — shall we arrange a call?<br><br>
+        With pleasure,<br>Cà Sagredo Hotel — Venice</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 31s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">Plans — transparent pricing</div>
+  <div class="pricing">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">80€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>AI concierge (EN / IT / FR / DE / RU)</li>
+        <li>Draft replies in ~30 seconds</li>
+        <li>Dashboard with full inbox + history</li>
+        <li>Unlimited emails</li>
+      </ul>
+    </div>
+    <div class="plan highlight">
+      <div class="plan-name">Premium ★</div>
+      <div class="plan-price">120€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly automatic AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="plan-price">150€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on Cà Sagredo's real email archive</li>
+        <li>Calibrated to your 5-star voice &amp; service standards</li>
+        <li>Onboarding with your concierge team</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="cta-block">
+  <div>
+    <h3>Ready to see it live on your inbox?</h3>
+    <p>Already live at IBB Palazzo Bettina (Birgu, Malta) — a similarly iconic Mediterranean palazzo.</p>
+  </div>
+  <button class="cta-btn">Book a 20-min demo</button>
+</div>
+
+<footer class="footer">
+  <span>AI Concierge · enzo26cosnard@gmail.com · IBB Palazzo Bettina, Birgu, Malta</span>
+  <span>Demo prepared for Cà Sagredo Hotel · Venice · July 2026</span>
+</footer>
+
+</body>
+</html>

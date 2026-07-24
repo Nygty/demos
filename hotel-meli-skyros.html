@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Hotel Meli, Skyros</title>
+<style>
+  :root {
+    --primary: #2A3B52;       /* Aegean twilight deep blue */
+    --accent:  #B8973C;       /* Skyrian gold — miniature horse mane */
+    --light:   #F4F1EB;       /* Skyrian whitewashed cubic wall */
+    --dark:    #162130;
+    --text:    #2D2D2D;
+    --muted:   #8A8E9A;
+    --border:  #DAD6CC;
+    --sage:    #6E8C6A;       /* Aegean wild thyme sage green */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header { background: var(--dark); color: #fff; padding: 0 52px;
+            display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero { background: var(--primary); color: #fff; padding: 70px 52px 56px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+                  background: linear-gradient(90deg, transparent, rgba(184,151,60,0.07)); }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2; font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                 display: flex; justify-content: space-between; border-top: 1px solid var(--border); }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 24px; background: #fff; }
+  .plan.highlight { border-color: var(--accent); border-width: 2px; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .plan .plan-price { font-size: 1.9rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .plan .plan-price sub { font-size: 0.8rem; color: var(--muted); }
+  .plan .plan-setup { font-family: sans-serif; font-size: 0.75rem; color: var(--muted); margin-top: 4px; margin-bottom: 16px; }
+  .plan ul { list-style: none; }
+  .plan ul li { font-family: sans-serif; font-size: 0.78rem; color: #555; padding: 4px 0; display: flex; gap: 8px; }
+  .plan ul li::before { content: '✓'; color: var(--accent); flex-shrink: 0; }
+  .plan.highlight .plan-name { color: var(--accent); }
+
+  .cta-block { background: var(--primary); color: #fff; padding: 48px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .cta-block h3 { font-family: sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 0.04em; }
+  .cta-block p { font-family: sans-serif; font-size: 0.85rem; opacity: 0.7; margin-top: 6px; }
+  .cta-btn { background: var(--accent); color: #fff; border: none; padding: 14px 32px;
+             font-family: sans-serif; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+             border-radius: 2px; cursor: pointer; white-space: nowrap; }
+
+  .footer { padding: 24px 52px; font-family: sans-serif; font-size: 0.7rem; color: var(--muted);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+  @media (max-width: 768px) {
+    .header, .hero, .section, .cta-block, .roi-strip, .footer { padding-left: 20px; padding-right: 20px; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-wrap: wrap; gap: 24px; }
+    .email-grid { grid-template-columns: 1fr; }
+    .email-card.full { grid-column: 1; }
+    .pricing { grid-template-columns: 1fr; }
+    .cta-block { flex-direction: column; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Hotel <em>Meli</em> — Skyros</div>
+  <span class="badge">AI Concierge · Preview</span>
+</header>
+
+<section class="hero">
+  <div class="tag">Skyros Town · Sporades, Greece · 16 Rooms · The Intentional Island</div>
+  <h1>Your AI Concierge<br>for the Aegean's Most Enigmatic Island</h1>
+  <p>Skyros has no package tourism. Every guest who finds Hotel Meli has sought it out deliberately — for the miniature Skyrian horses, the cubist Chora, Rupert Brooke's grave. They email with considered, specific questions. Your AI concierge gives them the thoughtful, expert replies they deserve — in 30 seconds, freeing your team to deliver the personal touch that defines Meli.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">16</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~22</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">AI draft time</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">★★★★</div>
+      <div class="lbl">Skyros Boutique</div>
+    </div>
+  </div>
+</section>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~22</div>
+    <div class="lbl">Guest emails per day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">7.3 hrs</div>
+    <div class="lbl">Writing time saved / week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~33 days</div>
+    <div class="lbl">ROI payback period</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">EN / DE / FR</div>
+    <div class="lbl">Languages handled</div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-title">Live examples — Hotel Meli inbox</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Skyrian Horse Experience</div>
+          <div>Alice &amp; Robert F. — Arriving 4 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">08:29</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Good morning. We came to Skyros specifically to see the Skyrian horses — we've read they're one of the rarest horse breeds in the world and can roam wild in the south of the island. Is it possible to arrange a guided horseback ride to see them? We'd also love to visit the Rupert Brooke memorial — we're both literature enthusiasts. And how do we get to the southern part of the island, is there transport or do we need a car?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear Alice and Robert,<br><br>
+        What a wonderful reason to come to Skyros — and you're right, the Skyrian horse (<em>Skyros pony</em>) is one of the rarest horse breeds in the world, possibly descended from the ancient Greek horses depicted on the Parthenon friezes.<br><br>
+        <strong>Horseback ride to see the Skyrian horses:</strong> We work with <em>Skyrian Horse Farm</em> (near Kalamitsa) — the dedicated conservation centre. They offer 2-hour guided rides into the southern plateau where the semi-wild herd grazes (€55/person). Suitable for beginners. It is the most moving experience Skyros offers — seeing these small, ancient horses completely free on the hillside above the sea. We book for you.<br><br>
+        <strong>Rupert Brooke memorial:</strong> The grave and monument are in Tris Boukes bay in the far south — a moving, isolated spot. Accessible by boat (30 min from Linaria) or by car/ATV on a rough track. We recommend combining with the southern coast boat trip — see below.<br><br>
+        <strong>Transport south:</strong> We rent ATVs through a trusted local partner (€35/day, no licence required) — the standard Skyros way to explore. Alternatively, we can arrange a private driver for a full-day island tour (€90). There is no public bus to the south.<br><br>
+        We'll plan the full day for you,<br>Hotel Meli — Skyros</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 31s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Pottery Workshop &amp; Chora Visit</div>
+          <div>Monika S. — Ankunft 12. August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">10:55</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Guten Tag! Ich interessiere mich sehr für die traditionelle Handwerkskunst von Skyros. Ich habe gelesen, dass die Insel bekannt für seine Töpferei und Schnitzkunst ist. Gibt es noch Handwerker, die diese Traditionen pflegen? Kann man Workshops besuchen? Außerdem möchte ich die Chora erkunden — wie lange braucht man für einen Rundgang? Danke vielmals!</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s (German detected → reply in German)
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Guten Tag Monika,<br><br>
+        Skyros ist tatsächlich eine der letzten griechischen Inseln, auf der das traditionelle Kunsthandwerk noch aktiv und lebendig ist — eine Seltenheit.<br><br>
+        <strong>Töpferei:</strong> Meisterin <em>Nikos Papadimitriou</em> in der Chora führt seit 30 Jahren eine kleine Töpferwerkstatt mit charakteristischen Skyros-Mustern (geometrische Muster in Blau, Weiß und Terrakotta). Workshopteilnahme auf Anfrage möglich (2 Stunden, ~€35). Wir stellen den Kontakt für Sie her.<br><br>
+        <strong>Holzschnitzkunst:</strong> Skyros ist berühmt für seine handgeschnitzten Möbel und Truhen — besonders die <em>Skyrian chests</em>. Im Folklore-Museum der Chora (Manos Faltaits Museum) finden Sie die schönste Sammlung. Das Museum selbst ist außergewöhnlich gut kuratiert für eine so kleine Insel.<br><br>
+        <strong>Chora-Rundgang:</strong> Planen Sie 2–3 Stunden ein: die kubistischen weißen Häuschen auf dem Fels sind einzigartig in Griechenland — erinnern an die Kykladen, aber wilder und weniger touristisch. Beginnen Sie am Kastro (oben) und schlendern Sie hinunter durch die engen Gassen. Am späten Nachmittag ist das Licht besonders schön.<br><br>
+        Herzliche Grüße,<br>Hotel Meli — Skyros</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 33s · Language auto-detected: German</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Island Arrival &amp; Logistics</div>
+          <div>James &amp; Diana H. — Arriving 18 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">15:38</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hello, we're planning to arrive on 18 August but we're finding the logistics a bit complex. The ferry from Kymi (mainland) seems to be the only way? How long is the crossing? Is there a flight option? We'll be flying into Athens first. Also — we're not hiring a car. Is it possible to get around Skyros without one? We prefer walking and cycling if that's viable.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear James and Diana,<br><br>
+        Excellent questions — Skyros logistics are indeed a little more involved than other islands, which is part of why it remains so unspoiled.<br><br>
+        <strong>Getting to Skyros:</strong><br>
+        <em>Option 1 — Ferry from Kymi:</em> Athens (Liossion bus terminal) → Kymi by bus (2.5 hrs, €14.50), then Skyros Shipping ferry Kymi → Linaria port (2 hrs, €12.50). Two daily departures in summer (usually 09:00 and 15:00). The crossing is comfortable and often spectacular — dolphins are common in August.<br>
+        <em>Option 2 — Sky Express flight:</em> Athens → Skyros Airport is a 40-minute flight (€60–€120 one way, seasonal). We recommend booking 4–6 weeks ahead in August. The airport is 5 minutes from the hotel — we'll arrange the pickup.<br><br>
+        <strong>Getting around without a car:</strong> Entirely possible for a relaxed stay. Skyros Town (Chora) is fully walkable — all tavernas, shops and the Kastro are on foot. For beaches, local buses run Chora → Magazia Beach (5 min, hourly in season, €1.50). For the south and more remote spots, we'd suggest one day with a rented ATV (€35) as the most enjoyable way to explore — not required but transformative.<br><br>
+        <strong>Cycling:</strong> The north of the island has lovely quiet roads. We keep two bicycles available for guests at no charge — first come, first served.<br><br>
+        Let us know your preferred arrival route and we'll help book everything.<br><br>
+        Looking forward to welcoming you,<br>Hotel Meli — Skyros Town</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 30s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">Plans — transparent pricing</div>
+  <div class="pricing">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">80€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>AI concierge (EN / DE / FR / GR)</li>
+        <li>Draft replies in ~30 seconds</li>
+        <li>Dashboard with inbox + history</li>
+        <li>Unlimited emails</li>
+      </ul>
+    </div>
+    <div class="plan highlight">
+      <div class="plan-name">Premium ★</div>
+      <div class="plan-price">120€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly automatic AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="plan-price">150€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on Hotel Meli's real email archive</li>
+        <li>Personalised to Skyros &amp; Meli's unique identity</li>
+        <li>Onboarding with your small team</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="cta-block">
+  <div>
+    <h3>Ready to see it live on your inbox?</h3>
+    <p>Already live at IBB Palazzo Bettina (Birgu, Malta) — a similar island boutique with intentional travellers.</p>
+  </div>
+  <button class="cta-btn">Book a 20-min demo</button>
+</div>
+
+<footer class="footer">
+  <span>AI Concierge · enzo26cosnard@gmail.com · IBB Palazzo Bettina, Birgu, Malta</span>
+  <span>Demo prepared for Hotel Meli · Skyros Town, Skyros · July 2026</span>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Locanda Orseolo, Venice</title>
+<style>
+  :root {
+    --primary: #1A2744;       /* midnight Venetian blue */
+    --accent:  #B8973C;       /* Venetian gold */
+    --light:   #F5F3EE;       /* aged Venetian plaster */
+    --dark:    #0F1929;
+    --text:    #2D2D2D;
+    --muted:   #8A8E98;
+    --border:  #DDD9CF;
+    --teal:    #4A8B8C;       /* canal water green */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header {
+    background: var(--dark);
+    color: #fff;
+    padding: 0 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 68px;
+  }
+  .header .logo { font-size: 1.15rem; letter-spacing: 0.22em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero {
+    background: var(--primary);
+    color: #fff;
+    padding: 70px 52px 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(184,151,60,0.07));
+  }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+               color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2;
+             font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p  { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; gap: 0; justify-content: space-around; text-align: center; }
+  .roi-item .num  { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl  { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+                   color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                 display: flex; justify-content: space-between; border-top: 1px solid var(--border); }
+
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 24px; background: #fff; }
+  .plan.highlight { border-color: var(--accent); border-width: 2px; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .plan .plan-price { font-size: 1.9rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .plan .plan-price sub { font-size: 0.8rem; color: var(--muted); }
+  .plan .plan-setup { font-family: sans-serif; font-size: 0.75rem; color: var(--muted); margin-top: 4px; margin-bottom: 16px; }
+  .plan ul { list-style: none; }
+  .plan ul li { font-family: sans-serif; font-size: 0.78rem; color: #555; padding: 4px 0; display: flex; gap: 8px; }
+  .plan ul li::before { content: '✓'; color: var(--accent); flex-shrink: 0; }
+  .plan.highlight .plan-name { color: var(--accent); }
+
+  .cta-block { background: var(--primary); color: #fff; padding: 48px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .cta-block h3 { font-family: sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 0.04em; }
+  .cta-block p { font-family: sans-serif; font-size: 0.85rem; opacity: 0.7; margin-top: 6px; }
+  .cta-btn { background: var(--accent); color: #fff; border: none; padding: 14px 32px;
+             font-family: sans-serif; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+             border-radius: 2px; cursor: pointer; white-space: nowrap; }
+
+  .footer { padding: 24px 52px; font-family: sans-serif; font-size: 0.7rem; color: var(--muted);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+  @media (max-width: 768px) {
+    .header { padding: 0 20px; }
+    .hero { padding: 40px 20px; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { padding: 24px 20px; flex-wrap: wrap; gap: 24px; }
+    .section { padding: 32px 20px; }
+    .email-grid { grid-template-columns: 1fr; }
+    .email-card.full { grid-column: 1; }
+    .pricing { grid-template-columns: 1fr; }
+    .cta-block { flex-direction: column; gap: 24px; padding: 32px 20px; }
+    .footer { flex-direction: column; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">Locanda <em>Orseolo</em></div>
+  <span class="badge">AI Concierge · Preview</span>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="tag">Venice · Steps from Piazza San Marco · 15 Rooms</div>
+  <h1>Your AI Concierge<br>for the Heart of Venice</h1>
+  <p>Your guests arrive with high expectations — gondola tours at dawn, hidden bacari wine bars, skip-the-queue access to the Basilica. Every email is a personalised request. Your AI concierge handles the reply in 30 seconds, so your team focuses on the magic.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">15</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~22</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">AI draft time</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">★★★★</div>
+      <div class="lbl">Venice Boutique</div>
+    </div>
+  </div>
+</section>
+
+<!-- ROI STRIP -->
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~22</div>
+    <div class="lbl">Guest emails per day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">7.3 hrs</div>
+    <div class="lbl">Writing time saved / week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~30 days</div>
+    <div class="lbl">ROI payback period</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">EN / IT / FR / DE</div>
+    <div class="lbl">Languages handled</div>
+  </div>
+</div>
+
+<!-- EMAIL EXAMPLES -->
+<section class="section">
+  <div class="section-title">Live examples — Locanda Orseolo inbox</div>
+  <div class="email-grid">
+
+    <!-- Email 1: Gondola + Bacari -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Concierge Request</div>
+          <div>Thomas W. — Arriving 28 July</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">08:14</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hi, we arrive on 28 July for our anniversary. We'd love a private gondola ride at sunset, ideally with a small aperitivo on board. Could you also recommend a few authentic bacari away from the tourist traps? We tried to book Ristorante da Fiore for dinner on the 29th — is it worth it or is there somewhere better? Thanks so much.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear Thomas,<br><br>
+        What a wonderful occasion — congratulations on your anniversary! We've arranged a private gondola sunset ride departing from the San Tomà traghetto at 19:00 on 28 July (approx. 45 minutes, €120/gondola). Your gondolier Marco can arrange a small Prosecco and cicchetti on board — just confirm numbers when you arrive.<br><br>
+        For authentic bacari: <strong>All'Arco</strong> (Rialto market side, arrive before noon), <strong>Osteria al Squero</strong> (San Trovaso, facing the gondola workshop) and <strong>Cantina Do Mori</strong> — Venice's oldest bar. None will disappoint.<br><br>
+        Da Fiore is exceptional and absolutely worth it. Alternatively, <strong>Alle Testiere</strong> (Sant'Elena) offers a more intimate experience — we can call ahead for you.<br><br>
+        We look forward to welcoming you both.<br><br>
+        Warm regards,<br>Locanda Orseolo</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 28s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <!-- Email 2: Early access Basilica -->
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Special Access Request</div>
+          <div>Claire M. — Arriving 2 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">06:52</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Good morning — is it possible to visit the Basilica di San Marco before the crowds? I've read about an early morning access for hotel guests. We're also keen to visit the Doge's Palace and the Accademia. Given we only have 3 days, could you build us a rough itinerary so we don't waste time? We love art history and photography.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear Claire,<br><br>
+        Wonderful choices — Venice rewards those who plan carefully.<br><br>
+        <strong>Day 1 — Dawn:</strong> Basilica di San Marco opens at 09:45, but the Pala d'Oro and Treasury have earlier access via <em>Basilica San Marco Skip-the-Line</em> (we can book for you, ~€5). Arrive by 09:00 for the golden mosaics in near-solitude.<br><br>
+        <strong>Day 1 afternoon:</strong> Doge's Palace (pre-booked) — request the Secret Itineraries tour (€28pp) for access to the torture chambers and Bridge of Sighs interior.<br><br>
+        <strong>Day 2:</strong> Accademia opens at 08:15 on Tuesdays — perfect for photography before groups arrive. Bellini, Titian, Veronese in morning light: unmissable.<br><br>
+        <strong>Day 3:</strong> We suggest Ca' d'Oro and the Frari church for Titian's Assunta.<br><br>
+        Shall we pre-book all tickets? No extra charge from us.<br><br>
+        Warm regards,<br>Locanda Orseolo</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 31s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <!-- Email 3: Reservation change (full width) -->
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Reservation Amendment</div>
+          <div>Pierre &amp; Sophie D. — Check-in 15 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">14:37</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Buonasera, nous avons une réservation du 15 au 18 août (chambre Deluxe côté canal). Suite à un changement de programme, nous souhaiterions arriver un jour plus tôt, soit le 14 août. Est-il possible d'ajouter cette nuit ? Aussi, notre fille de 8 ans nous accompagne finalement — est-ce que la chambre est adaptée ou faut-il changer de catégorie ? Merci d'avance.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s (French detected → reply in French)
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Chère Sophie, cher Pierre,<br><br>
+        Bonne nouvelle — la chambre Deluxe côté canal est disponible dès le <strong>14 août</strong>. Nous avons ajouté cette nuit à votre réservation (même tarif, 195 €). Une confirmation vous sera envoyée par le système d'ici quelques minutes.<br><br>
+        Concernant votre fille : la chambre Deluxe (28 m²) peut accueillir un lit bébé ou un petit lit d'appoint (jusqu'à 12 ans) sans frais supplémentaires — nous nous en chargeons avant votre arrivée. Elle sera ravie : depuis la fenêtre, on aperçoit les gondoles qui passent sur le Rio dell'Orseolo.<br><br>
+        Si vous souhaitez une chambre communicante ou une suite familiale, nous pouvons également vous proposer une option — n'hésitez pas à nous le faire savoir.<br><br>
+        À très bientôt,<br>Locanda Orseolo</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 27s · Language auto-detected: French</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section">
+  <div class="section-title">Plans — transparent pricing</div>
+  <div class="pricing">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">80€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>AI concierge agent (all languages)</li>
+        <li>Draft replies in ~30 seconds</li>
+        <li>Dashboard with inbox + history</li>
+        <li>Unlimited emails</li>
+      </ul>
+    </div>
+    <div class="plan highlight">
+      <div class="plan-name">Premium ★</div>
+      <div class="plan-price">120€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly automatic AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="plan-price">150€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real email exchanges</li>
+        <li>Fully personalised to Locanda Orseolo's voice</li>
+        <li>Onboarding session with your team</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-block">
+  <div>
+    <h3>Ready to see it live on your inbox?</h3>
+    <p>Already live at IBB Palazzo Bettina (Birgu, Malta) — a similarly intimate historic property.</p>
+  </div>
+  <button class="cta-btn">Book a 20-min demo</button>
+</div>
+
+<footer class="footer">
+  <span>AI Concierge · enzo26cosnard@gmail.com · IBB Palazzo Bettina, Birgu, Malta</span>
+  <span>Demo prepared for Locanda Orseolo · Venice · July 2026</span>
+</footer>
+
+</body>
+</html>

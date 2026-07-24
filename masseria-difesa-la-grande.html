@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Concierge Demo — Masseria Difesa La Grande, Abruzzo</title>
+<style>
+  :root {
+    --primary: #2E3A1F;       /* Abruzzo dark forest green */
+    --accent:  #C87C2A;       /* Montepulciano terracotta amber */
+    --light:   #F3F0E8;       /* Adriatic limestone warm white */
+    --dark:    #1A2210;
+    --text:    #2D2D2D;
+    --muted:   #8A9278;
+    --border:  #D8D4C6;
+    --blue:    #3A6E8C;       /* Adriatic sea */
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Georgia', serif; background: var(--light); color: var(--text); }
+
+  .header { background: var(--dark); color: #fff; padding: 0 52px;
+            display: flex; align-items: center; justify-content: space-between; height: 68px; }
+  .header .logo { font-size: 1.1rem; letter-spacing: 0.2em; font-weight: normal; text-transform: uppercase; font-family: sans-serif; }
+  .header .logo em { color: var(--accent); font-style: normal; }
+  .badge { background: transparent; border: 1px solid var(--accent); color: var(--accent);
+           font-family: sans-serif; font-size: 0.65rem; padding: 4px 14px; border-radius: 2px;
+           letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .hero { background: var(--primary); color: #fff; padding: 70px 52px 56px; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%;
+                  background: linear-gradient(90deg, transparent, rgba(200,124,42,0.08)); }
+  .hero .tag { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  .hero h1 { font-size: 2.4rem; font-weight: normal; margin-bottom: 12px; line-height: 1.2; font-family: sans-serif; letter-spacing: 0.04em; }
+  .hero p { font-size: 0.95rem; opacity: 0.8; max-width: 580px; line-height: 1.65; }
+  .hero .meta { margin-top: 36px; display: flex; gap: 48px; }
+  .hero .meta-item .num { font-size: 2.2rem; color: var(--accent); font-family: sans-serif; font-weight: 300; }
+  .hero .meta-item .lbl { font-family: sans-serif; font-size: 0.65rem; letter-spacing: 0.1em; opacity: 0.7; text-transform: uppercase; margin-top: 4px; }
+
+  .roi-strip { background: #fff; border-top: 3px solid var(--accent); padding: 40px 52px;
+               display: flex; justify-content: space-around; text-align: center; }
+  .roi-item .num { font-size: 2.2rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .roi-item .lbl { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; margin-top: 4px; }
+
+  .section { padding: 52px; }
+  .section + .section { border-top: 1px solid var(--border); }
+  .section-title { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-bottom: 32px; }
+
+  .email-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .email-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #fff; }
+  .email-card .card-header { background: var(--primary); color: #fff; padding: 14px 22px;
+                              font-family: sans-serif; font-size: 0.78rem; display: flex; justify-content: space-between; align-items: center; }
+  .email-card .card-header .type { color: var(--accent); font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 3px; }
+  .inbound { background: #FAFAF7; padding: 18px 22px; border-bottom: 1px solid var(--border); }
+  .inbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .inbound p { font-size: 0.87rem; line-height: 1.55; color: #555; }
+  .outbound { padding: 18px 22px; }
+  .outbound .label { font-family: sans-serif; font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+                      color: var(--primary); margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .outbound .label span { background: #EBF5ED; color: #2A6B40; padding: 2px 8px; border-radius: 10px; font-size: 0.58rem; }
+  .outbound p { font-size: 0.87rem; line-height: 1.62; color: var(--text); }
+  .card-footer { background: var(--light); padding: 10px 22px; font-family: sans-serif; font-size: 0.68rem; color: var(--muted);
+                 display: flex; justify-content: space-between; border-top: 1px solid var(--border); }
+  .email-card.full { grid-column: 1 / -1; }
+
+  .pricing { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 8px; }
+  .plan { border: 1px solid var(--border); border-radius: 4px; padding: 28px 24px; background: #fff; }
+  .plan.highlight { border-color: var(--accent); border-width: 2px; }
+  .plan .plan-name { font-family: sans-serif; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .plan .plan-price { font-size: 1.9rem; color: var(--primary); font-family: sans-serif; font-weight: 300; }
+  .plan .plan-price sub { font-size: 0.8rem; color: var(--muted); }
+  .plan .plan-setup { font-family: sans-serif; font-size: 0.75rem; color: var(--muted); margin-top: 4px; margin-bottom: 16px; }
+  .plan ul { list-style: none; }
+  .plan ul li { font-family: sans-serif; font-size: 0.78rem; color: #555; padding: 4px 0; display: flex; gap: 8px; }
+  .plan ul li::before { content: '✓'; color: var(--accent); flex-shrink: 0; }
+  .plan.highlight .plan-name { color: var(--accent); }
+
+  .cta-block { background: var(--primary); color: #fff; padding: 48px 52px; display: flex; justify-content: space-between; align-items: center; }
+  .cta-block h3 { font-family: sans-serif; font-size: 1.3rem; font-weight: 300; letter-spacing: 0.04em; }
+  .cta-block p { font-family: sans-serif; font-size: 0.85rem; opacity: 0.7; margin-top: 6px; }
+  .cta-btn { background: var(--accent); color: #fff; border: none; padding: 14px 32px;
+             font-family: sans-serif; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase;
+             border-radius: 2px; cursor: pointer; white-space: nowrap; }
+
+  .footer { padding: 24px 52px; font-family: sans-serif; font-size: 0.7rem; color: var(--muted);
+            border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+  @media (max-width: 768px) {
+    .header, .hero, .section, .cta-block, .roi-strip, .footer { padding-left: 20px; padding-right: 20px; }
+    .hero h1 { font-size: 1.6rem; }
+    .hero .meta { flex-wrap: wrap; gap: 24px; }
+    .roi-strip { flex-wrap: wrap; gap: 24px; }
+    .email-grid { grid-template-columns: 1fr; }
+    .email-card.full { grid-column: 1; }
+    .pricing { grid-template-columns: 1fr; }
+    .cta-block { flex-direction: column; gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Masseria Difesa <em>La Grande</em></div>
+  <span class="badge">AI Concierge · Preview</span>
+</header>
+
+<section class="hero">
+  <div class="tag">Ortona, Abruzzo · Adriatic Hillsides · 18 Rooms · Agritourism Masseria</div>
+  <h1>Your AI Concierge<br>for Italy's Last Wild Coastline</h1>
+  <p>Abruzzo is rising fast — UNESCO protected, unspoiled, genuinely wild. Your guests arrive from London and Berlin expecting vineyard tours of Montepulciano d'Abruzzo, hikes through the Gran Sasso and cliff-diving at the Costa dei Trabocchi. Your lean team deserves tools that match the territory. Your AI concierge handles every email in 30 seconds.</p>
+  <div class="meta">
+    <div class="meta-item">
+      <div class="num">18</div>
+      <div class="lbl">Rooms</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">~24</div>
+      <div class="lbl">Emails / day</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">30s</div>
+      <div class="lbl">AI draft time</div>
+    </div>
+    <div class="meta-item">
+      <div class="num">★★★★</div>
+      <div class="lbl">Abruzzo Masseria</div>
+    </div>
+  </div>
+</section>
+
+<div class="roi-strip">
+  <div class="roi-item">
+    <div class="num">~24</div>
+    <div class="lbl">Guest emails per day</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">8 hrs</div>
+    <div class="lbl">Writing time saved / week</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">~33 days</div>
+    <div class="lbl">ROI payback period</div>
+  </div>
+  <div class="roi-item">
+    <div class="num">EN / IT / DE</div>
+    <div class="lbl">Languages handled</div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="section-title">Live examples — Masseria Difesa La Grande inbox</div>
+  <div class="email-grid">
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Vineyard Tour Request</div>
+          <div>David &amp; Rachel H. — Arriving 8 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">09:15</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hello, we're wine lovers arriving on 8 August. We've read that Montepulciano d'Abruzzo is seriously underrated and we'd love to visit a good producer — ideally a family winery, not a big commercial one. Can you arrange a visit and tasting? We're also keen on exploring the Costa dei Trabocchi — what exactly are the trabocchi and can we have a meal on one?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear David and Rachel,<br><br>
+        You've come to exactly the right part of Italy — and you're right, Montepulciano d'Abruzzo is one of the world's great undervalued reds.<br><br>
+        <strong>Vineyard visit:</strong> We work with <em>Cantina Zaccagnini</em> in Bolognano (20 min from us) — a fourth-generation family winery producing exceptional Montepulciano d'Abruzzo Riserva and Trebbiano d'Abruzzo. Full tasting with barrel room visit, €25/person. Alternatively, <em>Villa Medoro</em> in Atri is smaller and more artisanal — very intimate (€18/person). Both open by appointment; we'll book for you.<br><br>
+        <strong>Trabocchi:</strong> A trabocco is a traditional Adriatic fishing machine — a wooden structure on stilts projecting out over the sea, once used by fishermen for net fishing. Many on the Costa dei Trabocchi have been converted into exceptional seafood restaurants, accessible only by narrow walkways over the sea. <em>Trabocco Punta Tufano</em> near Fossacesia serves the morning's catch — we'll book you a table, sunset seating. Extraordinary.<br><br>
+        Shall we arrange both?<br><br>
+        Warmly,<br>Masseria Difesa La Grande</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 31s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card">
+      <div class="card-header">
+        <div>
+          <div class="type">Gran Sasso Hiking Request</div>
+          <div>Marco G. — Arriving 15 August</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">11:42</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Buongiorno, sono un escursionista esperto e durante il mio soggiorno alla Masseria vorrei fare almeno un'escursione sul Gran Sasso. Il Corno Grande è fattibile in autonomia oppure serve una guida? Qual è il percorso migliore dal rifugio Franchetti? Ho anche sentito che c'è il ghiacciaio del Calderone — è ancora visitabile? Grazie mille.</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s (Italian detected → reply in Italian)
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Buongiorno Marco,<br><br>
+        Ottima scelta — il Gran Sasso è uno degli ambienti più selvaggi e spettacolari degli Appennini.<br><br>
+        <strong>Corno Grande (2.912m):</strong> Per escursionisti esperti il percorso è fattibile in autonomia con cartina IGM e attrezzatura adeguata. Il percorso classico è la <em>Direttissima</em> dal Rifugio Franchetti (CAI segnato) — circa 4–5 ore andata/ritorno dalla base. Difficoltà EE (per escursionisti esperti). In agosto in genere il sentiero è pulito ma può esserci neve residua nelle zone d'ombra sotto la vetta — ramponcini consigliati.<br><br>
+        <strong>Ghiacciaio del Calderone:</strong> È il ghiacciaio più meridionale d'Europa — purtroppo si sta ritirando rapidamente. Ancora visitabile (estate 2026 confermato), ma ridotto rispetto a 20 anni fa. Visibile chiaramente dalla cresta nord del Corno Piccolo.<br><br>
+        <strong>Guida alpina:</strong> Se preferisce sicurezza massima, organizziamo una guida CAI da Castel del Monte (€150/giornata, fino a 3 persone). Per un escursionista esperto come lei, tuttavia, è facoltativa.<br><br>
+        Le prepariamo il cestino da pranzo alla partenza — ci dica l'orario.<br><br>
+        In bocca al lupo!<br>Masseria Difesa La Grande</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 33s · Language auto-detected: Italian</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+    <div class="email-card full">
+      <div class="card-header">
+        <div>
+          <div class="type">Long Stay &amp; Agritourism Experience</div>
+          <div>Ben &amp; Nadia C. — Arriving 1 September (10 nights)</div>
+        </div>
+        <div style="font-family:sans-serif;font-size:0.68rem;opacity:0.6;">16:03</div>
+      </div>
+      <div class="inbound">
+        <div class="label">Guest email — received</div>
+        <p>Hello, we're planning a 10-night stay from 1 September with our two kids (7 and 11). We've been to Tuscany too many times and want something more authentic — we chose Abruzzo and La Grande specifically because it's a working masseria. What can the kids actually participate in on the farm? We're also interested in a cooking class using the masseria's own produce. What's on in early September?</p>
+      </div>
+      <div class="outbound">
+        <div class="label">
+          AI Draft — ready in 30s
+          <span>✓ Draft ready</span>
+        </div>
+        <p>Dear Ben and Nadia,<br><br>
+        You've made the right choice — and your instinct about Abruzzo over Tuscany is well founded. We are a real working masseria, not a villa with a decorative olive press.<br><br>
+        <strong>Farm activities for your children:</strong><br>
+        — <em>Morning collection:</em> Our hens, ducks and vegetable garden open at 07:30 — the children can collect eggs with our farm manager Armando, who is wonderfully patient with children<br>
+        — <em>Grape harvest (September):</em> Early September is vendemmia season. Your children can take part in the Montepulciano d'Abruzzo hand harvest — the most authentic Italian farm experience<br>
+        — <em>Bread &amp; pasta mornings:</em> Our cook Giuseppina runs a weekly pasta-making session (fazzoletti, chitarra) — she loves teaching children<br>
+        — <em>Orchard and olive groves:</em> September brings figs, pears and early olives — your children can pick and taste directly<br><br>
+        <strong>Cooking class:</strong> Our full masseria cooking class (3 hours, €45/adult, children free): antipasto from the garden, handmade chitarra pasta with lamb ragù, and a Montepulciano d'Abruzzo tasting. All produce from our land.<br><br>
+        <strong>September in Abruzzo:</strong> The Sagra della Ventricina (traditional cured meat festival) is in Guilmi on 7 September — 40 minutes from us. The Gran Sasso hiking season is also at its best.<br><br>
+        We very much look forward to a long stay — 10 nights gives your family time to settle in and truly feel at home.<br><br>
+        Warm regards,<br>Masseria Difesa La Grande — Ortona, Abruzzo</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ Generated in 29s</span>
+        <span>Ready for review · Not sent</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-title">Plans — transparent pricing</div>
+  <div class="pricing">
+    <div class="plan">
+      <div class="plan-name">Standard</div>
+      <div class="plan-price">80€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>AI concierge (EN / IT / DE)</li>
+        <li>Draft replies in ~30 seconds</li>
+        <li>Dashboard with inbox + history</li>
+        <li>Unlimited emails</li>
+      </ul>
+    </div>
+    <div class="plan highlight">
+      <div class="plan-name">Premium ★</div>
+      <div class="plan-price">120€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 800€ one-time setup</div>
+      <ul>
+        <li>Everything in Standard</li>
+        <li>Weekly automatic AI improvement</li>
+        <li>Monthly performance report</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+    <div class="plan">
+      <div class="plan-name">Premium+</div>
+      <div class="plan-price">150€ <sub>/ month</sub></div>
+      <div class="plan-setup">+ 1,200€ one-time setup</div>
+      <ul>
+        <li>Everything in Premium</li>
+        <li>Training on your real masseria email archive</li>
+        <li>Personalised to La Grande's authentic voice</li>
+        <li>Onboarding with your team</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="cta-block">
+  <div>
+    <h3>Ready to see it live on your inbox?</h3>
+    <p>Already live at IBB Palazzo Bettina (Birgu, Malta) — a similar historic boutique property.</p>
+  </div>
+  <button class="cta-btn">Book a 20-min demo</button>
+</div>
+
+<footer class="footer">
+  <span>AI Concierge · enzo26cosnard@gmail.com · IBB Palazzo Bettina, Birgu, Malta</span>
+  <span>Demo prepared for Masseria Difesa La Grande · Ortona, Abruzzo · July 2026</span>
+</footer>
+
+</body>
+</html>
